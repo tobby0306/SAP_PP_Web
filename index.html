@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>SAP PP 模組上線戰情排查互動系統 | Interactive Triage Suite</title>
+  <meta name="description" content="集團 SAP S/4HANA PP 模組日常業務實戰與上線異常處置互動排查指南，專為生管人員、KU 與現場排查人員打造。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css?v=12">
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header" id="main-header">
+      <div class="brand-section">
+        <div class="logo-icon" id="brand-logo" aria-label="SAP PP Logo">⚡</div>
+        <div class="brand-text">
+          <h1>
+            SAP PP 上線戰情排查互動系統
+            <span class="badge-tag badge-cyan">S/4HANA Fashion</span>
+          </h1>
+          <div class="brand-subtitle">
+            <span>集團鞋業矩陣架構</span>
+            <span>•</span>
+            <span>KU & 一線排查實戰指南 (SSOT)</span>
+            <span>•</span>
+            <span style="color: var(--emerald);">● 離線可攜支援 (Zero Backend)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real Global Omni-Search Bar in Header -->
+      <div class="header-omni-search-container" id="omni-search-container">
+        <div class="omni-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="global-omni-search" class="omni-search-input"
+            placeholder="全站排查 (支援錯誤代碼 E001~E023、T-Code、情境流程、工單)..." autocomplete="off"
+            oninput="handleOmniSearch(this.value)" onfocus="handleOmniSearch(this.value)">
+          <div class="search-shortcut-hint">
+            <span class="kbd">/</span>
+            <span class="kbd">Ctrl</span>
+            <span class="kbd">K</span>
+          </div>
+        </div>
+        <!-- Live Instant Suggestions Dropdown -->
+        <div class="omni-dropdown" id="omni-dropdown" style="display: none;"></div>
+      </div>
+
+      <div class="header-actions">
+        <button id="theme-toggle-btn" class="btn-icon" title="切換深淺主題">☀️ 亮色 Fiori</button>
+        <button class="btn-icon" onclick="copyTCode('COOIS')" title="常用工單總查驗">📋 COOIS</button>
+        <button class="btn-icon" onclick="copyTCode('COGI')" title="失敗異動清理">📋 COGI</button>
+      </div>
+    </header>
+
+    <!-- Top Navigation Tabs (Sitting directly below Header) -->
+    <nav class="tabs-bar" id="navigation-tabs" role="tablist">
+      <button class="tab-btn active" data-tab="tab-cheat-sheet" id="tab-btn-cheat-sheet" role="tab">
+        🚨 秒級急救表
+        <span class="tab-count" id="count-cheat-sheet">18</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-decision-tree" id="tab-btn-decision-tree" role="tab">
+        🌳 互動排查決策樹
+      </button>
+      <button class="tab-btn" data-tab="tab-order-matrix" id="tab-btn-order-matrix" role="tab">
+        🏭 工單體系與途程 (ZP01~07)
+      </button>
+      <button class="tab-btn" data-tab="tab-wo-inspector" id="tab-btn-wo-inspector" role="tab">
+        🔬 工單穿透診斷器
+        <span class="badge-tag badge-cyan">7維體檢</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-audit-checklist" id="tab-btn-audit-checklist" role="tab">
+        ✅ 月結 TECO 自檢清單
+      </button>
+      <!-- [依各廠權責差異考量，暫時 MARK 掉 RACI 權責分頁]
+      <button class="tab-btn" data-tab="tab-raci-matrix" id="tab-btn-raci-matrix" role="tab">
+        👥 跨部門 RACI 權責
+      </button>
+      -->
+      <button class="tab-btn" data-tab="tab-tcode-dictionary" id="tab-btn-tcode-dictionary" role="tab">
+        🗺️ 業務情境 T-Code 循序地圖 (68 大字典)
+      </button>
+    </nav>
+
+    <!-- TAB 1: 秒級急救表 (Cheat Sheet) -->
+    <main class="tab-panel active" id="tab-cheat-sheet" role="tabpanel">
+      <!-- High Alert Emergency Box -->
+      <div
+        style="background: linear-gradient(135deg, rgba(244,63,94,0.15), rgba(99,102,241,0.15)); border: 1px solid rgba(244,63,94,0.3); border-radius: 14px; padding: 1.15rem 1.35rem; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 1rem;">
+        <div style="font-size: 1.8rem;">🚨</div>
+        <div style="flex: 1;">
+          <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">
+            上線現場三大最高頻核心雷區 (關鍵防呆)
+          </h2>
+          <div style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.6;">
+            <strong>1. E005 領料後改單</strong>：切勿進 <code>CO02</code> 改元件！必須開 <code>ZPP024</code> 退料 ➔ 倉庫 <code>ZMM047</code>
+            (262) 歸零 ➔ 再用 <code>ZPP010</code> 改單。<br>
+            <strong>2. 領料單無法刪除 (狀態鎖定)</strong>：檢查 <code>ZMMT046</code> 是否為狀態 <code>I</code> 或 <code>M</code>，通知倉庫取消
+            <code>ZMM046</code> 備料單即可解鎖。<br>
+            <strong>3. 自動入庫失效 (途程控制碼)</strong>：工單末站途程控制碼必須是 <code>PP03</code> 或
+            <code>PP08</code>，且整張工單<strong>只能放一次</strong>！
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 1 In-Page Emergency Search & Filter Toolbar -->
+      <div class="cheat-toolbar"
+        style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 260px;">
+            <div class="search-input-wrapper" style="width: 100%;">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="cheat-search-input" class="search-input"
+                placeholder="在 18 大急救代碼中快篩 (如 E005、PP02、541、備料單、退料)..." autocomplete="off"
+                oninput="handleCheatSearch(this.value)">
+            </div>
+          </div>
+          <div id="cheat-results-count"
+            style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap;">
+            顯示 18 / 18 項
+          </div>
+        </div>
+
+        <div class="filter-pills-row" id="filter-pills">
+          <span class="filter-pill-label">急救類別篩選：</span>
+          <button class="pill-btn active" data-category="ALL" onclick="handleCheatCategory('ALL', this)">全部
+            (18)</button>
+          <button class="pill-btn" data-category="CRITICAL" onclick="handleCheatCategory('CRITICAL', this)">💥 阻擋/致命
+            (Critical)</button>
+          <button class="pill-btn" data-category="工序委外" onclick="handleCheatCategory('工序委外', this)">工序委外 (PP02 / 541 /
+            543)</button>
+          <button class="pill-btn" data-category="開單與轉單" onclick="handleCheatCategory('開單與轉單', this)">開單與轉單 (ZPP015 /
+            尺碼)</button>
+          <button class="pill-btn" data-category="領料與發料" onclick="handleCheatCategory('領料與發料', this)">領料與發料 (ZPP020 /
+            ZMM046)</button>
+          <button class="pill-btn" data-category="退料與改單" onclick="handleCheatCategory('退料與改單', this)">退料與改單 (E005 /
+            ZPP010)</button>
+          <button class="pill-btn" data-category="報工與入庫" onclick="handleCheatCategory('報工與入庫', this)">報工與入庫 (COGI /
+            PP03)</button>
+        </div>
+      </div>
+
+      <!-- Issues Cards Grid -->
+      <div class="issues-grid" id="issues-grid">
+        <!-- Injected via JavaScript -->
+      </div>
+    </main>
+
+    <!-- TAB 2: 互動排查決策樹與退料防呆實驗室 (TSK-06) -->
+    <section class="tab-panel" id="tab-decision-tree" role="tabpanel">
+      <div class="tree-container">
+
+        <div class="tree-selector-bar" id="tree-selector-bar">
+          <button class="tree-select-btn active" data-tree="mrp_tree" onclick="switchTree('mrp_tree')"
+            id="btn-tree-mrp">
+            🔍 1. MRP 跑不出資料六步標準排查樹 (VA03 ➔ C223)
+          </button>
+          <button class="tree-select-btn" data-tree="return_tree" onclick="switchTree('return_tree')"
+            id="btn-tree-return">
+            🔄 2. 現場退料與元件抽換防呆鏈條 (解鎖 E005)
+          </button>
+          <button class="tree-select-btn" data-tree="order_transfer_tree" onclick="switchTree('order_transfer_tree')"
+            id="btn-tree-transfer">
+            📦 3. SIT-626 業務訂單挪單生管因應處置流程
+          </button>
+          <button class="tree-select-btn" data-tree="sandbox_e005" onclick="switchTree('sandbox_e005')"
+            id="btn-tree-sandbox">
+            🧪 4. 現場退料與 ECN 改單防呆模擬沙盒 (E005 解鎖沙盤)
+          </button>
+          <button class="tree-select-btn" data-tree="sandbox_subcontract" onclick="switchTree('sandbox_subcontract')"
+            id="btn-tree-sandbox-sub">
+            🤝 5. 製程委外 (PP02 / 541 / 543) 防呆模擬沙盒 (委外閉環沙盤)
+          </button>
+        </div>
+
+        <div id="tree-wizard-container">
+          <div style="margin-bottom: 1.25rem;">
+            <h2 id="tree-title"
+              style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">排查樹標題</h2>
+            <p id="tree-root-question" style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">情境問題
+            </p>
+          </div>
+
+          <div id="wizard-content">
+            <!-- Injected via JavaScript -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TSK-06: 現場退料與元件抽換動態模擬沙盒 (E005 解鎖沙盤 - 項次 4 獨立顯示) -->
+      <div class="sandbox-card" id="sandbox-e005-container" style="display: none; margin-top: 1.5rem;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h2
+              style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+              🧪 現場退料與 ECN 改單防呆模擬沙盒 (E005 解鎖沙盤)
+              <span class="badge-tag badge-rose">SOP 第 5 章實戰</span>
+            </h2>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              模擬切換工單實體發料、備料單鎖定與 TECO 狀態，點擊不同現場動作，即時預覽 SAP 系統報錯訊息與標準閉環處置：
+            </p>
+          </div>
+          <div>
+            <button class="btn-icon" onclick="copyTCode('ZPP024')">📋 退料單 ZPP024</button>
+            <button class="btn-icon" onclick="copyTCode('ZMM047')">📋 MM過帳 ZMM047</button>
+            <button class="btn-icon" onclick="copyTCode('ZPP010')">📋 改單 ZPP010</button>
+          </div>
+        </div>
+
+        <div class="sandbox-panel-grid">
+
+          <!-- Left Controls -->
+          <div class="sandbox-controls">
+
+            <div>
+              <div class="sandbox-control-title">步驟 1：選擇目前工單實體狀態</div>
+              <div class="state-selector-row">
+                <button class="state-btn active" data-state="STATE_ISSUED" onclick="setSimState('STATE_ISSUED')">
+                  <span>🔴 已實體領料扣帳 (RESB-ENMNG &gt; 0)</span>
+                  <span class="badge-tag badge-rose">最常見</span>
+                </button>
+                <button class="state-btn" data-state="STATE_NOT_ISSUED" onclick="setSimState('STATE_NOT_ISSUED')">
+                  <span>🟢 尚未發料 (RESB-ENMNG = 0)</span>
+                  <span class="badge-tag badge-emerald">安全狀態</span>
+                </button>
+                <button class="state-btn" data-state="STATE_LOCKED_ZMMT046"
+                  onclick="setSimState('STATE_LOCKED_ZMMT046')">
+                  <span>🔒 倉庫備料單處理中 (ZMMT046 狀態 I/M)</span>
+                  <span class="badge-tag badge-amber">鎖定防呆</span>
+                </button>
+                <button class="state-btn" data-state="STATE_TECO" onclick="setSimState('STATE_TECO')">
+                  <span>🏁 工單已技術完成 (TECO 結案)</span>
+                  <span class="badge-tag badge-cyan">月結狀態</span>
+                </button>
+                <button class="state-btn" data-state="STATE_PHANTOM" onclick="setSimState('STATE_PHANTOM')">
+                  <span>👻 虛擬階材料 (SOBSL=50 貼合餘料)</span>
+                  <span class="badge-tag badge-cyan">Task #62286</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div class="sandbox-control-title">步驟 2：模擬現場人員執行動作</div>
+              <div class="actions-buttons-grid">
+                <button class="sim-action-btn" onclick="simulateAction('ACTION_CO02_CHANGE')">
+                  <span>💥 動作 A：嘗試進 CO02 手動修改/新增元件</span>
+                </button>
+                <button class="sim-action-btn" onclick="simulateAction('ACTION_DELETE_ELEMENT')">
+                  <span>💥 動作 B：嘗試直接在工單刪除該元件</span>
+                </button>
+                <button class="sim-action-btn" onclick="simulateAction('ACTION_DELETE_ZPP020')">
+                  <span>💥 動作 C：嘗試至 ZPP020 刪除領料單</span>
+                </button>
+                <button class="sim-action-btn" onclick="simulateAction('ACTION_MIXED_RETURN')">
+                  <span>💥 動作 D：嘗試未指定工單進行混退料</span>
+                </button>
+                <button class="sim-action-btn safe-action" onclick="simulateAction('ACTION_STANDARD_CLOSED_LOOP')">
+                  <span>🟢 動作 E：執行標準三步閉環 (ZPP024 ➔ ZMM047 ➔ ZPP010)</span>
+                  <span class="badge-tag badge-emerald">推薦 SOP</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Simulated SAP Screen -->
+          <div class="sim-display-screen" id="sim-display-screen">
+            <div class="sim-screen-header">
+              <span>SAP GUI STATUS BAR MONITOR (Terminal Simulation)</span>
+              <span id="sim-timestamp">ONLINE</span>
+            </div>
+
+            <div class="sim-screen-body" id="sim-screen-body">
+              <!-- Dynamic simulation message will be injected here -->
+            </div>
+
+            <div class="sim-screen-footer">
+              <span id="sim-raci-footer">責任單位：PP 生管 + MM 倉管</span>
+              <span>手冊引用：第 5.1 &amp; 5.2 節</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Three Big Taboos Cards (三大禁忌) -->
+        <div style="margin-top: 1.5rem;">
+          <h3 style="font-size: 1.05rem; font-weight: 700; color: #fda4af; margin-bottom: 0.6rem;">
+            💥 第 5.2 節：現場退料與改單三大死穴禁忌 (Red-Card Rules)
+          </h3>
+          <div class="taboos-grid">
+
+            <div class="taboo-card">
+              <div class="taboo-title">
+                <span>🟥 禁忌一：切勿在 CO02 手動修改工單元件</span>
+              </div>
+              <div class="taboo-consequence">
+                <strong>嚴重後果：</strong> <code>CO02</code> 手動調整之料件<strong>無法與 BOM 建立關聯</strong>，導致後續 <code>ZPP020</code>
+                領料單完全無法帶出首投製程 (<code>STPO-ZZFIRST</code> 為空)，現場無法依製程分批拆單發料！
+              </div>
+              <div class="taboo-solution">
+                ✔ 正確做法：必須 100% 使用專用程式 <strong><code>ZPP010</code> (ECN調整工單)</strong>。
+              </div>
+            </div>
+
+            <div class="taboo-card">
+              <div class="taboo-title">
+                <span>🟥 禁忌二：已領料元件不可直接刪除 (硬卡 E005)</span>
+              </div>
+              <div class="taboo-consequence">
+                <strong>嚴重後果：</strong> 元件在工單已有實發扣帳 (<code>RESB-ENMNG &gt; 0</code>) 時，直接刪除會跳出 <code>E005</code>
+                硬阻擋；若強行繞道會造成後台預留帳實脫鉤！
+              </div>
+              <div class="taboo-solution">
+                ✔ 正確做法：開立 <code>ZPP024</code> ➔ 倉管 <code>ZMM047</code> (262) 退料歸零 ➔ <code>ZPP010</code> 改單。
+              </div>
+            </div>
+
+            <div class="taboo-card">
+              <div class="taboo-title">
+                <span>🟥 禁忌三：嚴禁未指定工單的彙總混退料</span>
+              </div>
+              <div class="taboo-consequence">
+                <strong>嚴重後果：</strong> 系統自動攤提會產生尾差殘留，在月結財務成本計算 (<code>KKS2/CO88</code>) 時產生重工借貸尾差，導致會計停帳無法關閉！
+              </div>
+              <div class="taboo-solution">
+                ✔ 正確做法：必須嚴格指定「原發料工單號」與「原首投製程」辦理退庫。
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TSK-M3-02: 製程委外 (PP02 / 541 / 543) 防呆模擬沙盒 (委外閉環沙盤 - 項次 5 獨立顯示) -->
+      <div class="sandbox-card" id="sandbox-subcontract-container" style="display: none; margin-top: 1.5rem;">
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h2
+              style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+              🤝 製程委外 (PP02 / 541 / 543) 防呆模擬沙盒 (委外閉環沙盤)
+              <span class="badge-tag badge-cyan">SOP 第 3.5 節實戰</span>
+              <span class="badge-tag badge-amber">PP02 / 541 / 543</span>
+            </h2>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              動態模擬製程委外供應商主檔 (ME11)、工單釋放 (REL)、原料出廠移轉 (541) 與委外加工驗收 (101/543)，即時監控系統報錯與自動報工連動：
+            </p>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+            <button class="btn-icon" onclick="copyTCode('ME11')">📋 委外資訊 ME11</button>
+            <button class="btn-icon" onclick="copyTCode('ME21N')">📋 委外PO ME21N</button>
+            <button class="btn-icon" onclick="copyTCode('ME27')">📋 委外發料 ME27</button>
+            <button class="btn-icon" onclick="copyTCode('MIGO')">📋 收發貨 MIGO</button>
+            <button class="btn-icon" onclick="copyTCode('ME2O')">📋 委外庫存 ME2O</button>
+          </div>
+        </div>
+
+        <div class="sandbox-panel-grid">
+
+          <!-- Left Controls -->
+          <div class="sandbox-controls">
+
+            <div>
+              <div class="sandbox-control-title">步驟 1：選擇製程委外工序與供應商庫存現狀 (5 大情境預設)</div>
+              <div class="state-selector-row">
+                <button class="state-btn active" data-sub-state="SUB_STATE_HEALTHY"
+                  onclick="setSubSimState('SUB_STATE_HEALTHY')">
+                  <span>🟢 標準合規狀態 (ME11 齊全 / 已REL / 541 在庫 1,000 YD)</span>
+                  <span class="badge-tag badge-emerald">安全綠燈</span>
+                </button>
+                <button class="state-btn" data-sub-state="SUB_STATE_NO_ME11"
+                  onclick="setSubSimState('SUB_STATE_NO_ME11')">
+                  <span>🔴 缺少採購資訊記錄 (ME11 遺失導致釋放 PR 阻擋)</span>
+                  <span class="badge-tag badge-rose">E_SUB_NO_ME11</span>
+                </button>
+                <button class="state-btn" data-sub-state="SUB_STATE_NO_REL"
+                  onclick="setSubSimState('SUB_STATE_NO_REL')">
+                  <span>🟡 工單尚未釋放 (處於 CRTD 草稿，未生委外 PR)</span>
+                  <span class="badge-tag badge-amber">流程卡關</span>
+                </button>
+                <button class="state-btn" data-sub-state="SUB_STATE_NO_541"
+                  onclick="setSubSimState('SUB_STATE_NO_541')">
+                  <span>💥 出廠漏過帳 541 (物料送出廠但委外特殊庫存 = 0)</span>
+                  <span class="badge-tag badge-rose">E_SUB_541_LACK</span>
+                </button>
+                <button class="state-btn" data-sub-state="SUB_STATE_541_PARTIAL"
+                  onclick="setSubSimState('SUB_STATE_541_PARTIAL')">
+                  <span>🟠 委外庫存不足 (需求 1,000 YD，但 541 僅發 600 YD)</span>
+                  <span class="badge-tag badge-amber">庫存短缺</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div class="sandbox-control-title">步驟 2：模擬現場人員執行動作 (6 大實戰操作)</div>
+              <div class="actions-buttons-grid">
+                <button class="sim-action-btn" onclick="simulateSubAction('ACT_SUB_REL_ORDER')">
+                  <span>📋 動作 A：生管嘗試於 CO02 / ZPP019 執行工單釋放 (REL)</span>
+                </button>
+                <button class="sim-action-btn" onclick="simulateSubAction('ACT_SUB_CONVERT_PO')">
+                  <span>💼 動作 B：採購嘗試於 ME21N / ME57 將委外 PR 轉為 PO</span>
+                </button>
+                <button class="sim-action-btn" onclick="simulateSubAction('ACT_SUB_ISSUE_541')">
+                  <span>📦 動作 C：倉庫嘗試於 ME27 / MIGO 541 原料出廠移轉供應商庫存</span>
+                </button>
+                <button class="sim-action-btn" onclick="simulateSubAction('ACT_SUB_RECEIVE_101')">
+                  <span>📥 動作 D：委外加工品回廠，倉庫於 MIGO 嘗試執行 101 收貨過帳</span>
+                </button>
+                <button class="sim-action-btn" onclick="simulateSubAction('ACT_SUB_MANUAL_CO11N')">
+                  <span>🚫 動作 E：生管現場嘗試在 CO11N 手動為 PP02 站點報工 (測試違規)</span>
+                </button>
+                <button class="sim-action-btn safe-action" onclick="simulateSubAction('ACT_SUB_FULL_CLOSED_LOOP')">
+                  <span>🟢 動作 F：執行標準 5 步委外閉環全通關演示 (ME11 ➔ REL ➔ PO ➔ 541 ➔ 101/543)</span>
+                  <span class="badge-tag badge-emerald">推薦 SOP</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Simulated SAP Screen -->
+          <div class="sim-display-screen" id="sim-sub-display-screen">
+            <div class="sim-screen-header">
+              <span>SAP GUI STATUS BAR MONITOR (Subcontracting Terminal)</span>
+              <span id="sim-sub-timestamp">ONLINE</span>
+            </div>
+
+            <div class="sim-screen-body" id="sim-sub-screen-body">
+              <!-- Dynamic simulation message will be injected here -->
+            </div>
+
+            <div class="sim-screen-footer">
+              <span id="sim-sub-raci-footer">權責單位：PP 生管 + MM 採購 + MM 倉管</span>
+              <span>手冊引用：第 3.5 節 (SIT-612)</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Subcontracting Red-Card Rules (製程委外三大死穴禁忌) -->
+        <div style="margin-top: 1.5rem;">
+          <h3 style="font-size: 1.05rem; font-weight: 700; color: #fda4af; margin-bottom: 0.6rem;">
+            💥 第 3.5 節：途程製程委外 (PP02) 三大死穴禁忌 (Red-Card Rules)
+          </h3>
+          <div class="taboos-grid">
+
+            <div class="taboo-card">
+              <div class="taboo-title">
+                <span>🟥 禁忌一：未過帳 541 嚴禁在 MIGO 執行 101 收貨</span>
+              </div>
+              <div class="taboo-consequence">
+                <strong>嚴重後果：</strong> <code>101</code> 採購收貨過帳瞬間，系統後台會強制觸發 <code>Mvt 543</code> 倒扣供應商處之原材料。若出廠時未做
+                <code>541</code> 移轉，供應商特殊庫存為 0，系統直接跳出 <strong><code>E_SUB_541_LACK (Deficit of SC stock)</code></strong>
+                阻擋，驗收全數卡死！
+              </div>
+              <div class="taboo-solution">
+                ✔ 正確做法：倉管出廠時必須以 <strong><code>ME27</code> 或 <code>MIGO 541</code></strong> 確實將原料移轉至供應商特殊庫存。
+              </div>
+            </div>
+
+            <div class="taboo-card">
+              <div class="taboo-title">
+                <span>🟥 禁忌二：途程 PP02 工序嚴禁進 CO11N 手動報工</span>
+              </div>
+              <div class="taboo-consequence">
+                <strong>嚴重後果：</strong> 途程控制碼為 <code>PP02</code> 時，系統已將其定義為外部委外加工站。<strong>系統 100% 依賴 MIGO 101
+                  收貨自動將工序標記為完工確認 (CNF)</strong>。手動報工會導致工單報工狀態混亂、重複計算人工工時且加工費月結無法勾稽！
+              </div>
+              <div class="taboo-solution">
+                ✔ 正確做法：現場完全<strong>免報工</strong>，委外加工品到貨檢驗合格後直接執行 <code>MIGO 101</code> 收貨即可。
+              </div>
+            </div>
+
+            <div class="taboo-card">
+              <div class="taboo-title">
+                <span>🟥 禁忌三：ME11 採購資訊記錄資訊類別嚴禁選錯</span>
+              </div>
+              <div class="taboo-consequence">
+                <strong>嚴重後果：</strong> 建立資訊記錄時若誤選「0 (標準採購)」而非「3 (委外加工)」，工單釋放產生的委外 PR（項目類別
+                L）將<strong>完全無法匹配計價條件</strong>，採購無法順利轉出 <code>POUR</code>/<code>POSS</code> 採購單，引發
+                <code>E_SUB_NO_ME11</code>！
+              </div>
+              <div class="taboo-solution">
+                ✔ 正確做法：採購在 <code>ME11</code> 建立資訊記錄時，首頁單選鈕<strong>務必 100% 勾選「委外加工 (Subcontracting)」(類別 3)</strong>。
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- TAB 3: 工單體系與途程進階試算中心 (ZP01~07 & Routing Lab) -->
+    <section class="tab-panel" id="tab-order-matrix" role="tabpanel">
+
+      <!-- Sub Navigation Pills for Lab Tools -->
+      <div class="lab-nav-pills" id="lab-nav-pills">
+        <button class="lab-pill-btn active" data-lab="lab-tables" id="btn-lab-tab">
+          📊 1. ZP01~07 與 8 大控制碼矩陣表
+        </button>
+        <button class="lab-pill-btn" data-lab="lab-pipeline" id="btn-lab-pipe">
+          ⛓️ 2. 途程控制碼連動模擬器 (第 1.3 節)
+        </button>
+        <button class="lab-pill-btn" data-lab="lab-recommender" id="btn-lab-rec">
+          🎯 3. 工單類型情境智能推薦器 (第 0.1 節)
+        </button>
+        <button class="lab-pill-btn" data-lab="lab-calculator" id="btn-lab-calc">
+          🧮 4. 途程工時與排程產能試算器 (第 1.3 節)
+        </button>
+      </div>
+
+      <!-- LAB 1: 原始矩陣對照表 (ZP01~07 & 8 大控制碼矩陣表) -->
+      <div class="lab-content-panel active" id="lab-tables">
+
+        <!-- ZP01~ZP07 Matrix -->
+        <div class="table-wrapper">
+          <div class="table-header-toolbar">
+            <div class="table-title">
+              <span>🏭 集團 7 大核心工單屬性與業務行為全覽矩陣 (ZP01~ZP07)</span>
+              <span class="badge-tag badge-cyan">Slide 17 全場景規範</span>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="custom-table" id="order-matrix-table">
+              <thead>
+                <tr>
+                  <th>工單代碼</th>
+                  <th>名稱</th>
+                  <th>業務場景</th>
+                  <th>觸發 T-Code</th>
+                  <th>領料單類別</th>
+                  <th>MES輪次派工</th>
+                  <th>SAP報工</th>
+                  <th>工單入庫</th>
+                  <th>成本歸集特點</th>
+                </tr>
+              </thead>
+              <tbody id="order-matrix-tbody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 8 大途程控制碼矩陣 -->
+        <div class="table-wrapper">
+          <div class="table-header-toolbar">
+            <div class="table-title">
+              <span>⚙️ 8 大途程控制碼（Control Key）全解析矩陣</span>
+              <span class="badge-tag badge-amber">一線必查</span>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="custom-table" id="control-keys-table">
+              <thead>
+                <tr>
+                  <th>控制碼</th>
+                  <th>處理方式</th>
+                  <th>強制報工</th>
+                  <th>外部處理</th>
+                  <th>自動收貨入庫</th>
+                  <th>排程/成本</th>
+                  <th>核心應用場景與系統行為</th>
+                </tr>
+              </thead>
+              <tbody id="control-keys-tbody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 虛擬階 vs 實體階對照卡片 -->
+        <div
+          style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 1.25rem 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--primary);">
+            💡 虛擬階 (SOBSL=50) vs 實體階 關鍵防呆法則
+          </h3>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+            • <strong>虛擬階 (SOBSL=50)</strong>：鞋面虛擬總成、裁斷部件虛擬包、虛擬貼合。MRP 穿透至底層料，<strong>不開工單、無實體庫存帳</strong>；現場直發會報錯
+            <code>E008 (虛擬階不可直接發料)</code>！若需專案控管庫存，BOM 維護展開類型 <code>Z1 (退出虛擬裝配)</code>。<br>
+            • <strong>外購品</strong>：無途程、無生產版本；MRP 直接產生採購請購單 (PR)，必備 <code>ME11</code> 資訊記錄核價。
+          </p>
+        </div>
+
+      </div>
+
+      <!-- LAB 2: 途程控制碼連動模擬器 -->
+      <div class="lab-content-panel" id="lab-pipeline" style="display: none;">
+        <div class="calc-card">
+          <div class="calc-header">
+            <div>
+              <h2 class="calc-title">
+                ⛓️ 產線途程控制碼（Control Key）連動與防呆模擬器
+                <span class="badge-tag badge-amber">SOP 1.3 矩陣行為</span>
+              </h2>
+              <p class="calc-desc">
+                模擬配置整條生產線各工序的控制碼 (PP01~PP08, PP99)，即時驗證自動開 PR、里程碑連帶報工與自動 101 入庫防呆鐵律！
+              </p>
+            </div>
+            <div>
+              <button class="btn-icon" onclick="resetRoutingPipeline()">🔄 重設標準產線配置</button>
+            </div>
+          </div>
+
+          <!-- Pipeline Stations Visualizer -->
+          <div class="pipeline-stations-wrapper" id="pipeline-stations">
+            <!-- Dynamic station cards injected via JavaScript -->
+          </div>
+
+          <!-- Realtime Validation Alert -->
+          <div id="pipeline-validation-container">
+            <!-- Dynamic validation alerts injected via JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- LAB 3: 工單類型智能判定器 -->
+      <div class="lab-content-panel" id="lab-recommender" style="display: none;">
+        <div class="calc-card">
+          <div class="calc-header">
+            <div>
+              <h2 class="calc-title">
+                🎯 現場生產情境 ➔ 工單類型智能推薦器
+                <span class="badge-tag badge-cyan">SOP 0.1 矩陣決策</span>
+              </h2>
+              <p class="calc-desc">請點選您現場當前遇到的生產業務場景，系統將秒級判定標準工單類型、開單 T-Code 與跨系統連動規範：</p>
+            </div>
+          </div>
+
+          <div class="recommender-grid" id="recommender-scenarios">
+            <!-- Scenario cards injected via JavaScript -->
+          </div>
+
+          <div id="recommender-result">
+            <!-- Dynamic result card injected via JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- LAB 4: 途程工時與產能試算器 -->
+      <div class="lab-content-panel" id="lab-calculator" style="display: none;">
+        <div class="calc-card">
+          <div class="calc-header">
+            <div>
+              <h2 class="calc-title">
+                🧮 途程工時與排程產能動態試算器
+                <span class="badge-tag badge-cyan">SOP 1.3.B 標準公式</span>
+              </h2>
+              <p class="calc-desc">
+                依據標準途程之基礎數量 (AF)、直接人工 (AK)、完成量與作業分割數，即時試算系統報工工時與產線排程天數。
+              </p>
+            </div>
+            <div>
+              <span style="font-size: 0.8rem; color: var(--text-muted); margin-right: 0.4rem;">快速範本：</span>
+              <div class="preset-pills-row" id="calc-preset-pills" style="display: inline-flex;">
+                <button class="preset-pill" data-preset="cutting" onclick="loadCalcPreset('cutting')">👞 慢跑鞋裁斷線</button>
+                <button class="preset-pill" data-preset="stitching" onclick="loadCalcPreset('stitching')">🪡
+                  高階針車組</button>
+                <button class="preset-pill" data-preset="assembly" onclick="loadCalcPreset('assembly')">⚙️
+                  自動化成型線</button>
+                <button class="preset-pill" data-preset="as001_co" onclick="loadCalcPreset('as001_co')">🔎 實戰：成型線 AS001
+                  (117雙/3900分)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc-grid-layout">
+            <!-- Inputs Pane -->
+            <div class="calc-inputs-pane">
+
+              <!-- Input 1: 基礎數量 AF -->
+              <div class="calc-input-group">
+                <div class="calc-label-row">
+                  <span class="calc-label">基礎數量 (Base Quantity)</span>
+                  <span class="calc-var-badge">AF</span>
+                </div>
+                <div class="calc-input-control-row">
+                  <input type="number" id="calc-af" class="calc-number-input" value="1000" min="1" step="10">
+                  <span style="font-size: 0.85rem; color: var(--text-muted);">雙</span>
+                  <input type="range" id="slider-af" class="calc-range-slider" min="50" max="5000" value="1000"
+                    step="10">
+                </div>
+              </div>
+
+              <!-- Input 2: 直接人工 AK -->
+              <div class="calc-input-group">
+                <div class="calc-label-row">
+                  <span class="calc-label">工作中心直接人工 (Direct Labor Time)</span>
+                  <span class="calc-var-badge">AK</span>
+                </div>
+                <div class="calc-input-control-row">
+                  <input type="number" id="calc-ak" class="calc-number-input" value="480" min="1" step="30">
+                  <span style="font-size: 0.85rem; color: var(--text-muted);">分鐘</span>
+                  <input type="range" id="slider-ak" class="calc-range-slider" min="30" max="6000" value="480"
+                    step="30">
+                </div>
+              </div>
+
+              <!-- Input 3: 工單報工完成量 -->
+              <div class="calc-input-group">
+                <div class="calc-label-row">
+                  <span class="calc-label">工單預計/實際報工量 (Yield Qty)</span>
+                  <span class="calc-var-badge">報工完成量</span>
+                </div>
+                <div class="calc-input-control-row">
+                  <input type="number" id="calc-yield" class="calc-number-input" value="2500" min="1" step="100">
+                  <span style="font-size: 0.85rem; color: var(--text-muted);">雙</span>
+                  <input type="range" id="slider-yield" class="calc-range-slider" min="100" max="10000" value="2500"
+                    step="100">
+                </div>
+              </div>
+
+              <!-- Input 4: 最大分割數 -->
+              <div class="calc-input-group">
+                <div class="calc-label-row">
+                  <span class="calc-label">工序配置機台數 / 作業人數 (Splitting)</span>
+                  <span class="calc-var-badge">最大分割數</span>
+                </div>
+                <div class="calc-input-control-row">
+                  <input type="number" id="calc-split" class="calc-number-input" value="5" min="1" max="300" step="1">
+                  <span style="font-size: 0.85rem; color: var(--text-muted);">機台/人</span>
+                  <input type="range" id="slider-split" class="calc-range-slider" min="1" max="120" value="5" step="1">
+                </div>
+              </div>
+
+              <!-- Input 5: 每日作業工時 -->
+              <div class="calc-input-group">
+                <div class="calc-label-row">
+                  <span class="calc-label">產線每日運作班制工時 (Daily Shift Hours)</span>
+                  <span class="calc-var-badge">每日工時</span>
+                </div>
+                <div class="calc-input-control-row">
+                  <input type="number" id="calc-shift-hours" class="calc-number-input" value="8" min="1" max="24"
+                    step="0.5">
+                  <span style="font-size: 0.85rem; color: var(--text-muted);">小時/天</span>
+                  <input type="range" id="slider-shift-hours" class="calc-range-slider" min="4" max="16" value="8"
+                    step="0.5">
+                </div>
+              </div>
+
+            </div>
+
+            <!-- KPI Results Output Pane -->
+            <div class="calc-results-pane">
+
+              <div class="kpi-cards-grid">
+                <!-- KPI 1: 單雙標準工時 -->
+                <div class="kpi-card">
+                  <div class="kpi-title">單雙標準作業工時 (Cycle Time)</div>
+                  <div class="kpi-value-row">
+                    <span class="kpi-value" id="kpi-cycle-time">0.48</span>
+                    <span class="kpi-unit">分鐘 / 雙</span>
+                  </div>
+                  <div class="kpi-subtext" id="kpi-cycle-sec">約 28.8 秒 / 雙</div>
+                </div>
+
+                <!-- KPI 2: 系統報工總工時 -->
+                <div class="kpi-card amber">
+                  <div class="kpi-title">系統報工工時 (Confirmation Time)</div>
+                  <div class="kpi-value-row">
+                    <span class="kpi-value" id="kpi-total-minutes">1,200</span>
+                    <span class="kpi-unit">分鐘</span>
+                  </div>
+                  <div class="kpi-subtext" id="kpi-total-hours">累計 20.0 人工工時 (Man-hours)</div>
+                </div>
+
+                <!-- KPI 3: 產線實際排程耗時 -->
+                <div class="kpi-card emerald">
+                  <div class="kpi-title">產線實際排程耗時 (Lead Time)</div>
+                  <div class="kpi-value-row">
+                    <span class="kpi-value" id="kpi-lead-hours">4.0</span>
+                    <span class="kpi-unit">小時</span>
+                  </div>
+                  <div class="kpi-subtext" id="kpi-lead-split-desc">已透過 5 台機台分割並行加速</div>
+                </div>
+
+                <!-- KPI 4: 預估排程天數 -->
+                <div class="kpi-card purple">
+                  <div class="kpi-title">預估排程作業天數 (Lead Days)</div>
+                  <div class="kpi-value-row">
+                    <span class="kpi-value" id="kpi-lead-days">0.50</span>
+                    <span class="kpi-unit">工作天</span>
+                  </div>
+                  <div class="kpi-subtext" id="kpi-daily-capacity">每日極限產能：5,000 雙 / 天</div>
+                </div>
+              </div>
+
+              <!-- Formula Reference Card -->
+              <div class="formula-card" id="formula-card-content">
+                <strong style="color: var(--primary);">📐 手冊標準計算公式即時驗證：</strong><br>
+                1. <strong>系統報工工時</strong> = (AK ÷ AF) × 報工量 = (480 ÷ 1000) × 2500 = <strong>1,200 分鐘 (20.0
+                  H)</strong><br>
+                2. <strong>產線排程實際耗時</strong> = 總作業工時 ÷ 最大分割數 = 20.0 小時 ÷ 5 = <strong>4.0 小時</strong><br>
+                3. <strong>排程天數</strong> = 4.0 小時 ÷ 8 小時/天 = <strong>0.50 天</strong> (CO 千雙標準工時：<strong>8.000 H / 1,000
+                  PR</strong>)
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 新增：途程參數白話文全解析 & CO 成本檢核實戰備註 (全動態連動) -->
+          <div style="margin-top: 1.75rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+
+            <!-- 區塊 1：顧問重點提示（PP 途程工時 vs CO 工資率） -->
+            <div
+              style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(56, 189, 248, 0.12)); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; padding: 1.15rem 1.35rem; margin-bottom: 1.5rem;">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                <span style="font-size: 1.35rem;">💡</span>
+                <strong style="font-size: 1.02rem; color: var(--text-main);">顧問實戰備忘：當 CO
+                  檢核出「產品工費成本太高」時，生管如何秒判是誰的問題？</strong>
+                <span class="badge-tag badge-amber" id="note-active-preset-badge">當前對照：預設試算情境</span>
+              </div>
+              <div style="font-size: 0.86rem; color: var(--text-secondary); line-height: 1.65;">
+                產品的<strong>人工與製造費用成本（工費成本）</strong>在 SAP 中是由兩個數字相乘決定的：<br>
+                <div
+                  style="background: rgba(0, 0, 0, 0.25); border-left: 3px solid var(--amber); padding: 0.6rem 1rem; margin: 0.5rem 0; border-radius: 6px; font-family: var(--font-mono); color: var(--text-main);">
+                  💰 產品工費成本 = <strong>① 途程標準工時 (PP 生管於 CA01/CA02 維護)</strong> × <strong>② 作業類型每小時工資率 (CO 財務於 KP26
+                    維護)</strong>
+                </div>
+                • <strong>為什麼試算器不直接顯示美金成本？</strong> 因為 PP 途程只記載<strong>「做幾雙鞋要花多少時間（分鐘/小時）」</strong>，不包含每小時多少錢（工資率屬 CO
+                財務機密主檔 <code>KP26</code>）。<br>
+                • <span id="note-co-summary-steps">
+                  <strong>生管自檢 2 步驟（依目前上方設定值即時帶入）</strong>：<br>
+                  &nbsp;&nbsp;1️⃣ 先看右下角<strong>「每日極限產能」</strong>：目前設定
+                  <code>AF = 1,000 雙</code>、<code>AK = 480 分鐘</code>、<code>分割數 = 5 機台/人</code>、<code>每日 8 小時</code>，算出日產能為
+                  <span class="dyn-num">5,000 雙 / 天</span>，單雙人工 <code>28.8 秒</code>（5 台並行後產線節拍約
+                  <code>5.8 秒/雙</code>）。只要日產能符合現場實際產量，就代表<strong>生管途程工時 100% 正確！</strong><br>
+                  &nbsp;&nbsp;2️⃣ 再對照 CO 的 <code>CK11N / CK40N</code> 畫面：CO 預設以 <code>1,000 雙 (PR)</code> 估算成本，目前千雙總工時 =
+                  <code>(480 ÷ 1,000) × 1,000 = 480.0 分鐘 =</code> <span class="dyn-num">8.000 小時
+                    (H)</span>。若工時合理但成本金額過高，即代表 <strong>CO 在 <code>KP26</code> 將每小時工資率設得太高了</strong>！
+                </span>
+              </div>
+            </div>
+
+            <!-- 區塊 2：左側 5 大輸入參數（白話文定義 + 調高/調低影響對照表） -->
+            <div style="margin-bottom: 1.5rem;">
+              <h3
+                style="font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span>🎛️</span>
+                <span>一、左側 5 大輸入參數：白話文是什麼？調高 (▲) 或調低 (▼) 會有什麼影響？</span>
+                <span style="font-size: 0.78rem; color: var(--amber); font-weight: 600;">（⚡ 黃色底字會隨您點選上方範本或滑桿即時連動）</span>
+              </h3>
+              <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: 12px;">
+                <table class="custom-table" style="font-size: 0.85rem;">
+                  <thead>
+                    <tr>
+                      <th style="width: 18%;">參數名稱 (對應 SAP 欄位)</th>
+                      <th style="width: 32%;">🗣️ 白話文是什麼意思？（當前設定即時對照）</th>
+                      <th style="width: 25%;">📈 數值【調高 ▲】的影響</th>
+                      <th style="width: 25%;">📉 數值【調低 ▼】的影響</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <strong style="color: var(--primary);">1. 基礎數量 (AF)</strong><br>
+                        <span style="font-size: 0.76rem; color: var(--text-muted);">途程 <code>CA02</code> 基礎數量</span>
+                      </td>
+                      <td style="line-height: 1.55;" id="note-param-af">
+                        <strong>計算工時的「基準產量（分母）」</strong>。<br>
+                        也就是拿「幾雙鞋」當作一個測量單位。目前設定為 <span class="dyn-num">1,000 雙</span>，代表以產出 <span class="dyn-num">1,000
+                          雙</span> 作為計算標準工時的分母基準。
+                      </td>
+                      <td style="line-height: 1.55;">
+                        代表同樣時間能做<strong>更多雙鞋（效率變高）</strong>：<br>
+                        • 單雙工時與總報工工時 <strong>變少 👇</strong><br>
+                        • <strong style="color: #10b981;">CO 產品工費成本 變低 👇</strong><br>
+                        • 產線排程天數 <strong>縮短 👇</strong>
+                      </td>
+                      <td style="line-height: 1.55;">
+                        代表同樣時間做的<strong>鞋子變少（效率變慢）</strong>：<br>
+                        • 單雙工時與總報工工時 <strong>暴增 👆</strong><br>
+                        • <strong style="color: #f43f5e;">CO 產品工費成本 飆高 👆</strong><br>
+                        • 產線排程天數 <strong>拉長 👆</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong style="color: var(--primary);">2. 工作中心直接人工 (AK)</strong><br>
+                        <span style="font-size: 0.76rem; color: var(--text-muted);">途程 <code>CA02</code> 作業類型
+                          1000</span>
+                      </td>
+                      <td style="line-height: 1.55;" id="note-param-ak">
+                        <strong>做出上面那批「基礎數量」所需投入的「總人時分鐘數（分子）」</strong>。<br>
+                        目前設定：為了做出上方 <span class="dyn-num">1,000 雙</span> 基礎數量，全線所有作業員加起來總共需投入 <span class="dyn-num">480
+                          分鐘</span>（約 <span class="dyn-num">8.0 小時</span>）的直接人工。
+                      </td>
+                      <td style="line-height: 1.55;">
+                        代表做這批鞋要花<strong>更多人工分鐘數</strong>：<br>
+                        • 單雙工時與總報工工時 <strong>變多 👆</strong><br>
+                        • <strong style="color: #f43f5e;">CO 產品工費成本 飆高 👆</strong><br>
+                        • 產線排程天數 <strong>拉長 👆</strong>
+                      </td>
+                      <td style="line-height: 1.55;">
+                        代表做這批鞋花的<strong>人工分鐘數變少</strong>：<br>
+                        • 單雙工時與總報工工時 <strong>變少 👇</strong><br>
+                        • <strong style="color: #10b981;">CO 產品工費成本 變低 👇</strong><br>
+                        • 產線排程天數 <strong>縮短 👇</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong style="color: var(--primary);">3. 工單預計/實際報工量</strong><br>
+                        <span style="font-size: 0.76rem; color: var(--text-muted);">工單雙數 / <code>CK40N</code> 批量</span>
+                      </td>
+                      <td style="line-height: 1.55;" id="note-param-yield">
+                        <strong>這張工單總共要做幾雙鞋？</strong><br>
+                        • 目前試算工單雙數為 <span class="dyn-num">2,500 雙</span>（總報工工時為 <span class="dyn-num">1,200 分鐘 / 20.0
+                          H</span>）。<br>
+                        • <strong>與 CO 對帳時</strong>：請填 <code>1,000 雙</code>（CO <code>CK40N</code> 千雙標準工時為 <span
+                          class="dyn-num">8.000 H</span>）。
+                      </td>
+                      <td style="line-height: 1.55;">
+                        訂單雙數越多：<br>
+                        • 整張工單總報工工時與排程天數 <strong>等比例增加 👆</strong><br>
+                        • <strong>不影響</strong>「單雙標準工時」與「單雙成本」
+                      </td>
+                      <td style="line-height: 1.55;">
+                        訂單雙數越少：<br>
+                        • 整張工單總報工工時與排程天數 <strong>等比例減少 👇</strong><br>
+                        • <strong>不影響</strong>「單雙標準工時」與「單雙成本」
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong style="color: var(--primary);">4. 最大分割數 (Splitting)</strong><br>
+                        <span style="font-size: 0.76rem; color: var(--text-muted);">途程 <code>CA02</code> 最大分割數量</span>
+                      </td>
+                      <td style="line-height: 1.55;" id="note-param-split">
+                        <strong>現場同時有「幾個人（或幾台機台）」並排一起做這道工序？</strong><br>
+                        目前設定現場有 <span class="dyn-num">5 機台/人</span> 同時並行作業，系統算排程時會把總人工 <span class="dyn-num">20.0
+                          小時</span> 除以 <span class="dyn-num">5</span>，縮短為 <span class="dyn-num">4.0 小時</span>。
+                      </td>
+                      <td style="line-height: 1.55;">
+                        同時做的人/機台越多：<br>
+                        • <strong>產線排程耗時與天數 大幅縮短 👇</strong><br>
+                        • <strong>每日極限產能 提高 👆</strong><br>
+                        • ⚠️ <strong style="color: var(--amber);">完全不影響系統報工總工時與 CO 成本！</strong>
+                      </td>
+                      <td style="line-height: 1.55;" id="note-param-split-low">
+                        同時做的人/機台越少：<br>
+                        • <strong>產線排程天數 大幅拉長 👆</strong>（若漏填變 <code>1</code>，系統會以為只有 1 個人從頭做到尾，排程耗時會暴增 <span
+                          class="dyn-num">5 倍</span> 變成 <span class="dyn-num">20.0 小時</span>！）<br>
+                        • ⚠️ <strong style="color: var(--amber);">完全不影響 CO 成本！</strong>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong style="color: var(--primary);">5. 每日運作班制工時</strong><br>
+                        <span style="font-size: 0.76rem; color: var(--text-muted);">工作中心 <code>CR02</code> 產能班制</span>
+                      </td>
+                      <td style="line-height: 1.55;" id="note-param-shift">
+                        <strong>這條產線一天開工幾個小時？</strong><br>
+                        目前設定為每天開工 <span class="dyn-num">8 小時/天</span>，將產線排程耗時 <span class="dyn-num">4.0 小時</span> 除以
+                        <span class="dyn-num">8 小時</span>，即可換算為 <span class="dyn-num">0.50 個工作天</span>。
+                      </td>
+                      <td style="line-height: 1.55;">
+                        每天上班時數越長：<br>
+                        • 完成工單所需的<strong>工作天數 減少 👇</strong><br>
+                        • <strong>每日極限產能 提高 👆</strong><br>
+                        • ⚠️ <strong style="color: var(--amber);">完全不影響系統報工工時與 CO 成本！</strong>
+                      </td>
+                      <td style="line-height: 1.55;">
+                        每天上班時數越短：<br>
+                        • 完成工單所需的<strong>工作天數 增加 👆</strong><br>
+                        • <strong>每日極限產能 降低 👇</strong><br>
+                        • ⚠️ <strong style="color: var(--amber);">完全不影響系統報工工時與 CO 成本！</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 區塊 3：右側 4 大計算結果卡片白話文解讀 -->
+            <div>
+              <h3
+                style="font-size: 1.05rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span>📊</span>
+                <span>二、右側 4 個計算結果數字：分別代表什麼意思？怎麼用來檢查途程對不對？</span>
+                <span style="font-size: 0.78rem; color: var(--amber); font-weight: 600;">（⚡ 當前情境實算結果即時解讀）</span>
+              </h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+
+                <!-- 解讀 1 -->
+                <div
+                  style="background: var(--bg-card-solid); border: 1px solid var(--border-subtle); border-top: 3px solid var(--primary); border-radius: 10px; padding: 1rem 1.15rem;">
+                  <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-bottom: 0.35rem;">
+                    ① 單雙標準作業工時 (Cycle Time)
+                  </div>
+                  <div
+                    style="font-size: 0.78rem; color: var(--primary); font-family: var(--font-mono); margin-bottom: 0.45rem;">
+                    公式：直接人工 (AK) ÷ 基礎數量 (AF)
+                  </div>
+                  <div style="font-size: 0.83rem; color: var(--text-secondary); line-height: 1.55;" id="note-kpi-1">
+                    • <strong>白話文</strong>：平均做完 <strong>1 雙鞋</strong>，需要累積花費多少個人的分鐘數（單雙總人時）。<br>
+                    • <strong>當前數值對照</strong>：<code>480分 ÷ 1,000雙 =</code> <span class="dyn-num">0.48 分鐘/雙</span>（單人累計約
+                    <span class="dyn-num">28.8 秒</span>；由 <span class="dyn-num">5</span> 機台/人分攤，產線每 <span
+                      class="dyn-num">5.8 秒</span> 產出一雙鞋）。若算出來變成幾百分鐘，代表 <code>AF</code> 或 <code>AK</code> 填錯了！
+                  </div>
+                </div>
+
+                <!-- 解讀 2 -->
+                <div
+                  style="background: var(--bg-card-solid); border: 1px solid var(--border-subtle); border-top: 3px solid var(--amber); border-radius: 10px; padding: 1rem 1.15rem;">
+                  <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-bottom: 0.35rem;">
+                    ② 系統報工工時 (Confirmation Time) <span class="badge-tag badge-amber" style="font-size: 0.7rem;">CO
+                      成本直接依據</span>
+                  </div>
+                  <div
+                    style="font-size: 0.78rem; color: var(--amber); font-family: var(--font-mono); margin-bottom: 0.45rem;">
+                    公式：單雙標準工時 × 報工完成量 (÷ 60 轉小時 H)
+                  </div>
+                  <div style="font-size: 0.83rem; color: var(--text-secondary); line-height: 1.55;" id="note-kpi-2">
+                    • <strong>白話文</strong>：這批鞋子做完報工時，SAP 系統<strong>真正認列入帳的「總人工工時 (Man-hours)」</strong>。<br>
+                    • <strong>當前數值對照</strong>：生產 <span class="dyn-num">2,500 雙</span> 時，系統報工總工時為 <span
+                      class="dyn-num">1,200 分鐘</span>（累計 <span class="dyn-num">20.0 H</span>）；若以 CO <code>CK40N</code>
+                    預設 <code>1,000 雙</code> 計算則為 <span class="dyn-num">8.000 H</span>，CO 就是拿這個小時數去乘以每小時工資率算出總工費！
+                  </div>
+                </div>
+
+                <!-- 解讀 3 -->
+                <div
+                  style="background: var(--bg-card-solid); border: 1px solid var(--border-subtle); border-top: 3px solid var(--emerald); border-radius: 10px; padding: 1rem 1.15rem;">
+                  <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-bottom: 0.35rem;">
+                    ③ 產線實際排程耗時 (Lead Time)
+                  </div>
+                  <div
+                    style="font-size: 0.78rem; color: var(--emerald); font-family: var(--font-mono); margin-bottom: 0.45rem;">
+                    公式：系統報工總小時數 ÷ 最大分割數 (人數/機台)
+                  </div>
+                  <div style="font-size: 0.83rem; color: var(--text-secondary); line-height: 1.55;" id="note-kpi-3">
+                    • <strong>白話文</strong>：考慮到現場有多人同時並排做，<strong>這條產線實際需要「開線運轉幾個小時（看手錶的時間）」</strong>才能做完這張單。<br>
+                    • <strong>當前數值對照</strong>：<span class="dyn-num">2,500 雙</span> 雖然總共要花 <span class="dyn-num">20.0
+                      個人工小時</span>，但因為現場有 <span class="dyn-num">5 機台/人</span> 同時做，所以產線實際只要開機 <code>20.0 ÷ 5 =</code>
+                    <span class="dyn-num">4.0 小時</span> 就全部做完了！
+                  </div>
+                </div>
+
+                <!-- 解讀 4 -->
+                <div
+                  style="background: var(--bg-card-solid); border: 1px solid var(--border-subtle); border-top: 3px solid var(--purple); border-radius: 10px; padding: 1rem 1.15rem;">
+                  <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-bottom: 0.35rem;">
+                    ④ 預估排程天數 ＆ 每日極限產能 <span class="badge-tag badge-cyan" style="font-size: 0.7rem;">生管防呆首選</span>
+                  </div>
+                  <div
+                    style="font-size: 0.78rem; color: #c084fc; font-family: var(--font-mono); margin-bottom: 0.45rem;">
+                    公式：產線實際排程耗時 ÷ 每日班制工時
+                  </div>
+                  <div style="font-size: 0.83rem; color: var(--text-secondary); line-height: 1.55;" id="note-kpi-4">
+                    • <strong>白話文</strong>：這張工單要排程<strong>「幾個工作天」</strong>才能完工，以及這條線<strong>「一天最多能做幾雙鞋」</strong>。<br>
+                    • <strong>當前數值對照</strong>：<code>4.0 小時 ÷ 每天 8 小時 =</code> <span class="dyn-num">0.50
+                      個工作天</span>，且卡片下方算出<strong>「每日極限產能：<span class="dyn-num">5,000 雙 /
+                        天</span>」</strong>！問現場組長：「這條線一天是不是做 <span class="dyn-num">5,000</span> 雙左右？」如果是，這條途程就 100% 設對了！
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- TAB: 工單全生命週期穿透診斷器 (WO Lifecycle Inspector) -->
+    <section class="tab-panel" id="tab-wo-inspector" role="tabpanel">
+      <div class="inspector-card">
+        <!-- Inspector Banner -->
+        <div class="inspector-banner">
+          <div class="inspector-banner-title">
+            <span style="font-size: 1.8rem;">🔬</span>
+            <div>
+              <h2>工單全生命週期穿透診斷器 (WO Lifecycle Inspector)</h2>
+              <div class="inspector-banner-desc">
+                生管專家級七維穿透健康體檢：即時剖析工單底層
+                <code>JEST</code>、<code>RESB</code>、<code>PLPO</code>、<code>AFPO</code>、<code>AFFW/COGI</code>，精準攔截異常與斷點，產出
+                RACI 處置工單。
+              </div>
+            </div>
+          </div>
+          <div>
+            <span class="badge-tag badge-cyan">S/4HANA & ECC 6.0 深度相容</span>
+          </div>
+        </div>
+
+        <!-- Toolbar: WO Number Input & 5 Case Study Presets -->
+        <div class="inspector-toolbar">
+          <div class="inspector-search-row">
+            <div class="inspector-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="wo-inspector-input" class="inspector-input"
+                placeholder="輸入 12 碼 SAP 生產工單編號 (例如: 100028475901) 或從下方載入案例..." value="100028475901">
+            </div>
+            <button class="btn btn-primary" onclick="runWoInspection()" id="btn-run-inspection">
+              ⚡ 開始穿透診斷
+            </button>
+          </div>
+
+          <div class="presets-container">
+            <div class="presets-title">
+              <span>🎯 典型實戰情境快速載入 (Presets)：</span>
+            </div>
+            <div class="presets-grid" id="presets-grid">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 5-Stage Lifecycle Stepper -->
+        <div class="lifecycle-stepper-box">
+          <div class="stepper-header-title">
+            🧭 工單 5 大生命週期穿透狀態里程碑 (Lifecycle Trajectory)
+          </div>
+          <div class="stepper-track" id="inspector-stepper-track">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Two-Column Diagnostic Area -->
+        <div class="inspector-main-grid">
+          <!-- Left Column: Health Gauge, Action Dispatch Ticket, Interactive What-If Tweaker -->
+          <div class="inspector-left-col">
+            <!-- Health Gauge -->
+            <div class="health-gauge-card" id="inspector-gauge-card">
+              <div class="health-gauge-title">工單綜合健康指數 (Health Score)</div>
+              <div class="health-score-ring" id="inspector-score-ring">
+                <span class="health-score-number" id="inspector-score-num">--</span>
+                <span class="health-score-max">/ 100</span>
+              </div>
+              <div id="inspector-verdict-badge" class="health-verdict-badge">評估中</div>
+              <div class="health-metrics-summary" id="inspector-metrics-summary">
+                點擊上方案例或輸入工單執行診斷。
+              </div>
+            </div>
+
+            <!-- Action Dispatch Ticket (RACI) -->
+            <div class="action-ticket-card" id="inspector-action-ticket">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Interactive What-If Tweaker -->
+            <div class="tweaker-box">
+              <div class="tweaker-title">
+                <span>🎛️ 條件模擬沙盤 (What-If Tweaker)</span>
+              </div>
+              <div class="tweaker-toggles-list" id="tweaker-toggles-list">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: 7 Diagnostic Pillars Cards -->
+          <div class="pillars-container" id="inspector-pillars-container">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- TAB 4: 月結 TECO 自檢清單 -->
+    <section class="tab-panel" id="tab-audit-checklist" role="tabpanel">
+      <div class="checklist-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">
+              工單技術完成 (TECO) 結案前四重深度稽核
+            </h2>
+            <p style="font-size: 0.88rem; color: var(--text-secondary);">
+              月結關帳前生管必備清單。狀態自動保存於本地端 (LocalStorage)。
+            </p>
+          </div>
+          <div>
+            <button class="btn-icon" onclick="resetChecklist()" id="btn-reset-checklist">🔄 一鍵重置狀態</button>
+          </div>
+        </div>
+
+        <div class="checklist-progress-bar-wrapper">
+          <div class="checklist-progress-bar" id="checklist-progress"></div>
+        </div>
+        <div id="checklist-progress-text"
+          style="font-size: 0.85rem; font-weight: 600; color: var(--primary); margin-bottom: 1.25rem;">
+          稽核完成度：0%
+        </div>
+
+        <div id="checklist-items">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <div
+          style="margin-top: 1.5rem; background: rgba(0,0,0,0.2); padding: 1rem 1.25rem; border-radius: 10px; border-left: 3px solid var(--amber); font-size: 0.86rem; color: var(--text-secondary); line-height: 1.6;">
+          <strong>⚠️ 財務月結連動提醒：</strong><br>
+          • <strong>狀態為 REL</strong>：工單成本被財務認定為 <strong>在製品 (WIP)</strong>，不計算生產差異。<br>
+          • <strong>狀態為 TECO</strong>：系統認定完工，停止計算 WIP，財務於 <code>KKS2</code> 計算生產差異並於 <code>CO88</code> 結算損益！月結前未打 TECO
+          會導致財務無法關帳。
+        </div>
+      </div>
+    </section>
+
+    <!-- [依各廠權責差異考量，暫時 MARK 掉 RACI 權責矩陣內容區塊]
+    <section class="tab-panel" id="tab-raci-matrix" role="tabpanel">
+      <div class="table-wrapper">
+        <div class="table-header-toolbar">
+          <div class="table-title">
+            <span>👥 14 大跨部門角色職責與交接邊界矩陣 (RACI Matrix)</span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary);">
+            <strong>R</strong>: 執行負責 | <strong>A</strong>: 最終核准 | <strong>C</strong>: 協同審核 | <strong>I</strong>: 接收通知
+          </div>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="custom-table" id="raci-table">
+            <thead>
+              <tr>
+                <th>業務流程環節</th>
+                <th>生管 (PP)</th>
+                <th>開發/BOM</th>
+                <th>業務 (SD)</th>
+                <th>資材/倉庫 (MM)</th>
+                <th>品管 (QM)</th>
+                <th>成本會計 (CO)</th>
+                <th>關鍵交付成果與前置要求</th>
+              </tr>
+            </thead>
+            <tbody id="raci-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    -->
+
+    <!-- TAB 6: 業務情境 T-Code 循序流動地圖 & 68 大字典 -->
+    <section class="tab-panel" id="tab-tcode-dictionary" role="tabpanel">
+      <!-- Toolbar Header -->
+      <div class="flow-hub-header">
+        <div class="flow-hub-title">
+          <div style="font-size: 1.8rem;">🗺️</div>
+          <div>
+            <h2>情境導向 T-Code 業務循序流動地圖</h2>
+            <p>打破死板的交易碼列表！依照 13 大實戰業務情境，依序串聯 Step 1 ➔ Step 2 ➔ Step 3... 執行步驟、權責角色與防呆鐵律。</p>
+          </div>
+        </div>
+
+        <div class="view-mode-toggle-group">
+          <button class="view-mode-btn active" id="view-mode-flow" onclick="switchTCodeViewMode('flow')">
+            ⚡ 依情境循序流動檢視
+          </button>
+          <button class="view-mode-btn" id="view-mode-grid" onclick="switchTCodeViewMode('grid')">
+            🔤 68 大交易碼字典卡片
+          </button>
+        </div>
+      </div>
+
+      <!-- Flow View Container -->
+      <div id="scenario-flow-view">
+        <!-- Category Filter Bar -->
+        <div class="scenario-category-bar" id="scenario-cat-bar">
+          <span class="scenario-cat-label">情境分組：</span>
+          <button class="pill-btn active" data-cat="ALL" onclick="filterScenarioCategory('ALL')">全部 (13)</button>
+          <button class="pill-btn" data-cat="基礎主檔" onclick="filterScenarioCategory('基礎主檔')">基礎主檔 (1)</button>
+          <button class="pill-btn" data-cat="需求規劃" onclick="filterScenarioCategory('需求規劃')">需求規劃 (2)</button>
+          <button class="pill-btn" data-cat="工單與排程" onclick="filterScenarioCategory('工單與排程')">工單與排程 (4)</button>
+          <button class="pill-btn" data-cat="領料發料" onclick="filterScenarioCategory('領料發料')">領料發料 (1)</button>
+          <button class="pill-btn" data-cat="退料與ECN" onclick="filterScenarioCategory('退料與ECN')">退料與 ECN (2)</button>
+          <button class="pill-btn" data-cat="完工報工" onclick="filterScenarioCategory('完工報工')">報工與入庫 (2)</button>
+          <button class="pill-btn" data-cat="清理月結" onclick="filterScenarioCategory('清理月結')">月結 TECO (1)</button>
+        </div>
+
+        <!-- Scenario Pills Selector -->
+        <div class="scenario-pills-container" id="scenario-pills-list">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <!-- Active Scenario Banner -->
+        <div class="scenario-banner-card" id="scenario-banner">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <!-- Stepper Timeline -->
+        <div class="stepper-flow-container" id="scenario-stepper-container">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+
+      <!-- Grid View Container (Hidden by default, or toggled) -->
+      <div id="tcode-grid-view" style="display: none;">
+        <div
+          style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="font-size: 0.9rem; color: var(--text-secondary);">
+            共收錄 <strong style="color: var(--primary);">68</strong> 個集團鞋業 SAP PP / MM / SD 核心交易碼。點擊卡片右上角或交易碼代號可一鍵複製。
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="tcode-filter-input" placeholder="在 68 個 T-Code 中快篩..." class="search-input"
+              style="padding: 0.4rem 0.8rem; font-size: 0.85rem; width: 240px;" oninput="filterTCodeCards(this.value)">
+          </div>
+        </div>
+        <div class="issues-grid" id="tcode-cards-grid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- Toast Message Element -->
+  <div class="toast" id="app-toast">⚡ 已複製交易碼至剪貼簿</div>
+
+  <!-- Data & Script Bundle (Supports both file:// offline launch & web server) -->
+  <script src="data/knowledge_loader.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
+</body>
+
+</html>
