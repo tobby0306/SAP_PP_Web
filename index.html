@@ -14,7 +14,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=13">
+  <link rel="stylesheet" href="css/app.css?v=14">
 </head>
 
 <body>
@@ -160,6 +160,11 @@
     <!-- TAB 2: 互動排查決策樹與退料防呆實驗室 (TSK-06) -->
     <section class="tab-panel" id="tab-decision-tree" role="tabpanel">
       <div class="tree-container">
+
+        <div
+          style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.28); border-left: 4px solid var(--primary); border-radius: 10px; padding: 0.75rem 1.1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+          💡 <strong>操作指南</strong>：上方 <strong>1～3 為「互動問答決策樹」</strong>（像看診一樣，點選下方符合現場狀況的選項按鈕，一步步找出卡關原因與負責部門）；<strong>4～5 為「防呆模擬沙盒」</strong>（左邊選工單狀態＋點選動作，右邊模擬螢幕會立即顯示 SAP 報錯與正確 SOP）！
+        </div>
 
         <div class="tree-selector-bar" id="tree-selector-bar">
           <button class="tree-select-btn active" data-tree="mrp_tree" onclick="switchTree('mrp_tree')"
@@ -509,6 +514,11 @@
 
     <!-- TAB 3: 工單體系與途程進階試算中心 (ZP01~07 & Routing Lab) -->
     <section class="tab-panel" id="tab-order-matrix" role="tabpanel">
+
+      <div
+        style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.28); border-left: 4px solid var(--primary); border-radius: 10px; padding: 0.75rem 1.1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+        💡 <strong>本分頁內含 4 大工具（請點選下方按鈕切換）</strong>：① 查閱 <code>ZP01~07</code> 工單與 8 大控制碼總表 ➔ ② 下拉調整 5 道工序測試 <code>PP03</code> 自動入庫防呆 ➔ ③ 點選現場情境自動推薦開哪種工單 ➔ ④ 拉動滑桿即時試算標準工時、每日產能與 CO <code>CK40N</code> 千雙工時。
+      </div>
 
       <!-- Sub Navigation Pills for Lab Tools -->
       <div class="lab-nav-pills" id="lab-nav-pills">
@@ -1108,13 +1118,16 @@
         <div class="inspector-toolbar">
           <div
             style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.28); border-left: 4px solid var(--primary); border-radius: 10px; padding: 0.85rem 1.15rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65;">
-            <div style="font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <div
+              style="font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;">
               <span>💡</span>
               <span>操作指南：離線全生命週期卡單教學與自我體檢沙盤（零後端、不直接連線讀取 SAP 資料庫）</span>
             </div>
             <div>
-              • <strong>用法 ①（觀摩典型異常）</strong>：直接點選下方 <strong>「🎯 5 大典型實戰卡單情境」</strong>，即可一鍵剖析該異常在 5 大生命週期（建立 ➔ 釋放 ➔ 發料 ➔ 報工 ➔ 入庫月結）的卡關位置、跨部門 RACI 處置派工單與 7 大底層資料表狀態。<br>
-              • <strong>用法 ②（手邊工單自檢）</strong>：對照您手邊的 SAP 工單實際狀況，撥動左下角 <strong>「🎛️ 條件模擬沙盤 (What-If Tweaker)」</strong> 的 5 個檢查開關，即時試算工單健康分數與月結風險！
+              • <strong>用法 ①（觀摩典型異常）</strong>：直接點選下方 <strong>「🎯 5 大典型實戰卡單情境」</strong>，即可一鍵剖析該異常在 5 大生命週期（建立 ➔ 釋放 ➔ 發料 ➔
+              報工 ➔ 入庫月結）的卡關位置、跨部門 RACI 處置派工單與 7 大底層資料表狀態。<br>
+              • <strong>用法 ②（手邊工單自檢）</strong>：對照您手邊的 SAP 工單實際狀況，撥動左下角 <strong>「🎛️ 條件模擬沙盤 (What-If Tweaker)」</strong> 的
+              5 個檢查開關，即時試算工單健康分數與月結風險！
             </div>
           </div>
 
@@ -1164,6 +1177,11 @@
             <div class="tweaker-box">
               <div class="tweaker-title">
                 <span>🎛️ 條件模擬沙盤 (What-If Tweaker)</span>
+              </div>
+              <div
+                style="font-size: 0.79rem; color: var(--text-secondary); background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: 8px; padding: 0.55rem 0.75rem; margin-bottom: 0.75rem; line-height: 1.55;">
+                💡 <strong>勾選說明</strong>：<strong style="color: var(--emerald);">☑️ 打勾 ＝ 正常／已解決</strong>（獲得加分）；<strong style="color: var(--rose);">⬜ 未勾 ＝ 目前卡在此異常</strong>。<br>
+                👉 每排除一項問題即可打勾，<strong>5 項全勾即達 100 分綠燈（代表異常已完全解決，可安心入庫與 TECO 結案）</strong>！
               </div>
               <div class="tweaker-toggles-list" id="tweaker-toggles-list">
                 <!-- Rendered via JS -->
@@ -1330,8 +1348,8 @@
   <div class="toast" id="app-toast">⚡ 已複製交易碼至剪貼簿</div>
 
   <!-- Data & Script Bundle (Supports both file:// offline launch & web server) -->
-  <script src="data/knowledge_loader.js?v=13"></script>
-  <script src="js/app.js?v=13"></script>
+  <script src="data/knowledge_loader.js?v=14"></script>
+  <script src="js/app.js?v=14"></script>
 </body>
 
 </html>
