@@ -2168,7 +2168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'p2_resb',
           icon: '📦',
-          name: 'Pillar 2: 物料平衡與 E005 預留鏈',
+          name: 'Pillar 2: 物料平衡與「已領料禁刪元件 (E005)」預留鏈',
           table: 'RESB / AFPO / STPO',
           status: 'pass',
           badge: 'BALANCED',
@@ -2262,7 +2262,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'PRESET_E005_ERROR',
       woNumber: '100028475902',
       orderType: 'ZP02',
-      label: '🔴 E005 領料後改單 (嚴重阻擋)',
+      label: '🔴 已領料後違規改單 (E005 嚴重阻擋)',
       badge: '35 分 (高危)',
       badgeClass: 'badge-rose',
       sub: 'RESB-ENMNG>0 / 違規進 CO02 改元件',
@@ -2270,7 +2270,7 @@ document.addEventListener('DOMContentLoaded', () => {
       stepper: [
         { step: '01', name: '建立 (CRTD)', detail: 'BOM / 途程展開正常', status: 'passed' },
         { step: '02', name: '釋放 (REL)', detail: '正常釋放', status: 'passed' },
-        { step: '03', name: '發料 (GI)', detail: 'E005 斷鏈！RESB-ENMNG>0 遭擅改', status: 'blocked' },
+        { step: '03', name: '發料 (GI)', detail: '已領料禁刪元件 (E005) 斷鏈！', status: 'blocked' },
         { step: '04', name: '報工 (CNF)', detail: '元件扣帳關係混亂', status: 'warning' },
         { step: '05', name: '入庫/TECO', detail: '預留未平阻擋月結', status: 'blocked' }
       ],
@@ -2304,7 +2304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'p2_resb',
           icon: '📦',
-          name: 'Pillar 2: 物料平衡與 E005 預留鏈',
+          name: 'Pillar 2: 物料平衡與「已領料禁刪元件 (E005)」預留鏈',
           table: 'RESB / AFPO / STPO',
           status: 'fail',
           badge: 'E005_BLOCKED',
@@ -2440,7 +2440,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'p2_resb',
           icon: '📦',
-          name: 'Pillar 2: 物料平衡與 E005 預留鏈',
+          name: 'Pillar 2: 物料平衡與「已領料禁刪元件 (E005)」預留鏈',
           table: 'RESB / AFPO / STPO',
           status: 'pass',
           badge: 'BALANCED',
@@ -2575,7 +2575,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'p2_resb',
           icon: '📦',
-          name: 'Pillar 2: 物料平衡與 E005 預留鏈',
+          name: 'Pillar 2: 物料平衡與「已領料禁刪元件 (E005)」預留鏈',
           table: 'RESB / AFPO / STPO',
           status: 'pass',
           badge: 'BALANCED',
@@ -2710,7 +2710,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'p2_resb',
           icon: '📦',
-          name: 'Pillar 2: 物料平衡與 E005 預留鏈',
+          name: 'Pillar 2: 物料平衡與「已領料禁刪元件 (E005)」預留鏈',
           table: 'RESB / AFPO / STPO',
           status: 'warn',
           badge: 'PARTIAL_POST',
@@ -2826,7 +2826,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>${p.label}</span>
             <span class="badge-tag ${p.badgeClass}">${p.badge}</span>
           </div>
-          <div class="preset-chip-sub">工單 ${p.woNumber} (${p.orderType}) • ${p.sub}</div>
+          <div class="preset-chip-sub">情境範例 (${p.orderType}) • ${p.sub}</div>
         </button>
       `;
     }).join('');
@@ -2857,38 +2857,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Run Custom Inspection
-  window.runWoInspection = function () {
-    const input = document.getElementById('wo-inspector-input');
-    const val = input ? input.value.trim() : '';
-
-    if (!val) {
-      showToast('⚠️ 請輸入 12 碼 SAP 生產工單號碼');
-      return;
-    }
-
-    // Check if matches preset
-    const matchedKey = Object.keys(woPresets).find(k => woPresets[k].woNumber === val);
-    if (matchedKey) {
-      loadWoPreset(matchedKey);
-      return;
-    }
-
-    // Custom simulated check
-    showToast(`⚡ 正在穿透解析 SAP 工單 [${val}] 底層資料表...`);
-    setTimeout(() => {
-      activeWoPresetKey = 'PRESET_HEALTHY';
-      activeWoTweakers = { ...woPresets.PRESET_HEALTHY.tweakers };
-      renderWoPresetsButtons();
-      updateWoInspectorDisplay(val);
-      showToast(`✅ 工單 [${val}] 七維穿透診斷完畢 (健康指數 100/100)`);
-    }, 350);
-  };
-
   // Master update display
-  function updateWoInspectorDisplay(customWoNumber) {
+  function updateWoInspectorDisplay() {
     const p = woPresets[activeWoPresetKey];
-    const displayWo = customWoNumber || p.woNumber;
+    const cleanScenarioName = p.label.replace(/^[🟢🔴🟡]\s*/, '');
+    const displayWo = `${cleanScenarioName}`;
     const score = computeHealthScore(activeWoTweakers);
 
     // 1. Health Gauge
@@ -2902,18 +2875,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let ringClass = 'score-high';
     let badgeClass = 'badge-score-high';
     let verdictText = '🟢 體質優良 (可順暢月結)';
-    let summaryText = `工單 [${displayWo}] 各項指標健康，物料平衡、無 COGI 殘留、途程自動入庫完備，具備順暢結案條件。`;
+    let summaryText = `目前情境【${displayWo}】各項指標健康，物料平衡、無 COGI 殘留、途程自動入庫完備，具備順暢結案條件。`;
 
     if (score < 60) {
       ringClass = 'score-low';
       badgeClass = 'badge-score-low';
       verdictText = '🔴 高危阻擋 (立即照 RACI 處置)';
-      summaryText = `檢測到工單 [${displayWo}] 底層存在嚴重阻擋異常 (E005 斷鏈 / 委外缺料 / COGI 殘留)，月結與入庫受阻，請立即排除！`;
+      summaryText = `檢測到目前情境【${displayWo}】底層存在嚴重阻擋異常（已領料後改單 E005 斷鏈 / 委外缺料 / COGI 殘留），月結與入庫受阻，請立即排除！`;
     } else if (score < 80) {
       ringClass = 'score-med';
       badgeClass = 'badge-score-med';
       verdictText = '🟡 注意警示 (需生管介入)';
-      summaryText = `工單 [${displayWo}] 存在部分潛在瓶頸或途程警示，建議依照 RACI 處置工單進行預先修正，避免影響交期。`;
+      summaryText = `目前情境【${displayWo}】存在部分潛在瓶頸或途程警示，建議依照 RACI 處置工單進行預先修正，避免影響交期。`;
     }
 
     if (scoreRingEl) {
@@ -2939,7 +2912,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const stepsData = [
         { step: '01', name: '建立 (CRTD)', detail: 'BOM / 途程展開正常', status: step1Status },
         { step: '02', name: '釋放 (REL)', detail: activeWoTweakers.opt_rel ? 'ZMMT046 無鎖定 / 正常釋放' : 'CRTD 狀態未釋放 / 阻擋', status: step2Status },
-        { step: '03', name: '發料 (GI)', detail: !activeWoTweakers.opt_resb_balance ? 'E005 斷鏈！RESB-ENMNG 擅改' : (!activeWoTweakers.opt_sub_541 ? '委外原料未做 541 移轉' : 'RESB 扣帳平衡無斷鏈'), status: step3Status },
+        { step: '03', name: '發料 (GI)', detail: !activeWoTweakers.opt_resb_balance ? '已領料禁刪元件 (E005) 斷鏈！' : (!activeWoTweakers.opt_sub_541 ? '委外原料未做 541 移轉' : 'RESB 扣帳平衡無斷鏈'), status: step3Status },
         { step: '04', name: '報工/委外 (CONF)', detail: !activeWoTweakers.opt_sub_541 ? '委外庫存不足阻擋 101/543' : 'AFRU 正常記錄 / 工時吻合', status: step4Status },
         { step: '05', name: '入庫月結 (TECO)', detail: !activeWoTweakers.opt_cogi_clean ? 'AFFW 殘留！阻擋 CO88' : (!activeWoTweakers.opt_routing_pp03 ? '末站非 PP03 / 101 缺失' : 'PP03 自動 101 / 結算就緒'), status: step5Status }
       ];
@@ -3041,7 +3014,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tweakerList) {
       const tweakerConfigs = [
         { key: 'opt_rel', label: '1. 工單狀態已釋放 (REL) 無鎖定 (+15分)' },
-        { key: 'opt_resb_balance', label: '2. 預留扣帳平衡無 E005 斷鏈 (+25分)' },
+        { key: 'opt_resb_balance', label: '2. 預留扣帳平衡、無「已領料後改單 (E005)」斷鏈 (+25分)' },
         { key: 'opt_sub_541', label: '3. 製程委外已完成 541 原料外發 (+20分)' },
         { key: 'opt_cogi_clean', label: '4. AFFW / COGI 失敗異動全數清零 (+20分)' },
         { key: 'opt_routing_pp03', label: '5. 途程末站合法配置 PP03 自動入庫 (+20分)' }

@@ -14,7 +14,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=12">
+  <link rel="stylesheet" href="css/app.css?v=13">
 </head>
 
 <body>
@@ -1104,22 +1104,23 @@
           </div>
         </div>
 
-        <!-- Toolbar: WO Number Input & 5 Case Study Presets -->
+        <!-- Toolbar: Usage Guide & 5 Case Study Presets -->
         <div class="inspector-toolbar">
-          <div class="inspector-search-row">
-            <div class="inspector-input-wrapper">
-              <span class="search-icon">🔍</span>
-              <input type="text" id="wo-inspector-input" class="inspector-input"
-                placeholder="輸入 12 碼 SAP 生產工單編號 (例如: 100028475901) 或從下方載入案例..." value="100028475901">
+          <div
+            style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.28); border-left: 4px solid var(--primary); border-radius: 10px; padding: 0.85rem 1.15rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65;">
+            <div style="font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>💡</span>
+              <span>操作指南：離線全生命週期卡單教學與自我體檢沙盤（零後端、不直接連線讀取 SAP 資料庫）</span>
             </div>
-            <button class="btn btn-primary" onclick="runWoInspection()" id="btn-run-inspection">
-              ⚡ 開始穿透診斷
-            </button>
+            <div>
+              • <strong>用法 ①（觀摩典型異常）</strong>：直接點選下方 <strong>「🎯 5 大典型實戰卡單情境」</strong>，即可一鍵剖析該異常在 5 大生命週期（建立 ➔ 釋放 ➔ 發料 ➔ 報工 ➔ 入庫月結）的卡關位置、跨部門 RACI 處置派工單與 7 大底層資料表狀態。<br>
+              • <strong>用法 ②（手邊工單自檢）</strong>：對照您手邊的 SAP 工單實際狀況，撥動左下角 <strong>「🎛️ 條件模擬沙盤 (What-If Tweaker)」</strong> 的 5 個檢查開關，即時試算工單健康分數與月結風險！
+            </div>
           </div>
 
           <div class="presets-container">
             <div class="presets-title">
-              <span>🎯 典型實戰情境快速載入 (Presets)：</span>
+              <span>🎯 點選載入 5 大典型實戰卡單情境 (Presets)：</span>
             </div>
             <div class="presets-grid" id="presets-grid">
               <!-- Rendered via JS -->
@@ -1150,7 +1151,7 @@
               </div>
               <div id="inspector-verdict-badge" class="health-verdict-badge">評估中</div>
               <div class="health-metrics-summary" id="inspector-metrics-summary">
-                點擊上方案例或輸入工單執行診斷。
+                點選上方 5 大典型實戰情境或撥動下方條件開關執行診斷。
               </div>
             </div>
 
@@ -1329,8 +1330,8 @@
   <div class="toast" id="app-toast">⚡ 已複製交易碼至剪貼簿</div>
 
   <!-- Data & Script Bundle (Supports both file:// offline launch & web server) -->
-  <script src="data/knowledge_loader.js?v=12"></script>
-  <script src="js/app.js?v=12"></script>
+  <script src="data/knowledge_loader.js?v=13"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 
 </html>
