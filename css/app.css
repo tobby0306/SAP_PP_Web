@@ -50,25 +50,37 @@
 /* Light Theme Variables */
 body.light-theme {
   --bg-body: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-hover: rgba(255, 255, 255, 0.98);
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-hover: #ffffff;
   --bg-card-solid: #ffffff;
   --bg-input: #ffffff;
   --bg-badge: #e2e8f0;
 
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-glow: rgba(2, 132, 199, 0.35);
+  --border-subtle: rgba(15, 23, 42, 0.12);
+  --border-glow: rgba(2, 132, 199, 0.4);
   --border-focus: #0284c7;
 
   --text-main: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
+  --text-secondary: #334155;
+  --text-muted: #475569;
   --text-inverse: #ffffff;
 
   --primary: #0284c7;
   --primary-glow: rgba(2, 132, 199, 0.15);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+  --primary-dark: #0369a1;
+
+  --cyan: #0e7490;
+  --indigo: #4338ca;
+  --emerald: #047857;
+  --emerald-bg: rgba(16, 185, 129, 0.14);
+  --amber: #b45309;
+  --amber-bg: rgba(245, 158, 11, 0.15);
+  --rose: #be123c;
+  --rose-bg: rgba(244, 63, 94, 0.12);
+  --purple: #6d28d9;
+
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
 }
 
 /* Reset & Basics */
@@ -2813,4 +2825,321 @@ body.light-theme .omni-result-item:hover {
   padding-top: 0.5rem;
   font-size: 0.78rem;
   color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Comprehensive Light Theme (Fiori Mode) High-Contrast Overrides
+   ========================================================================== */
+body.light-theme .tab-btn:hover {
+  background: rgba(2, 132, 199, 0.06);
+}
+
+body.light-theme .root-cause-box {
+  background: #f1f5f9;
+  border-left-color: #0284c7;
+  color: #334155;
+}
+
+body.light-theme .forbidden-box {
+  background: #fff1f2;
+  border-color: #fda4af;
+  color: #9f1239;
+}
+
+body.light-theme .custom-table th {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+body.light-theme .custom-table tr:hover td {
+  background: #f8fafc;
+}
+
+body.light-theme .checklist-progress-bar-wrapper {
+  background: #cbd5e1;
+}
+
+body.light-theme .toast {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+/* Lab 2: Routing Pipeline Simulator in Light Theme */
+body.light-theme .behavior-auto-gr {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+  font-weight: 600;
+}
+
+body.light-theme .behavior-subcontract {
+  background: #e0e7ff;
+  color: #3730a3;
+  border-color: #a5b4fc;
+  font-weight: 600;
+}
+
+body.light-theme .behavior-milestone {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+  font-weight: 600;
+}
+
+body.light-theme .behavior-manual {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+  font-weight: 500;
+}
+
+body.light-theme .pipeline-alert.alert-success {
+  background: #ecfdf5;
+  border-color: #34d399;
+  color: #065f46;
+}
+
+body.light-theme .pipeline-alert.alert-error {
+  background: #fff1f2;
+  border-color: #fda4af;
+  color: #9f1239;
+}
+
+/* Lab 4: Calculator & Dynamic Numbers in Light Theme */
+body.light-theme .formula-card {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+body.light-theme .dyn-num {
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+}
+
+body.light-theme .preset-pill.active {
+  background: #fef3c7;
+  border-color: #d97706;
+  color: #92400e;
+}
+
+/* Tab 2: Decision Tree & Sandbox in Light Theme */
+body.light-theme .sim-action-btn.active {
+  background: #e0f2fe !important;
+  border-color: #0284c7 !important;
+  color: #0369a1 !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2) !important;
+}
+
+body.light-theme .sim-action-btn.safe-action.active {
+  background: #d1fae5 !important;
+  border-color: #059669 !important;
+  color: #065f46 !important;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2) !important;
+}
+
+body.light-theme .sim-display-screen {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.05);
+}
+
+body.light-theme .sim-screen-header,
+body.light-theme .sim-screen-footer {
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+body.light-theme .sim-sap-msg-bar.msg-error {
+  background: #ffe4e6;
+  border-color: #fda4af;
+  color: #9f1239;
+}
+
+body.light-theme .sim-sap-msg-bar.msg-success {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+
+body.light-theme .sim-sap-msg-bar.msg-warning {
+  background: #fef3c7;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
+body.light-theme .sim-solution-timeline {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+body.light-theme .taboo-title {
+  color: #be123c;
+}
+
+body.light-theme .taboo-solution {
+  color: #0369a1;
+}
+
+/* Tab 4: WO Lifecycle Inspector in Light Theme */
+body.light-theme .inspector-toolbar,
+body.light-theme .lifecycle-stepper-box {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+body.light-theme .health-gauge-card,
+body.light-theme .action-ticket-card,
+body.light-theme .tweaker-box,
+body.light-theme .pillar-card {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+body.light-theme .badge-score-high {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #34d399;
+}
+
+body.light-theme .badge-score-med {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+body.light-theme .badge-score-low {
+  background: #ffe4e6;
+  color: #9f1239;
+  border-color: #fda4af;
+}
+
+body.light-theme .ticket-header,
+body.light-theme .pillar-footer {
+  border-color: #e2e8f0;
+}
+
+body.light-theme .ticket-raci-pill {
+  background: #e0e7ff;
+  color: #3730a3;
+  border-color: #a5b4fc;
+}
+
+body.light-theme .ticket-problem {
+  background: #fff1f2;
+  color: #9f1239;
+  border-left-color: #e11d48;
+}
+
+body.light-theme .tweaker-item,
+body.light-theme .pillar-content-grid {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+/* Tab 6: Sequential Flow Hub in Light Theme */
+body.light-theme .view-mode-toggle-group {
+  background: #e2e8f0;
+}
+
+body.light-theme .scenario-pill.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+body.light-theme .scenario-banner-card {
+  background: linear-gradient(135deg, #f8fafc, #eff6ff);
+  border-color: #cbd5e1;
+  border-left: 4px solid #0284c7;
+}
+
+body.light-theme .stepper-tcode-chip {
+  background: #e0e7ff;
+  color: #3730a3;
+  border-color: #a5b4fc;
+}
+
+body.light-theme .stepper-role-pp {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+body.light-theme .stepper-role-mm {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+
+body.light-theme .stepper-role-sd {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border-color: #d8b4fe;
+}
+
+body.light-theme .stepper-role-co {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+body.light-theme .stepper-role-qm {
+  background: #cffafe;
+  color: #155e75;
+  border-color: #67e8f9;
+}
+
+body.light-theme .stepper-role-eng {
+  background: #fce7f3;
+  color: #9d174d;
+  border-color: #f9a8d4;
+}
+
+body.light-theme .stepper-output-box {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+
+body.light-theme .stepper-caution-box {
+  background: #fff1f2;
+  color: #9f1239;
+  border-color: #fda4af;
+}
+
+/* Inline Style Overrides for Light Theme Readability */
+body.light-theme [style*="color: #fda4af"],
+body.light-theme [style*="color: #fca5a5"] {
+  color: #be123c !important;
+}
+
+body.light-theme [style*="color: #a7f3d0"],
+body.light-theme [style*="color: #10b981"] {
+  color: #047857 !important;
+}
+
+body.light-theme [style*="color: #fde68a"],
+body.light-theme [style*="color: #fbbf24"] {
+  color: #b45309 !important;
+}
+
+body.light-theme [style*="color: #38bdf8"] {
+  color: #0369a1 !important;
+}
+
+body.light-theme [style*="color: #c084fc"] {
+  color: #6d28d9 !important;
+}
+
+body.light-theme [style*="background: rgba(0,0,0,0.2)"],
+body.light-theme [style*="background: rgba(0, 0, 0, 0.25)"],
+body.light-theme [style*="background: rgba(0,0,0,0.3)"],
+body.light-theme [style*="background: rgba(15, 23, 42"] {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
 }
