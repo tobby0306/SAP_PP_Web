@@ -1020,6 +1020,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   const calcPresets = {
+    std_1000: {
+      af: 1000, ak: 480, yieldQty: 1000, split: 5, shiftHours: 8,
+      name: '📦 標準 1,000 雙接單預設',
+      afDesc: '以每產出 1,000 雙作為途程標準分母',
+      akDesc: '全線投入 480 分鐘（8 小時人時）完成 1,000 雙'
+    },
     cutting: {
       af: 1200, ak: 480, yieldQty: 2400, split: 4, shiftHours: 8,
       name: '👞 慢跑鞋裁斷線',
@@ -1039,7 +1045,7 @@ document.addEventListener('DOMContentLoaded', () => {
       akDesc: '自動線機台與操作員合計投入 720 分鐘（12 小時人時）'
     },
     as001_co: {
-      af: 117, ak: 3900, yieldQty: 2500, split: 65, shiftHours: 8,
+      af: 117, ak: 3900, yieldQty: 1000, split: 65, shiftHours: 8,
       name: '🔎 實戰：成型線 AS001 (117雙/3900分)',
       afDesc: '成型 1 線 (AS001) 每 1 小時標準產出 117 雙鞋',
       akDesc: '全線配置 65 名作業員同時做 1 小時（65人 × 60分 = 3,900 分鐘）'
@@ -1049,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateCalculations() {
     const af = parseFloat(document.getElementById('calc-af')?.value || 1000);
     const ak = parseFloat(document.getElementById('calc-ak')?.value || 480);
-    const yieldQty = parseFloat(document.getElementById('calc-yield')?.value || 2500);
+    const yieldQty = parseFloat(document.getElementById('calc-yield')?.value || 1000);
     const split = parseFloat(document.getElementById('calc-split')?.value || 5);
     const shiftHours = parseFloat(document.getElementById('calc-shift-hours')?.value || 8);
 
@@ -1093,8 +1099,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const dailyCapacity = (shiftHours * 60 * split) / cycleTimeMin;
     const co1000Minutes = cycleTimeMin * 1000;
     const co1000Hours = co1000Minutes / 60;
+    const batchRatio = (yieldQty / af).toFixed(2);
 
-    // Update UI Elements
+    // 6. 更新頂部流水線即時總覽橫幅
+    const topLiveBanner = document.getElementById('pipeline-top-live-banner');
+    if (topLiveBanner) {
+      topLiveBanner.innerHTML = `
+        <span>📦 接單：<span class="dyn-num">${yieldQty.toLocaleString()} 雙</span></span>
+        <span>➔</span>
+        <span>⏱️ 單雙工時：<span class="dyn-num">${cycleTimeMin.toFixed(2)} 分/雙</span></span>
+        <span>➔</span>
+        <span>💰 系統報工總工時 (CO成本依據)：<span class="dyn-num">${Math.round(totalMinutes).toLocaleString()} 分 (${totalHours.toFixed(1)} H)</span></span>
+        <span>➔</span>
+        <span>⚙️ 產線實際耗時：<span class="dyn-num">${leadHours.toFixed(1)} 小時</span></span>
+        <span>➔</span>
+        <span>🏁 最終排程：<span class="dyn-num">${leadDays.toFixed(2)} 工作天</span>（日產能 <span class="dyn-num">${Math.round(dailyCapacity).toLocaleString()} 雙/天</span>）</span>
+      `;
+    }
+
+    // 7. 更新 Step 1 ~ Step 5 左欄當站即時小計 (Step Subtotals)
+    const s1Sub = document.getElementById('step1-subtotal');
+    if (s1Sub) {
+      s1Sub.innerHTML = `🎯 <strong>當站流水線起點</strong>：業務接單進來，生管開立工單預計生產 <span class="dyn-num">${yieldQty.toLocaleString()} 雙</span> 鞋。`;
+    }
+
+    const s2Sub = document.getElementById('step2-subtotal');
+    if (s2Sub) {
+      s2Sub.innerHTML = `📏 <strong>當站分母設定</strong>：以每產出 <span class="dyn-num">${af.toLocaleString()} 雙</span> 作為途程計算工時的分母基準（本單 <span class="dyn-num">${yieldQty.toLocaleString()} 雙</span> 相當於 <span class="dyn-num">${batchRatio} 個基準批</span>）。`;
+    }
+
+    const s3Sub = document.getElementById('step3-subtotal');
+    if (s3Sub) {
+      s3Sub.innerHTML = `
+        ⚡ <strong>走到第 3 步立即算出兩大核心結果</strong>：<br>
+        • <strong>① 單雙標準工時</strong>：<code>${ak.toLocaleString()}分 ÷ ${af.toLocaleString()}雙 =</code> <span class="dyn-num">${cycleTimeMin.toFixed(2)} 分鐘/雙</span>（約 <span class="dyn-num">${cycleTimeSec.toFixed(1)} 秒</span>）<br>
+        • <strong>② 系統報工總工時 (CO 成本直接依據)</strong>：<code>${cycleTimeMin.toFixed(2)} × ${yieldQty.toLocaleString()}雙 =</code> <span class="dyn-num">${Math.round(totalMinutes).toLocaleString()} 分鐘 (${totalHours.toFixed(1)} H)</span>
+      `;
+    }
+
+    const s4Sub = document.getElementById('step4-subtotal');
+    if (s4Sub) {
+      s4Sub.innerHTML = `
+        ⚡ <strong>走到第 4 步立即算出【③ 產線實際排程耗時】</strong>：<br>
+        • 總報工 <span class="dyn-num">${totalHours.toFixed(1)} 小時</span> ÷ 現場 <span class="dyn-num">${split} 機台/人</span> 同時做 ＝ 產線實際只要開機 <span class="dyn-num">${leadHours.toFixed(1)} 小時</span>！（每 <span class="dyn-num">${lineTaktSec.toFixed(1)} 秒</span> 產出一雙鞋）
+      `;
+    }
+
+    const s5Sub = document.getElementById('step5-subtotal');
+    if (s5Sub) {
+      s5Sub.innerHTML = `
+        🏁 <strong>走到第 5 步算出【④ 最終排程天數 ＆ 每日極限產能】</strong>：<br>
+        • <strong>預估排程工作天數</strong>：<code>${leadHours.toFixed(1)} H ÷ 每天 ${shiftHours} H =</code> <span class="dyn-num">${leadDays.toFixed(2)} 工作天</span><br>
+        • <strong>產線每日極限產能</strong>：<span class="dyn-num">${Math.round(dailyCapacity).toLocaleString()} 雙 / 天</span>（生管驗證途程最佳指標！）
+      `;
+    }
+
+    // 8. 更新底部 4 大 KPI 卡片
     const cycleEl = document.getElementById('kpi-cycle-time');
     const cycleSecEl = document.getElementById('kpi-cycle-sec');
     const totalMinEl = document.getElementById('kpi-total-minutes');
@@ -1113,7 +1173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (leadDaysEl) leadDaysEl.textContent = leadDays.toFixed(2);
     if (dailyCapEl) dailyCapEl.textContent = `每日極限產能：${Math.round(dailyCapacity).toLocaleString()} 雙 / 天`;
 
-    // 6. 動態更新公式驗證卡片與 CO 千雙標準工時對照
+    // 9. 動態更新公式驗證卡片與 CO 千雙標準工時對照
     const formulaCardEl = document.getElementById('formula-card-content');
     if (formulaCardEl) {
       formulaCardEl.innerHTML = `
@@ -1125,16 +1185,23 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
 
-    // 7. 動態同步底部三大白話文備註區塊的所有數值
+    // 10. 動態同步各站右欄白話文說明與底部 KPI 摘要
     const badgeEl = document.getElementById('note-active-preset-badge');
     if (badgeEl) badgeEl.textContent = `當前對照：${scenarioLabel}`;
 
     const coSummaryEl = document.getElementById('note-co-summary-steps');
     if (coSummaryEl) {
       coSummaryEl.innerHTML = `
-        <strong>生管自檢 2 步驟（依目前上方【${scenarioLabel}】設定值即時帶入）</strong>：<br>
-        &nbsp;&nbsp;1️⃣ 先看右下角<strong>「每日極限產能」</strong>：目前設定 <code>AF = <span class="dyn-num">${af.toLocaleString()} 雙</span></code>、<code>AK = <span class="dyn-num">${ak.toLocaleString()} 分鐘</span></code>、<code>分割數 = <span class="dyn-num">${split} 機台/人</span></code>、<code>每日 <span class="dyn-num">${shiftHours} 小時</span></code>，算出日產能為 <span class="dyn-num">${Math.round(dailyCapacity).toLocaleString()} 雙 / 天</span>，單雙累計人工 <code>${cycleTimeSec.toFixed(1)} 秒</code>（${split} 台/人並行後產線節拍約 <code>${lineTaktSec.toFixed(1)} 秒/雙</code>）。只要日產能符合現場實際產量，就代表<strong>生管途程工時 100% 正確！</strong><br>
-        &nbsp;&nbsp;2️⃣ 再對照 CO 的 <code>CK11N / CK40N</code> 畫面：CO 預設以 <code>1,000 雙 (PR)</code> 估算成本，目前千雙總工時 = <code>(${ak.toLocaleString()} ÷ ${af.toLocaleString()}) × 1,000 = ${co1000Minutes.toFixed(1)} 分鐘 =</code> <span class="dyn-num">${co1000Hours.toFixed(3)} 小時 (H)</span>。若工時合理但成本金額過高，即代表 <strong>CO 在 <code>KP26</code> 將每小時工資率設得太高了</strong>！
+        • <strong>Step 1 先看日產能</strong>：目前設定算出日產能為 <span class="dyn-num">${Math.round(dailyCapacity).toLocaleString()} 雙/天</span>，單雙人工 <code>${cycleTimeSec.toFixed(1)} 秒</code>（${split} 人並行後每 <code>${lineTaktSec.toFixed(1)} 秒</code> 產出一雙）。只要日產能符合現場實際產量，代表 <strong>生管途程 100% 沒設錯</strong>！<br>
+        • <strong>Step 2 再對照 CK40N</strong>：CO 預設以 <code>1,000 雙 (PR)</code> 估算，目前千雙標準工時 = <span class="dyn-num">${co1000Hours.toFixed(3)} 小時 (H)</span>。若工時合理但成本金額過高，即代表 <strong>CO 在 <code>KP26</code> 將每小時工資率設得太高了</strong>！
+      `;
+    }
+
+    const noteYieldEl = document.getElementById('note-param-yield');
+    if (noteYieldEl) {
+      noteYieldEl.innerHTML = `
+        🗣️ <strong>白話文是什麼意思？</strong><br>
+        代表<strong>「客戶這張訂單總共訂了幾雙鞋（這張工單要做幾雙）」</strong>。目前設定為生產 <span class="dyn-num">${yieldQty.toLocaleString()} 雙</span>（對應系統報工總工時為 <span class="dyn-num">${Math.round(totalMinutes).toLocaleString()} 分鐘 / ${totalHours.toFixed(1)} H</span>）；若與財務 CO 的 <code>CK40N</code> 標準成本對帳，1,000 雙批量工時為 <span class="dyn-num">${co1000Hours.toFixed(3)} H</span>。
       `;
     }
 
@@ -1142,8 +1209,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noteAfEl) {
       const afHint = activePresetObj ? `（${activePresetObj.afDesc}）` : '';
       noteAfEl.innerHTML = `
-        <strong>計算工時的「基準產量（分母）」</strong>。<br>
-        也就是拿「幾雙鞋」當作一個測量單位。目前設定為 <span class="dyn-num">${af.toLocaleString()} 雙</span>${afHint}，代表以產出 <span class="dyn-num">${af.toLocaleString()} 雙</span> 作為計算標準工時的分母基準。
+        🗣️ <strong>白話文是什麼意思？</strong><br>
+        代表<strong>「計算工時的基準產量（公式裡的分母）」</strong>。因為做 1 雙鞋可能只要幾十秒，在 SAP <code>CA02</code> 途程填小數點容易錯，所以放大拿「做 <span class="dyn-num">${af.toLocaleString()} 雙</span> 鞋」當作一個測量單位${afHint}。
       `;
     }
 
@@ -1151,75 +1218,56 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noteAkEl) {
       const akHint = activePresetObj ? `（${activePresetObj.akDesc}）` : '';
       noteAkEl.innerHTML = `
-        <strong>做出上面那批「基礎數量」所需投入的「總人時分鐘數（分子）」</strong>。<br>
-        目前設定：為了做出上方 <span class="dyn-num">${af.toLocaleString()} 雙</span> 基礎數量，全線加起來共需投入 <span class="dyn-num">${ak.toLocaleString()} 分鐘</span>（約 <span class="dyn-num">${(ak / 60).toFixed(1)} 小時人時</span>）的直接人工${akHint}。
-      `;
-    }
-
-    const noteYieldEl = document.getElementById('note-param-yield');
-    if (noteYieldEl) {
-      noteYieldEl.innerHTML = `
-        <strong>這張工單總共要做幾雙鞋？</strong><br>
-        • 目前試算工單雙數為 <span class="dyn-num">${yieldQty.toLocaleString()} 雙</span>（總報工工時為 <span class="dyn-num">${Math.round(totalMinutes).toLocaleString()} 分鐘 / ${totalHours.toFixed(1)} H</span>）。<br>
-        • <strong>與 CO 對帳時</strong>：請看千雙批量（<code>1,000 雙</code> 標準工時為 <span class="dyn-num">${co1000Hours.toFixed(3)} H</span>）。
+        🗣️ <strong>白話文是什麼意思？</strong><br>
+        代表<strong>「為了做出上面 STEP 2 那批基礎數量（<span class="dyn-num">${af.toLocaleString()} 雙</span>），產線所有工人加起來總共要投入 <span class="dyn-num">${ak.toLocaleString()} 分鐘</span>（約 <span class="dyn-num">${(ak / 60).toFixed(1)} 小時</span>）的直接人工（公式裡的分子）」</strong>${akHint}。走到這一步，SAP 就已經把<strong>「單雙工時 (<span class="dyn-num">${cycleTimeMin.toFixed(2)} 分</span>)」與「整張工單報工總工時 (<span class="dyn-num">${totalHours.toFixed(1)} H</span>)」100% 算完了</strong>！
       `;
     }
 
     const noteSplitEl = document.getElementById('note-param-split');
     if (noteSplitEl) {
       noteSplitEl.innerHTML = `
-        <strong>現場同時有「幾個人（或幾台機台）」並排一起做這道工序？</strong><br>
-        目前設定現場有 <span class="dyn-num">${split} 機台/人</span> 同時並行作業，系統算排程時會把總人工 <span class="dyn-num">${totalHours.toFixed(1)} 小時</span> 除以 <span class="dyn-num">${split}</span>，縮短為 <span class="dyn-num">${leadHours.toFixed(1)} 小時</span>。
+        🗣️ <strong>白話文是什麼意思？</strong><br>
+        代表<strong>「現場同時有幾個人（或幾台機器）並排一起做這道工序？」</strong><br>
+        這張單 (<span class="dyn-num">${yieldQty.toLocaleString()} 雙</span>) 總共要花 <span class="dyn-num">${totalHours.toFixed(1)} 個人工小時</span>，如果只有 1 個人做要花 ${totalHours.toFixed(1)} 小時；但現場有 <span class="dyn-num">${split} 機台/人</span> 同時做，手錶上的時間只要 <code>${totalHours.toFixed(1)} ÷ ${split} =</code> <span class="dyn-num">${leadHours.toFixed(1)} 小時</span> 就做完了！
       `;
     }
 
     const noteSplitLowEl = document.getElementById('note-param-split-low');
     if (noteSplitLowEl) {
       noteSplitLowEl.innerHTML = `
-        同時做的人/機台越少：<br>
-        • <strong>產線排程天數 大幅拉長 👆</strong>（若漏填變 <code>1</code>，系統會以為只有 1 個人從頭做到尾，排程耗時會暴增 <span class="dyn-num">${split} 倍</span> 變成 <span class="dyn-num">${totalHours.toFixed(1)} 小時</span>！）<br>
-        • ⚠️ <strong style="color: var(--amber);">完全不影響 CO 成本！</strong>
+        <strong style="color: #f43f5e;">📉 若把最大分割數【調低 ▼】對最後工單的影響：</strong><br>
+        • 最後工單的<strong>「產線排程天數」大幅拉長 👆</strong>（若漏填維持預設 <code>1</code>，排程耗時會暴增 <span class="dyn-num">${split} 倍</span> 變成 <span class="dyn-num">${totalHours.toFixed(1)} 小時</span>！）<br>
+        • ⚠️ <strong style="color: var(--amber);">完全不會改變 CO 產品成本！</strong>
       `;
     }
 
     const noteShiftEl = document.getElementById('note-param-shift');
     if (noteShiftEl) {
       noteShiftEl.innerHTML = `
-        <strong>這條產線一天開工幾個小時？</strong><br>
-        目前設定為每天開工 <span class="dyn-num">${shiftHours} 小時/天</span>，將產線排程耗時 <span class="dyn-num">${leadHours.toFixed(1)} 小時</span> 除以 <span class="dyn-num">${shiftHours} 小時</span>，即可換算為 <span class="dyn-num">${leadDays.toFixed(2)} 個工作天</span>。
+        🗣️ <strong>白話文是什麼意思？</strong><br>
+        代表<strong>「這條產線一天正常開機工作幾個小時（例如正常班 8 小時、加班 10 小時）？」</strong><br>
+        把 STEP 4 算出的產線實際開機耗時（<span class="dyn-num">${leadHours.toFixed(1)} 小時</span>）除以每天上班時數（<span class="dyn-num">${shiftHours} 小時</span>），就得到這張工單最後需要排程 <span class="dyn-num">${leadDays.toFixed(2)} 個工作天</span>！
       `;
     }
 
     const kpi1El = document.getElementById('note-kpi-1');
     if (kpi1El) {
-      kpi1El.innerHTML = `
-        • <strong>白話文</strong>：平均做完 <strong>1 雙鞋</strong>，需要累積花費多少個人的分鐘數（單雙總人時）。<br>
-        • <strong>當前數值對照</strong>：<code>${ak.toLocaleString()}分 ÷ ${af.toLocaleString()}雙 =</code> <span class="dyn-num">${cycleTimeMin.toFixed(2)} 分鐘/雙</span>（單人累計約 <span class="dyn-num">${cycleTimeSec.toFixed(1)} 秒</span>；由 <span class="dyn-num">${split}</span> 機台/人分攤，產線每 <span class="dyn-num">${lineTaktSec.toFixed(1)} 秒</span> 產出一雙鞋）。若算出來變成幾百分鐘，代表 <code>AF</code> 或 <code>AK</code> 填錯了！
-      `;
+      kpi1El.innerHTML = `• <strong>由 STEP 2 &amp; 3 決定</strong>：<code>${ak.toLocaleString()}分 ÷ ${af.toLocaleString()}雙 =</code> <span class="dyn-num">${cycleTimeMin.toFixed(2)} 分/雙</span>`;
     }
 
     const kpi2El = document.getElementById('note-kpi-2');
     if (kpi2El) {
-      kpi2El.innerHTML = `
-        • <strong>白話文</strong>：這批鞋子做完報工時，SAP 系統<strong>真正認列入帳的「總人工工時 (Man-hours)」</strong>。<br>
-        • <strong>當前數值對照</strong>：生產 <span class="dyn-num">${yieldQty.toLocaleString()} 雙</span> 時，系統報工總工時為 <span class="dyn-num">${Math.round(totalMinutes).toLocaleString()} 分鐘</span>（累計 <span class="dyn-num">${totalHours.toFixed(1)} H</span>）；若以 CO <code>CK40N</code> 預設 <code>1,000 雙</code> 計算則為 <span class="dyn-num">${co1000Hours.toFixed(3)} H</span>，CO 就是拿這個小時數去乘以每小時工資率算出總工費！
-      `;
+      kpi2El.innerHTML = `• <strong>由 STEP 1～3 決定</strong>：生產 <span class="dyn-num">${yieldQty.toLocaleString()} 雙</span> 認列 <span class="dyn-num">${totalHours.toFixed(1)} H</span>（CO 千雙為 <span class="dyn-num">${co1000Hours.toFixed(3)} H</span>）`;
     }
 
     const kpi3El = document.getElementById('note-kpi-3');
     if (kpi3El) {
-      kpi3El.innerHTML = `
-        • <strong>白話文</strong>：考慮到現場有多人同時並排做，<strong>這條產線實際需要「開線運轉幾個小時（看手錶的時間）」</strong>才能做完這張單。<br>
-        • <strong>當前數值對照</strong>：<span class="dyn-num">${yieldQty.toLocaleString()} 雙</span> 雖然總共要花 <span class="dyn-num">${totalHours.toFixed(1)} 個人工小時</span>，但因為現場有 <span class="dyn-num">${split} 機台/人</span> 同時做，所以產線實際只要開機 <code>${totalHours.toFixed(1)} ÷ ${split} =</code> <span class="dyn-num">${leadHours.toFixed(1)} 小時</span> 就全部做完了！
-      `;
+      kpi3El.innerHTML = `• <strong>由 STEP 4 並行加速</strong>：<code>${totalHours.toFixed(1)} H ÷ ${split} 人 =</code> 實際開機 <span class="dyn-num">${leadHours.toFixed(1)} 小時</span>`;
     }
 
     const kpi4El = document.getElementById('note-kpi-4');
     if (kpi4El) {
-      kpi4El.innerHTML = `
-        • <strong>白話文</strong>：這張工單要排程<strong>「幾個工作天」</strong>才能完工，以及這條線<strong>「一天最多能做幾雙鞋」</strong>。<br>
-        • <strong>當前數值對照</strong>：<code>${leadHours.toFixed(1)} 小時 ÷ 每天 ${shiftHours} 小時 =</code> <span class="dyn-num">${leadDays.toFixed(2)} 個工作天</span>，且卡片下方算出<strong>「每日極限產能：<span class="dyn-num">${Math.round(dailyCapacity).toLocaleString()} 雙 / 天</span>」</strong>！問現場組長：「這條線一天是不是做 <span class="dyn-num">${Math.round(dailyCapacity).toLocaleString()}</span> 雙左右？」如果是，這條途程就 100% 設對了！
-      `;
+      kpi4El.innerHTML = `• <strong>由 STEP 5 換算</strong>：<code>${leadHours.toFixed(1)} H ÷ ${shiftHours} H =</code> <span class="dyn-num">${leadDays.toFixed(2)} 天</span>（問組長日產是否約 <span class="dyn-num">${Math.round(dailyCapacity).toLocaleString()} 雙</span>）`;
     }
   }
 
