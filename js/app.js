@@ -13,7 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // App State
   const state = {
-    activeTab: 'tab-cheat-sheet',
+    activeTab: 'tab-pp-roadmap',
+    activeRoadmapStage: 'STAGE_1',
+    roadmapViewMode: 'single',
+    roadmapReturnStage: 'STAGE_1',
     searchQuery: '',
     selectedCategory: 'ALL',
     activeTreeKey: 'mrp_tree',
@@ -930,6 +933,11 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.add('active');
       const panel = document.getElementById(targetTab);
       if (panel) panel.classList.add('active');
+
+      if (targetTab === 'tab-pp-roadmap') {
+        const returnBanner = document.getElementById('roadmap-return-banner');
+        if (returnBanner) returnBanner.classList.remove('show');
+      }
     });
   });
 
@@ -3175,23 +3183,687 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWoInspectorDisplay();
   }
 
-  // Initial Renders
-  renderIssues();
-  renderDecisionTree();
-  renderOrderMatrix();
-  renderControlKeys();
-  renderChecklist();
-  renderRaci();
-  renderTcodes();
-  renderScenarioFlows();
-  updateCalculations();
-  renderRecommender();
-  renderRoutingPipeline();
-  simulateAction('ACTION_STATE_INSPECT');
-  simulateSubAction('ACT_SUB_INSPECT');
-  renderWoInspector();
+  // ==========================================================================
+  // Module 0: End-to-End PP Lifecycle Master Roadmap (PIR/SO ➔ 主檔 ➔ 雙軌MRP ➔ 開單 ➔ 執行 ➔ TECO)
+  // ==========================================================================
+  const ppRoadmapStages = [
+    {
+      id: 'STAGE_1',
+      num: 'STAGE 01',
+      icon: '📥',
+      shortTitle: '1. 需求源頭 (PIR / SO)',
+      shortSub: '預測單 vs 正式銷售訂單',
+      fullTitle: 'Stage 1：需求源頭分流（PIR 預測獨立需求 vs SO 銷售訂單）',
+      badge: 'SOP 2.1 / 2.2 雙軌起點',
+      badgeClass: 'badge-info',
+      summary: 'PP 模組的一切皆始於「需求源頭」。在製鞋業，我們有兩條截然不同的源頭軌道：① <strong>正式/預告銷售訂單 (<code>SO</code>)</strong> 用來驅動真實採購與現場生產；② <strong>預測獨立需求 (<code>PIR</code>)</strong> 用來給廠商做遠期產能與長交期備料預告（不產生真實工單）。源頭一旦選錯軌道，後面跑 MRP 就會天下大亂！',
+      dualTrackHtml: `
+        <div class="dual-track-grid">
+          <div class="dual-track-card track-so">
+            <div class="dual-track-title">🟢 軌道 A：正式訂單 / 預告訂單 (Sales Order)</div>
+            <div class="dual-track-flow">
+              <strong>T-Code：</strong><span class="tcode-chip" onclick="window.copyText('VA01', '已複製 VA01')">VA01</span> / <span class="tcode-chip" onclick="window.copyText('ZSD012', '已複製 ZSD012')">ZSD012</span><br>
+              • <strong>正式訂單 (<code>ZOR1</code>)</strong>：客戶正式下單，進入正式 MRP (<code>MD01N</code>) 展開真實請購單與工單。<br>
+              • <strong>預告訂單 (<code>ZA01</code>)</strong>：長交期主料需提前向供應商下正式 PO 時使用；<strong>⚠️ 轉完 PO 後必須至 <code>ZSD019</code> 壓拒絕原因 <code>Z3</code> 結案</strong>，否則正式單進來會重複跑出雙倍料！
+            </div>
+          </div>
+          <div class="dual-track-card track-pir">
+            <div class="dual-track-title">🟣 軌道 B：滾動預測獨立需求 (PIR 長期規劃)</div>
+            <div class="dual-track-flow">
+              <strong>T-Code：</strong><span class="tcode-chip" onclick="window.copyText('MD61', '已複製 MD61')">MD61</span> / <span class="tcode-chip" onclick="window.copyText('ZPP006', '已複製 ZPP006')">ZPP006</span> (Excel 批導)<br>
+              • <strong>需求版本固定填 <code>01</code> (待審批/模擬專用)</strong>，勾選可規劃。<br>
+              • <strong>核心目的</strong>：僅供長期規劃模擬 (<code>MS31 ➔ MS01</code>) 計算未來數月材料預估量並上傳 B2B (<code>ZPP914</code>)，<strong>絕對不會直接跑出正式工單</strong>！
+            </div>
+          </div>
+        </div>
+      `,
+      checkpoints: [
+        {
+          id: 'S1_C1',
+          stepCode: 'STEP 1.1',
+          title: '物料主檔 (MM01/MM02) 策略群組與 MRP 參數設定',
+          tcodes: ['MM01', 'MM02'],
+          desc: '成品與半成品在接單或建立 PIR 前，必須先於物料主檔 <code>MRP 1 ~ MRP 4</code> 視圖設妥：<strong>MRP 類型 (<code>PD</code>)</strong>、<strong>策略群組 (Strategy Group，決定 MTO 訂單生產或 MTS 預測生產)</strong>、<strong>批量大小 (<code>EX</code> 批對批)</strong> 與 <strong>個別/彙總指示碼 (<code>1</code> 僅個別需求 或 <code>2</code> 彙總)</strong>。',
+          forwardImpact: '👉 影響後續：若策略群組或 MRP 類型設為 ND (不規劃)，Stage 3 跑 MD01N / MS01 時系統將完全跳過該鞋型！'
+        },
+        {
+          id: 'S1_C2',
+          stepCode: 'STEP 1.2',
+          title: '正式銷售訂單 (ZOR1) 與預告銷售訂單 (ZA01) 開立與 Z3 沖銷防呆',
+          tcodes: ['VA01', 'ZSD012', 'ZSD019'],
+          desc: '業務透過 <code>ZSD012</code> 批次匯入或 <code>VA01</code> 建立銷售訂單（含客戶交期、型體、顏色與尺碼 Size Run 數量）。若為提前採購長交期材料而開立 <strong>預告訂單 (<code>ZA01</code>)</strong>，在跑完 <code>MD01N</code> 並把 PR 轉成 PO 後，<strong>必須立即用 <code>ZSD019</code> 批次壓上拒絕原因 <code>Z3 (預告訂單關閉)</code></strong>。',
+          forwardImpact: '👉 影響後續：預告單 ZA01 若忘記壓 Z3 關閉，當正式訂單 ZOR1 匯入後跑 Stage 3 MD01N，採購與生管會看到兩倍的需求量！'
+        },
+        {
+          id: 'S1_C3',
+          stepCode: 'STEP 1.3',
+          title: 'PIR 預測獨立需求建立 (MD61 / ZPP006) — 嚴守版本 01 隔離原則',
+          tcodes: ['MD61', 'MD62', 'ZPP006'],
+          desc: '生管透過 <code>ZPP006</code> 批次上傳或 <code>MD61</code> 維護滾動預測時，<strong>版本必須選 <code>01</code>（非啟用之模擬版本）</strong>，計畫期間選 <code>M (月)</code> 或 <code>W (週)</code>。嚴禁將未確認之滾動預測直接勾選為啟用版本 (<code>00</code> + Active)，否則會混入正式 <code>MD01N</code> 產生巨量假請購單。',
+          forwardImpact: '👉 影響後續：決定 Stage 3 能否在 MS31/MS01 乾淨算出模擬計畫單，並在 ZPPQ02 匯出預測材料需求表。'
+        }
+      ],
+      tracebacks: [
+        {
+          symptom: '在 MD04 看不到客戶剛下的銷售訂單需求，或跑完 MRP 完全沒反應？',
+          cause: '銷售訂單明細可能被壓了「拒絕原因 (如 Z3)」、交貨計畫行未確認，或物料主檔 MM02 的 MRP 類型被設為 ND。',
+          targetStageId: 'STAGE_1',
+          targetCheckId: 'S1_C1',
+          jumpLabel: '檢查本階段 Step 1.1 (MM02 MRP 參數) 與 Step 1.2 (SO 拒絕原因)'
+        },
+        {
+          symptom: '同一個型體跑完 MRP 後，材料請購單 (PR) 與計畫單數量竟然暴增為兩倍？',
+          cause: '先前開立的「預告銷售訂單 (ZA01)」在轉完採購單後，忘記到 ZSD019 壓拒絕原因 Z3 關閉，導致與新進的正式訂單 (ZOR1) 疊加！',
+          targetStageId: 'STAGE_1',
+          targetCheckId: 'S1_C2',
+          jumpLabel: '檢查本階段 Step 1.2 (ZSD019 預告單 Z3 結案防呆)'
+        }
+      ],
+      tools: [
+        { label: '🌳 開啟「MRP 展開異常 6 步排查樹」', tab: 'tab-decision-trees', subTarget: 'mrp_tree' },
+        { label: '🗺️ 查看「2.1 長期規劃 PIR」完整 T-Code 循序圖', tab: 'tab-tcode-directory', subTarget: 'scene_ltp_pir' }
+      ]
+    },
+    {
+      id: 'STAGE_2',
+      num: 'STAGE 02',
+      icon: '🏗️',
+      shortTitle: '2. 四大生產主檔',
+      shortSub: 'BOM / 途程 / 委外資訊 / 生產版本',
+      fullTitle: 'Stage 2：四大生產主檔建置（BOM ➔ 途程 ➔ 製程委外資訊記錄 ➔ 生產版本 C223）',
+      badge: 'SOP 1.1 ~ 1.4 工程核心',
+      badgeClass: 'badge-warning',
+      summary: '在跑 MRP 之前，工程與生管必須把「做一雙鞋需要什麼料、經過哪些工段、哪一道要委外、耗時多久」設定為四大主檔，最後用 <strong>生產版本 (<code>C223</code>)</strong> 把 BOM 與途程綁在一起。<strong>任何一個主檔漏設或日期不一致，後面跑 MRP 與開工單 100% 報錯卡死！</strong>',
+      dualTrackHtml: '',
+      checkpoints: [
+        {
+          id: 'S2_C1',
+          stepCode: 'STEP 2.1',
+          title: '部位代碼 (ZPP001) ➔ BOM 建立 (CS01/ZPP002) ➔ 尺碼對照九宮格 (FSH_BOM_VD / ZPPBOMFIX)',
+          tcodes: ['ZPP001', 'CS01', 'ZPP002', 'FSH_BOM_VD', 'ZPPBOMFIX'],
+          desc: '① 先在 <code>ZPP001</code> 定義部位代碼並綁定<strong>「首工序作業代號 (<code>ZZFIRST</code>)」</strong>；<br>② 建立 BOM (<code>CS01</code> / <code>ZPP002</code>) 時，輸入部位代碼於排序字串，系統會自動帶出首工序（<strong>決定日後 <code>ZPP020</code> 領料單如何按裁斷/針車/成型分單領料</strong>）；<br>③ 針對分尺碼材料（大底、中底、楦頭），於 <code>FSH_BOM_VD</code> 維護九宮格尺碼區段，若有漏碼立即執行 <strong><code>ZPPBOMFIX</code></strong> 自動補齊；<br>④ 廠內自製貼合半成品不領料者，特殊採購類設為 <strong><code>50</code> (虛擬件 Phantom)</strong>。',
+          forwardImpact: '👉 影響後續：若漏設首工序 ZZFIRST，Stage 5 現場用 ZPP020 列印領料單時會無法按工段分單；若九宮格漏碼，Stage 3 跑 MRP 時該尺碼將展不出大底需求！'
+        },
+        {
+          id: 'S2_C2',
+          stepCode: 'STEP 2.2',
+          title: '工作中心 (CR01) ➔ 標準途程 (CA01/ZPP003)：控制碼 PP01~PP08、基礎數量 AF、直接人工 AK 與分割數',
+          tcodes: ['CR01', 'CA01', 'CA02', 'ZPP003'],
+          desc: '① <code>CR01</code> 工作中心必須綁定財務<strong>成本中心</strong>與作業類型 (<code>AK</code> 直接人工、<code>AM</code> 機器)；<br>② <code>CA01</code> / <code>ZPP003</code> 建立途程各道工序時，必須正確配置<strong>控制碼 (<code>PP01</code> 廠內報工、<code>PP02/PP06/PP07</code> 工序委外、<code>PP05</code> 排程不報工)</strong>；<br>③ <strong>鐵律：整個途程的最後一道工序（且僅限一道）必須設為 <code>PP03</code>（廠內末站自動 101 入庫）或 <code>PP08</code>（外包末站收貨自動 101 入庫）</strong>；<br>④ 準確設定<strong>基礎數量 (<code>AF</code>，如 1,000 雙)</strong>、<strong>直接人工 (<code>AK</code> 分鐘)</strong> 與 <strong>最大分割數 (<code>Splitting</code> 機台/人數)</strong>。',
+          forwardImpact: '👉 影響後續：直接決定 Stage 4 工單排程天數、Stage 5 末站報工能否自動 101 成品入庫，以及財務 CK40N 標準成本估算！'
+        },
+        {
+          id: 'S2_C3',
+          stepCode: 'STEP 2.3',
+          title: '製程委外必備：採購資訊記錄 (ME11 類別 3 分包) 與途程外包工序連結',
+          tcodes: ['ME11', 'ME12', 'CA02'],
+          desc: '當途程中含有<strong>工序委外控制碼 (<code>PP02</code> 廠內發料工序委外、<code>PP06</code> 供應商發料、<code>PP07</code> 不轉移庫存純加工)</strong>，或是開立外包工單 (<code>ZP05</code>) 時：<br>① 採購必須先在 <code>ME11</code> 建立<strong>「分包 (Subcontracting, 資訊類別 3)」採購資訊記錄</strong>（維護加工單價、採購組織、採購群組、交貨天數）；<br>② 在途程 <code>CA02</code> 雙擊該委外工序，將<strong>採購資訊記錄號碼、採購組織、物料群組</strong>填入外包頁籤。',
+          forwardImpact: '👉 影響後續：若漏建 ME11 或未填入途程外包工序，Stage 4 工單下達 (REL) 時將無法自動產生外包請購單 (PR)，或報錯「無法建立外部處理請購單」！'
+        },
+        {
+          id: 'S2_C4',
+          stepCode: 'STEP 2.4',
+          title: '生產版本四合一綁定 (C223 / ZC223) — 綠燈檢核與有效日期對齊',
+          tcodes: ['C223', 'ZC223', 'MM02'],
+          desc: 'MRP 與工單不會直接去抓 BOM 或途程，而是只認 <strong>生產版本 (<code>C223</code> / 批導 <code>ZC223</code>)</strong>！<br>① 將「成品/半成品料號 + 批量範圍 (1 ~ 99,999,999) + <strong>有效起訖日期</strong> + <strong>途程群組/計數器</strong> + <strong>BOM 用途/可選 BOM</strong>」綁定為版本 <code>0001</code>；<br>② 點擊<strong>「檢查 (Check)」按鈕，確保途程與 BOM 雙雙亮起 🟢 綠燈</strong>；<br>③ <strong>⚠️ 日期鐵律：生產版本的「有效起始日」必須 <code>&gt;=</code> 途程 (<code>CA01</code>) 與 BOM (<code>CS01</code>) 的有效起始日</strong>，否則轉工單必崩潰！',
+          forwardImpact: '👉 影響後續：這是連接 Stage 2 主檔與 Stage 3 MRP / Stage 4 開工單的唯一橋樑！C223 沒亮綠燈，後面一步都走不動。'
+        }
+      ],
+      tracebacks: [
+        {
+          symptom: '在 Stage 4 計畫單轉工單 (MD04 / CO40) 時，系統報錯：「未維護訂單類型 ZP02 作業產生的預設值，請調整生產版本的有效開始日」？',
+          cause: '生產版本 (C223) 的「有效起始日」比途程 (CA01) 的有效起始日還要早，導致開單當下抓不到有效途程！',
+          targetStageId: 'STAGE_2',
+          targetCheckId: 'S2_C4',
+          jumpLabel: '檢查本階段 Step 2.4 (C223 生產版本與途程有效起始日對齊)'
+        },
+        {
+          symptom: '在 Stage 4 釋放 (REL) 含委外工序的工單時，沒有自動產生委外請購單 (PR) 或直接報錯阻擋？',
+          cause: '途程 PP02/PP06/PP07 委外工序未維護採購資訊記錄，或採購尚未在 ME11 建立「類別 3 (分包)」之資訊記錄。',
+          targetStageId: 'STAGE_2',
+          targetCheckId: 'S2_C3',
+          jumpLabel: '檢查本階段 Step 2.3 (ME11 分包資訊記錄與 CA02 外包頁籤)'
+        },
+        {
+          symptom: '在 Stage 5 末站報工 (CO11N) 成功了，但倉庫去 MB52 查卻發現成品庫存為 0（沒有自動 101 入庫）？',
+          cause: '當初在 Stage 2 設定途程 (CA01) 時，最後一道工序忘記設為 PP03 (廠內入庫) 或 PP08 (外包入庫)，誤設成了一般的 PP01！',
+          targetStageId: 'STAGE_2',
+          targetCheckId: 'S2_C2',
+          jumpLabel: '檢查本階段 Step 2.2 (CA01 途程末站必須為 PP03/PP08)'
+        }
+      ],
+      tools: [
+        { label: '🧮 開啟「1,000 雙接單 ➔ 途程 5 階流水線試算器」', tab: 'tab-order-matrix', subTarget: 'subtab-routing-calc' },
+        { label: '🎛️ 開啟「途程控制碼 PP01~PP08 連動模擬器」', tab: 'tab-order-matrix', subTarget: 'subtab-control-sim' },
+        { label: '🌳 開啟「委外 541 調撥與 PR 排查決策樹」', tab: 'tab-decision-trees', subTarget: 'subcon_tree' }
+      ]
+    },
+    {
+      id: 'STAGE_3',
+      num: 'STAGE 03',
+      icon: '⚡',
+      shortTitle: '3. 雙軌 MRP 運算',
+      shortSub: 'MD01N 正式 vs MS01 模擬',
+      fullTitle: 'Stage 3：MRP 雙軌運算（正式訂單跑 MD01N vs 預測 PIR 跑 MS31 ➔ MS01/MSBT ➔ ZPPQ02*）',
+      badge: 'SOP 2.1 / 2.2 核心差異',
+      badgeClass: 'badge-danger',
+      summary: '<strong>這是最多人搞混的關鍵分水嶺！</strong>「正式銷售訂單 (<code>SO</code>)」與「預測獨立需求 (<code>PIR</code>)」跑的 MRP 引擎與產出結果完全不同：正式訂單跑 <strong><code>MD01N</code> (MRP Live)</strong> 產生真實計畫單與請購單；而 PIR 預測單必須透過 <strong><code>MS31</code> 長期規劃情境 ➔ <code>MS01 / MSBT</code> 模擬 MRP</strong> 產生「模擬計畫單」，再用 <strong><code>ZPPQ02</code>（料號結尾必加 <code>*</code>）</strong>展開尺碼預估材料表！',
+      dualTrackHtml: `
+        <div class="dual-track-grid">
+          <div class="dual-track-card track-so">
+            <div class="dual-track-title">🟢 正式軌：銷售訂單 MRP Live (真實供需)</div>
+            <div class="dual-track-flow">
+              <strong>執行順序：</strong><span class="tcode-chip" onclick="window.copyText('MD01N', '已複製 MD01N')">MD01N</span> ➔ <span class="tcode-chip" onclick="window.copyText('MD04', '已複製 MD04')">MD04</span><br>
+              1. <strong>設定參數</strong>：勾選「變更之 BOM 展開」、規劃模式選 <strong><code>1</code> (適應規劃資料)</strong> 或 <strong><code>3</code> (刪除並重新建立未確定之計畫單/PR)</strong>。<br>
+              2. <strong>展開結果</strong>：依據 <code>C223</code> 生產版本逐階展開 BOM，產生<strong>正式計畫訂單 (<code>PLDORD</code>)</strong> 與 <strong>正式採購請購單 (<code>PurRqs</code>)</strong>。<br>
+              3. <strong>接續動作</strong>：採購將 PR 轉正式 PO；生管進入 Stage 4 將計畫單轉為正式生產工單 (<code>ZP01~ZP07</code>)。
+            </div>
+          </div>
+          <div class="dual-track-card track-pir">
+            <div class="dual-track-title">🟣 模擬軌：PIR 長期規劃 LTP (模擬預測備料)</div>
+            <div class="dual-track-flow">
+              <strong>執行順序：</strong><span class="tcode-chip" onclick="window.copyText('MS31', '已複製 MS31')">MS31</span> ➔ <span class="tcode-chip" onclick="window.copyText('MS01', '已複製 MS01')">MS01</span> / <span class="tcode-chip" onclick="window.copyText('MSBT', '已複製 MSBT')">MSBT</span> ➔ <span class="tcode-chip" onclick="window.copyText('ZPPQ02', '已複製 ZPPQ02')">ZPPQ02</span> ➔ <span class="tcode-chip" onclick="window.copyText('ZPP914', '已複製 ZPP914')">ZPP914</span><br>
+              1. <strong><code>MS31</code> 建立規劃情境</strong>：綁定我們在 Stage 1 建立的 <strong>PIR 版本 <code>01</code></strong> 與工廠，點選「下達 + 儲存」。<br>
+              2. <strong><code>MS01</code> (立即線上跑) 或 <code>MSBT</code> (排夜間背景 Job)</strong>：執行模擬 MRP，產生<strong>模擬計畫訂單 (Simulative Planned Orders)</strong>，完全不影響正式庫存與正式請購！<br>
+              3. <strong><code>ZPPQ02</code> 查詢預測材料需求</strong>：<strong>⚠️ 物料編號結尾必須加上 <code>*</code> 號 (例如 <code>1011B547-001*</code>)</strong>，系統才會展開各尺碼變式 (VA) 的材料需求！確認無誤後由 <code>ZPP914</code> 拋轉 B2B 供廠商備料。
+            </div>
+          </div>
+        </div>
+      `,
+      checkpoints: [
+        {
+          id: 'S3_C1',
+          stepCode: 'STEP 3.1',
+          title: '正式 MRP Live 執行要點 (MD01N)：規劃模式 1 vs 3 與半成品連帶展開',
+          tcodes: ['MD01N', 'MD04'],
+          desc: '在 <code>MD01N</code> 執行正式 MRP 時，若工程剛修改過 Stage 2 的 BOM (<code>CS02</code>) 或生產版本 (<code>C223</code>)，<strong>規劃模式務必選擇 <code>3 (刪除並重新建立規劃資料)</code></strong>，並勾選「規劃變更之 BOM 組件」，系統才會把舊的未確認計畫單刪掉、按最新 BOM 重算！',
+          forwardImpact: '👉 影響後續：若改了 BOM 卻只用模式 1 或沒重跑 MD01N，Stage 4 轉出來的工單仍會帶著舊版錯誤的組件清單！'
+        },
+        {
+          id: 'S3_C2',
+          stepCode: 'STEP 3.2',
+          title: 'PIR 長期規劃模擬三部曲 (MS31 情境 ➔ MS01/MSBT 模擬執行 ➔ MS04 模擬供需檢視)',
+          tcodes: ['MS31', 'MS32', 'MS01', 'MSBT', 'MS04'],
+          desc: '針對 Stage 1 的 <code>MD61/ZPP006</code> 預測單：先確認 <code>MS31/MS32</code> 長期規劃情境已納入獨立需求版本 <code>01</code> 並已「下達 (Released)」；筆數少時直接用 <code>MS01</code> 執行，大批量季預測則用 <code>MSBT</code> 設定背景 Job 夜間跑完，隔天早上於 <code>MS04</code> 檢視模擬展開結果。',
+          forwardImpact: '👉 影響後續：讓生管與採購在不污染正式 MRP (MD04) 的前提下，精準算出未來 3~6 個月的皮革、大底、包材預測總需求。'
+        },
+        {
+          id: 'S3_C3',
+          stepCode: 'STEP 3.3',
+          title: '預測材料需求報表 (ZPPQ02) 必加星號 * 鐵律與 B2B 拋轉 (ZPP914)',
+          tcodes: ['ZPPQ02', 'ZPP914'],
+          desc: '跑完 <code>MS01/MSBT</code> 後，打開 <code>ZPPQ02</code> 匯出預測材料需求表時，因為成鞋屬於具有尺碼網格的變式料號 (Generic Article + Variants)，<strong>在「物料」欄位輸入型體色號後，結尾絕對要加上 <code>*</code>（例如 <code>1011B547-001*</code>）</strong>！若漏打 <code>*</code>，系統只會查空殼母料號，查出 0 筆尺碼材料！',
+          forwardImpact: '👉 影響後續：查出完整尺碼材料預估量後，透過 ZPP914 上傳 B2B 平台提供供應商提前備料。'
+        }
+      ],
+      tracebacks: [
+        {
+          symptom: '已經在 CS02 修改了 BOM 材料或用量，為什麼跑完 MD01N 後，MD04 裡的計畫單還是舊材料？',
+          cause: '1. 跑 MD01N 時「規劃模式」沒有選 3 (刪除並重建)；2. 或者該計畫單被人工勾選了「固定 (Firmed * 號)」，MRP 不敢覆蓋固定計畫單！',
+          targetStageId: 'STAGE_3',
+          targetCheckId: 'S3_C1',
+          jumpLabel: '檢查本階段 Step 3.1 (MD01N 規劃模式 3 與取消計畫單固定)'
+        },
+        {
+          symptom: '跑完 MD01N 後，MD04 完全沒有展開下階半成品或沒有產生計畫訂單？',
+          cause: '問題出在上游 Stage 2！成品或半成品的「生產版本 C223」未建立、未亮綠燈、批量範圍不符，或 BOM 尺碼九宮格 (FSH_BOM_VD) 漏碼。',
+          targetStageId: 'STAGE_2',
+          targetCheckId: 'S2_C4',
+          jumpLabel: '🔙 退回 Stage 2 檢查 Step 2.4 (C223 生產版本綠燈) 與 Step 2.1 (ZPPBOMFIX 九宮格)'
+        },
+        {
+          symptom: '跑完 MS01 長期規劃模擬後，去 ZPPQ02 查預測材料需求卻是一片空白（0 筆資料）？',
+          cause: '1. 在 ZPPQ02 輸入成品料號時結尾忘記加星號 *（未展開尺碼變式 VA）；2. 或 MS31 規劃情境尚未點選「下達 (Release)」。',
+          targetStageId: 'STAGE_3',
+          targetCheckId: 'S3_C3',
+          jumpLabel: '檢查本階段 Step 3.3 (ZPPQ02 料號結尾必加 * 號)'
+        }
+      ],
+      tools: [
+        { label: '🌳 開啟「MRP 展開異常 6 步排查決策樹」', tab: 'tab-decision-trees', subTarget: 'mrp_tree' },
+        { label: '🚨 查看「ZPPQ02 漏加 * 號 / BOM 九宮格漏碼」秒級急救卡', tab: 'tab-cheat-sheet', subTarget: 'MRP' }
+      ]
+    },
+    {
+      id: 'STAGE_4',
+      num: 'STAGE 04',
+      icon: '🏭',
+      shortTitle: '4. 開立工單與釋放',
+      shortSub: 'ZP01~07 轉單與 REL 下達',
+      fullTitle: 'Stage 4：開立計畫單與正式工單（ZP01~ZP07 選型轉單 ➔ CRTD 建立 ➔ REL 下達釋放）',
+      badge: 'SOP 0.1 / 2.2 / 3.1 生管核心',
+      badgeClass: 'badge-info',
+      summary: '當 Stage 3 的正式 MRP (<code>MD01N</code>) 產出計畫訂單 (<code>PLDORD</code>) 後，生管要將計畫單轉換為<strong>正式生產工單 (<code>ZP01~ZP07</code>)</strong>，或者手動開立補料/重工工單 (<code>CO01/CO07</code>)。工單從 <strong><code>CRTD (建立)</code></strong> 切換到 <strong><code>REL (下達釋放)</code></strong> 的瞬間，系統會自動執行三大關鍵動作：① 產生倉庫領料預留單 (<code>RESB</code>)、② 觸發委外工序請購單 (<code>EBAN</code>)、③ 開放現場領料與報工權限！',
+      dualTrackHtml: '',
+      checkpoints: [
+        {
+          id: 'S4_C1',
+          stepCode: 'STEP 4.1',
+          title: '精準選擇工單類型 (ZP01 ~ ZP07) 並由計畫單轉換開單 (MD04 / CO40 / CO41 / ZPP014)',
+          tcodes: ['MD04', 'CO40', 'CO41', 'ZPP014', 'CO01', 'CO07'],
+          desc: '生管依生產情境選對工單類型：<br>• <strong><code>ZP01</code> (大底工單) / <code>ZP02</code> (成型成品與半成品工單)</strong>：由 <code>MD04</code> 單筆轉、<code>CO41</code> 批次轉或 <code>ZPP014</code> 開立；<br>• <strong><code>ZP03</code> (廠內補料工單，用 <code>CO07</code> 無料號開單) / <code>ZP06</code> (外包補料工單)</strong>：現場材料損耗超領時開立，<strong>僅含材料組件、無須報工入庫</strong>；<br>• <strong><code>ZP04</code> (重工工單，用 <code>CO01</code> 同料號自我消耗重工)</strong>：成品不良退回重修；<br>• <strong><code>ZP05</code> (全製程或主要外包工單)</strong>：整雙或半成品委外加工；<br>• <strong><code>ZP07</code> (鞋墊/特殊半成品工單)</strong>。',
+          forwardImpact: '👉 影響後續：若把單純現場損耗補料誤開成 ZP02 量產工單，Stage 6 月結時會因為沒有成品入庫而卡死無法 TECO！補料請務必開 ZP03/ZP06。'
+        },
+        {
+          id: 'S4_C2',
+          stepCode: 'STEP 4.2',
+          title: '工單讀取主檔檢核 (Read PP Master Data) 與可用性檢查 (ATP Check)',
+          tcodes: ['CO02', 'COHV'],
+          desc: '工單開立為 <code>CRTD (已建立)</code> 狀態時，系統已將當下 <code>C223</code> 生產版本的 BOM 組件與途程工序「快照 (Snapshot)」複製進工單裡。下達前可執行可用性檢查確認齊套狀況；<strong>若開單後才在 Stage 2 修改了 <code>CS02</code> BOM 或 <code>CA02</code> 途程，必須在尚未領料報工前於 <code>CO02</code> 執行「功能 ➔ 讀取 PP 主檔資料」才會更新至該工單</strong>！',
+          forwardImpact: '👉 影響後續：確保進入 Stage 5 現場領料前，工單組件 (RESB) 與工序 (AFVC) 百分之百正確。'
+        },
+        {
+          id: 'S4_C3',
+          stepCode: 'STEP 4.3',
+          title: '工單下達釋放 (REL - Release)：正式啟動領料預留與委外請購單',
+          tcodes: ['CO02', 'CO05N', 'COHV'],
+          desc: '在 <code>CO02</code> 點選綠旗「下達 (Release)」或透過 <code>CO05N / COHV</code> 批次下達，工單系統狀態由 <code>CRTD</code> 變為 <strong><code>REL</code></strong>：<br>① 正式生效組件預留單，允許倉庫執行 <code>ZPP020</code> / <code>MIGO 261</code> 發料；<br>② 若途程含 <code>PP02/PP06/PP07</code> 委外工序，系統立即自動拋出<strong>委外服務請購單 (<code>PR</code>)</strong> 供採購轉 <code>PO</code>。',
+          forwardImpact: '👉 影響後續：工單若停留在 CRTD 未下達 REL，Stage 5 現場用 ZPP020 印領料單或 CO11N 報工都會被系統直接擋下！'
+        }
+      ],
+      tracebacks: [
+        {
+          symptom: '在 MD04 點選「計畫單轉工單」時，彈出紅字錯誤「未維護訂單類型 ZP02 作業產生的預設值」而無法開單？',
+          cause: '這是上游 Stage 2 的生產版本 (C223)「有效開始日」早於途程 (CA01) 的有效開始日，導致開單引擎抓不到途程工序！',
+          targetStageId: 'STAGE_2',
+          targetCheckId: 'S2_C4',
+          jumpLabel: '🔙 退回 Stage 2 檢查 Step 2.4 (C223 生產版本有效開始日對齊途程)'
+        },
+        {
+          symptom: '剛在 CS02 改了 BOM 用量，為什麼已經開出來的工單 (CO03 組件清單) 卻一點都沒變？',
+          cause: '工單在開立瞬間就已經把舊版 BOM 拍成快照存進工單了！改 CS02 只會影響「未來新開的工單」，既有工單必須去 CO02 重讀 PP 主檔（若已領料則需走 Stage 5 解鎖改單流程）。',
+          targetStageId: 'STAGE_4',
+          targetCheckId: 'S4_C2',
+          jumpLabel: '檢查本階段 Step 4.2 (CO02 讀取 PP 主檔資料)'
+        },
+        {
+          symptom: '工單已經下達 (REL) 了，為什麼採購在 ME5A 卻查不到外包工序的請購單 (PR)？',
+          cause: '上游 Stage 2 的途程外包工序控制碼未設為 PP02/PP06/PP07，或漏填 ME11 分包資訊記錄號碼！',
+          targetStageId: 'STAGE_2',
+          targetCheckId: 'S2_C3',
+          jumpLabel: '🔙 退回 Stage 2 檢查 Step 2.3 (ME11 分包資訊記錄與途程外包設定)'
+        }
+      ],
+      tools: [
+        { label: '🎯 開啟「ZP01 ~ ZP07 工單類型情境智能推薦器」', tab: 'tab-order-matrix', subTarget: 'subtab-recommender' },
+        { label: '📊 查看「ZP01 ~ ZP07 與 8 大控制碼完整對照矩陣」', tab: 'tab-order-matrix', subTarget: 'subtab-matrix' }
+      ]
+    },
+    {
+      id: 'STAGE_5',
+      num: 'STAGE 05',
+      icon: '⚙️',
+      shortTitle: '5. 現場執行閉環',
+      shortSub: '領料 ➔ 委外 ➔ E005改單 ➔ 報工入庫',
+      fullTitle: 'Stage 5：現場執行閉環（領發料 ZPP020/261 ➔ 委外 541/543 ➔ E005 退料改單防呆 ➔ 報工 CO11N 與末站 101 入庫）',
+      badge: 'SOP 3.1 ~ 4.4 現場高頻戰區',
+      badgeClass: 'badge-warning',
+      summary: '工單下達 (<code>REL</code>) 進入車間後，是異常發生率最高的實戰階段：包含<strong>倉庫按首工序分單發料 (<code>261</code>)</strong>、<strong>委外加工調撥 (<code>541</code>) 與收貨倒扣 (<code>101+543</code>)</strong>、<strong>已發料工單的 <code>E005</code> 鎖定與退料改單標準五步曲</strong>，以及最後<strong>現場工序報工 (<code>CO11N</code>) 觸發末站 <code>PP03</code> 自動 <code>101</code> 成品入庫 (<code>DLV</code>)</strong>。',
+      dualTrackHtml: '',
+      checkpoints: [
+        {
+          id: 'S5_C1',
+          stepCode: 'STEP 5.1',
+          title: '現場領發料作業 (ZPP020 列印領料單 ➔ MIGO 261 發料 / ZPP015 超欠領管控)',
+          tcodes: ['ZPP020', 'ZPP015', 'MIGO', 'CO27'],
+          desc: '生管/現場透過 <code>ZPP020</code> 依工單與首工序列印領料單，倉管於 <code>MIGO</code> 執行移動類型 <strong><code>261</code> (對工單發料)</strong>。系統瞬間將材料庫存轉入工單在製品 (WIP)，並<strong>自動將工單使用者狀態切換為 <code>E005 (組件鎖定)</code>，同時觸發系統狀態 <code>GMPS (已過帳物料異動)</code></strong>，嚴格保護已領料之工單不被隨意竄改！',
+          forwardImpact: '👉 影響後續：一旦發過 1 筆 261 領料，工單即鎖上 E005，若要修改該材料或重讀主檔，必須遵循 Step 5.3 的五步解鎖退料法。'
+        },
+        {
+          id: 'S5_C2',
+          stepCode: 'STEP 5.2',
+          title: '製程委外實物流與帳務流閉環 (ME21N 轉 PO ➔ MIGO 541 調撥發料 ➔ MIGO 101 收貨自動 543 扣帳)',
+          tcodes: ['ME57', 'ME21N', 'ZMM007', 'MIGO', 'MBLB'],
+          desc: '針對含委外 (<code>PP02</code> / <code>ZP05</code>) 之工單：<br>① 採購將工單產生的委外 PR 轉為正式委外 PO (<code>ME21N</code>，項目類別 <code>L</code>)；<br>② 倉管憑藉 <code>ZMM007</code> 委外發料單，於 <code>MIGO</code> 執行<strong>「調撥過帳 + 採購訂單 + 移動類型 <code>541</code>」</strong>，將裁片/半成品移轉至<strong>供應商特殊庫存 (<code>O</code> 庫存，可用 <code>MBLB</code> 查詢)</strong>；<br>③ 廠商加工完成送回時，驗收人員執行 <code>MIGO</code> 對委外 PO <strong>收貨 (<code>101</code>)</strong>，系統同步自動觸發 <strong><code>543</code> 倒扣沖銷供應商 <code>O</code> 庫存</strong>！',
+          forwardImpact: '👉 影響後續：若倉管在步驟 ② 未做 541 調撥就把實物交給廠商，步驟 ③ 收貨 101 時會因「供應商 O 庫存為 0」無法扣 543 而直接報錯卡死！'
+        },
+        {
+          id: 'S5_C3',
+          stepCode: 'STEP 5.3',
+          title: '已領料工單變更標準五步曲（破解 E005 鎖定與 262 退料防呆）',
+          tcodes: ['MIGO', 'CO02', 'CS02'],
+          desc: '當工單已執行 <code>261</code> 領料而鎖上 <code>E005</code>，現場卻發現 BOM 用錯料或需變更設計時，<strong>嚴禁硬改</strong>，請依序執行標準五步曲：<br>① <strong><code>MIGO</code> 執行移動類型 <code>262</code> (工單退料)</strong> 將已領出之錯誤材料全數退回倉庫（使該項已發料數歸零）；<br>② 進入 <code>CO02</code> 表頭點擊 <code>i</code> 狀態鈕，將使用者狀態由 <strong><code>E005 (組件鎖定)</code> 改選為 <code>E006 (組件解鎖)</code></strong> 並先存檔；<br>③ 若全數材料與報工皆已沖銷歸零，可使用 <code>CO02 ➔ 功能 ➔ 讀取 PP 主檔資料</code> 同步最新 <code>CS02</code> BOM；若僅單一組件退料，則於 <code>CO02</code> 組件清單手動調整該組件；<br>④ 改完後將狀態切回 <code>E005</code> 存檔；<br>⑤ 重新列印領料單並執行 <code>MIGO 261</code> 領取正確材料。',
+          forwardImpact: '👉 影響後續：避免工單留下「帳上領了 A 料、實際卻用 B 料」的陰陽帳，確保 Stage 6 月結成本結算 (KKS2/CO88) 精準無誤。'
+        },
+        {
+          id: 'S5_C4',
+          stepCode: 'STEP 5.4',
+          title: '工序報工 (CO11N / ZPP010) 與末站 PP03/PP08 自動 101 成品入庫 (DLV)',
+          tcodes: ['CO11N', 'ZPP010', 'CO14', 'COOIS', 'MB51', 'MB52'],
+          desc: '現場依途程順序逐站於 <code>CO11N</code> 或 <code>ZPP010</code> 執行報工（回報良品數 Yield、報廢數 Scrap 與實際人工工時，產生 <code>AFRU</code> 紀錄並使工單帶上 <code>CNF</code> 狀態）。<br><strong>🎉 關鍵閉環時刻</strong>：當報工來到<strong>最後一道設定為 <code>PP03</code> 的廠內工序（或 <code>PP08</code> 外包收貨）</strong>並按下存檔時，SAP 會<strong>在背景自動執行移動類型 <code>101</code> 成品入庫</strong>，將完工鞋品直接送入成品倉 (<code>MB52</code>)，並為工單打上 <strong><code>DLV (已交貨)</code></strong> 狀態！',
+          forwardImpact: '👉 影響後續：工單必須具備 DLV (完全交貨) 狀態且無卡帳，才能順利進入 Stage 6 執行月結 TECO！'
+        }
+      ],
+      tracebacks: [
+        {
+          symptom: '想在 CO02 修改工單組件數量或刪除組件，發現欄位全部反灰無法編輯，或想點「讀取 PP 主檔」卻報錯「已發生貨物移動 (GMPS)」？',
+          cause: '該工單已經執行過 261 領料，系統自動啟動了 E005 (組件鎖定) 與 GMPS 保護機制！必須先用 MIGO 262 退料並切換 E006 解鎖。',
+          targetStageId: 'STAGE_5',
+          targetCheckId: 'S5_C3',
+          jumpLabel: '檢查本階段 Step 5.3 (MIGO 262 退料 ➔ CO02 切 E006 解鎖五步曲)'
+        },
+        {
+          symptom: '委外廠商把加工好的鞋面送回來了，在 MIGO 對委外 PO 執行 101 收貨時，系統報錯「供應商特殊庫存 O 不足 / Deficit of SL Unrestricted-use」？',
+          cause: '當初把半成品交給廠商時，倉庫忘記在 MIGO 執行「541 調撥至供應商 O 庫存」，導致收貨 101 要自動倒扣 543 時無帳可扣！',
+          targetStageId: 'STAGE_5',
+          targetCheckId: 'S5_C2',
+          jumpLabel: '檢查本階段 Step 5.2 (先補做 MIGO 541 調撥至 O 庫存，再做 101 收貨)'
+        },
+        {
+          symptom: '現場已經在 CO11N 把最後一站報工完畢（工單狀態有 CNF），但為什麼工單沒有變成 DLV，且 MB52 查不到任何 101 成品入庫？',
+          cause: '這是上游 Stage 2 途程設定問題！該工單最後一道工序的控制碼被設成了一般報工 (PP01)，沒有設為「PP03 (自動入庫)」，或者觸發了 COGI 入庫異常佇列！',
+          targetStageId: 'STAGE_2',
+          targetCheckId: 'S2_C2',
+          jumpLabel: '🔙 退回 Stage 2 檢查 Step 2.2 (途程末站控制碼必須為 PP03/PP08)'
+        }
+      ],
+      tools: [
+        { label: '🧪 開啟「E005 組件鎖定 & 262 退料改單互動沙盒」', tab: 'tab-order-matrix', subTarget: 'subtab-e005-sandbox' },
+        { label: '🚚 開啟「委外 541 調撥 vs 101/543 倒扣實戰沙盒」', tab: 'tab-order-matrix', subTarget: 'subtab-subcon-sandbox' },
+        { label: '🔬 開啟「工單 7 維度穿透式生命週期診斷器」', tab: 'tab-wo-inspector', subTarget: 'WO_E005_LOCKED' }
+      ]
+    },
+    {
+      id: 'STAGE_6',
+      num: 'STAGE 06',
+      icon: '🏁',
+      shortTitle: '6. 月結清理與 TECO',
+      shortSub: 'COGI 清零 ➔ 四重稽核 ➔ 結算',
+      fullTitle: 'Stage 6：月結清理與技術性結案（COGI 異常清零 ➔ TECO 四重防呆稽核 ➔ KKS2/CO88 財務結算）',
+      badge: 'SOP 3.2 / 第 5 章 月結終點站',
+      badgeClass: 'badge-success',
+      summary: '來到 PP 全流程的終點站！每逢月底結帳前，生管與現場必須將當月已完工之工單壓上 <strong><code>TECO (技術性完成)</code></strong>，向系統宣告「這張工單不再發生任何領退料與報工」，財務 CO 模組才能接著執行 <strong>在製品計算 (<code>KKAX</code>)、差異計算 (<code>KKS2</code>) 與工單成本結算 (<code>CO88</code>)</strong>。若亂壓 TECO 或漏清殘帳，月底財務結算將出現巨額異常差異！',
+      dualTrackHtml: '',
+      checkpoints: [
+        {
+          id: 'S6_C1',
+          stepCode: 'STEP 6.1',
+          title: '第一關：COGI 自動異動失敗佇列每日/月結清零 (COGI)',
+          tcodes: ['COGI', 'MIGO', 'MMBE'],
+          desc: '當 Stage 5 執行報工反沖扣料 (<code>Backflush</code>) 或末站 <code>PP03</code> 自動入庫時，若遇材料庫存不足、批次未指定或儲位鎖定，系統會將失敗紀錄暫存於 <strong><code>COGI</code></strong>。<strong>月結執行 TECO 前，必須進 <code>COGI</code> 逐筆補齊庫存並重過帳至 0 筆殘留</strong>！',
+          forwardImpact: '👉 影響後續：若 COGI 還有殘留未過帳之 261 扣料就壓 TECO，該工單實際耗用之材料成本將嚴重少算（造成假性有利差異）！'
+        },
+        {
+          id: 'S6_C2',
+          stepCode: 'STEP 6.2',
+          title: '第二關：在途委外 PO 與未結請購單 PR 徹底清理 (ME2O / MBLB / ME5A)',
+          tcodes: ['ME2O', 'MBLB', 'ME5A', 'CO02'],
+          desc: '針對曾有委外工序 (<code>PP02/PP06/PP07</code>) 或外包工單 (<code>ZP05</code>)：<br>① 檢查是否有未轉 PO 之殘留委外請購單 (<code>PR</code>)，若不再生產須於工單刪除或結案；<br>② 檢查委外採購單 (<code>PO</code>) 是否已全數完成 <code>101</code> 收貨與 <code>543</code> 扣帳，<strong>若有未交尾數須於 PO 明細勾選「交貨已完成 (Delivery Completed)」</strong>；<br>③ 確認 <code>MBLB</code> 供應商 <code>O</code> 庫存無異常滯留。',
+          forwardImpact: '👉 影響後續：若工單綁定的委外 PO 仍處於開放未結狀態，系統將阻擋工單結算或留下懸帳。'
+        },
+        {
+          id: 'S6_C3',
+          stepCode: 'STEP 6.3',
+          title: '第三關：工單齊套、報工與交貨狀態核對 (COOIS / MB51) ➔ 執行 TECO (CO02 / COHV)',
+          tcodes: ['COOIS', 'MB51', 'CO02', 'COHV'],
+          desc: '透過 <code>COOIS</code> 批次巡檢準備結案之工單：<br>① <strong>組件發料核對</strong>：應發數 vs 實發數 (<code>261 - 262</code>) 是否合理（無漏領主料）；<br>② <strong>工序報工核對</strong>：各站 <code>CNF</code> 報工數是否一致；<br>③ <strong>成品入庫核對</strong>：末站 <code>101</code> 入庫數是否等於工單完工數（狀態具 <code>DLV</code>）；<br>④ 確認四重指標全數綠燈後，於 <code>CO02</code>（功能 ➔ 限制處理 ➔ 技術上完成）或 <code>COHV</code> 批次壓上 <strong><code>TECO</code></strong>（系統同時自動刪除剩餘未領之 <code>RESB</code> 預留單）！',
+          forwardImpact: '👉 影響後續：一旦壓上 TECO，該工單原有的未領預留單與剩餘產能需求立即釋放，讓 MD04 供需畫面保持乾淨！'
+        },
+        {
+          id: 'S6_C4',
+          stepCode: 'STEP 6.4',
+          title: '第四關：跨部門交棒財務 CO 執行差異與成本結算 (KKAX ➔ KKS2 ➔ CO88)',
+          tcodes: ['KKAX', 'KKS2', 'CO88', 'KO88'],
+          desc: '生管完成 <code>TECO</code> 後交棒予財務成本會計：<br>• 跨月尚未完工（狀態為 <code>REL</code> 但未 <code>DLV/TECO</code>）之工單 ➔ 執行 <code>KKAX</code> 計算在製品 (WIP)；<br>• 當月已完工並壓妥 <code>DLV / TECO</code> 之工單 ➔ 執行 <code>KKS2</code> 計算投入與產出之生產成本差異，最後由 <code>CO88</code> (批次) / <code>KO88</code> (單筆) 結算拋轉會計傳票，完成 PP-CO 完美閉環！',
+          forwardImpact: '👉 影響後續：若生管在 TECO 後才發現漏報工或漏退料，需於當月結帳關帳前在 CO02 執行「取消技術完成 (Revoke TECO)」補帳後再重壓 TECO。'
+        }
+      ],
+      tracebacks: [
+        {
+          symptom: '月底想把工單壓 TECO 或財務跑 CO88 結算時，發現該工單「只有領料與前段報工成本，卻完全沒有 101 成品入庫（變成全額差異）」？',
+          cause: '回頭追查 Stage 5 末站報工與 Stage 2 途程設定：1. 現場漏報最後一站；2. 途程末站誤設為 PP01 而非 PP03；3. 末站 101 入庫卡在 COGI 佇列中沒處理！',
+          targetStageId: 'STAGE_5',
+          targetCheckId: 'S5_C4',
+          jumpLabel: '🔙 退回 Stage 5 檢查 Step 5.4 (末站報工 101 入庫) 與本階段 Step 6.1 (COGI 清零)'
+        },
+        {
+          symptom: '工單明明已經完工不再投產了，為什麼在 MD04 裡還一直看到這張工單的「剩餘材料預留需求 (OrdRes)」，害採購一直多買料？',
+          cause: '工單雖然實務上停產或減量完工，但生管忘記將該工單壓上 TECO（或在組件勾選最後發貨），導致未領完的 RESB 預留單一直佔用需求！',
+          targetStageId: 'STAGE_6',
+          targetCheckId: 'S6_C3',
+          jumpLabel: '檢查本階段 Step 6.3 (壓上 TECO 自動清除剩餘未領預留單)'
+        },
+        {
+          symptom: '財務月結反映某張工單某項主料耗用金額為 0（有入庫卻沒領料成本），去查才發現倉庫發料卡住？',
+          cause: '該組件在 Stage 5 發料或反沖時因庫存不足掉進了 COGI 異常池，或者在 Stage 5 做了 262 退料改單後忘記補做 261 重發料！',
+          targetStageId: 'STAGE_6',
+          targetCheckId: 'S6_C1',
+          jumpLabel: '檢查本階段 Step 6.1 (COGI 異常池清零) 與 Stage 5 Step 5.3 (261 領發料)'
+        }
+      ],
+      tools: [
+        { label: '✅ 開啟「月結 TECO 四重防呆互動自檢表」', tab: 'tab-teco-checklist', subTarget: null },
+        { label: '🔬 開啟「工單 7 維度診斷器 — 檢視 TECO 阻擋案例」', tab: 'tab-wo-inspector', subTarget: 'WO_COGI_BLOCKED' },
+        { label: '🌳 開啟「月結 TECO 前置異常排查決策樹」', tab: 'tab-decision-trees', subTarget: 'teco_tree' }
+      ]
+    }
+  ];
 
-  console.log("SAP PP Go-Live Interactive Triage Suite ready with Module 10 WO Lifecycle Inspector.");
+function renderRoadmapStageHtml(stage, idx, total) {
+  const prevStage = idx > 0 ? ppRoadmapStages[idx - 1] : null;
+  const nextStage = idx < total - 1 ? ppRoadmapStages[idx + 1] : null;
+
+  const checkpointsHtml = stage.checkpoints.map(chk => `
+      <div class="roadmap-check-item" id="check-${chk.id}">
+        <div class="check-item-top">
+          <div class="check-item-title">
+            <span class="badge badge-info" style="font-family:var(--font-mono);">${chk.stepCode}</span>
+            ${chk.title}
+          </div>
+          <div class="check-item-tcodes">
+            ${chk.tcodes.map(tc => `<span class="tcode-chip" onclick="window.copyText('${tc}', '已複製 T-Code: ${tc}')" title="點擊複製 ${tc}">${tc}</span>`).join('')}
+          </div>
+        </div>
+        <div class="check-item-desc">${chk.desc}</div>
+        <div class="forward-impact-tag">${chk.forwardImpact}</div>
+      </div>
+    `).join('');
+
+  const tracebacksHtml = stage.tracebacks.map(tb => `
+      <div class="trace-back-card">
+        <div class="trace-symptom">🚨 異常現象：${tb.symptom}</div>
+        <div class="trace-cause">🔍 根因定位：${tb.cause}</div>
+        <button class="trace-jump-btn" onclick="window.traceBackToStage('${tb.targetStageId}', '${tb.targetCheckId}')">
+          🎯 ${tb.jumpLabel}
+        </button>
+      </div>
+    `).join('');
+
+  const toolsHtml = stage.tools.map(tl => `
+      <button class="tool-launch-btn" onclick="window.jumpFromRoadmapToTool('${stage.id}', '${tl.tab}', '${tl.subTarget || ''}')">
+        ${tl.label} <span>➔</span>
+      </button>
+    `).join('');
+
+  return `
+      <div class="roadmap-stage-card" id="roadmap-card-${stage.id}" style="margin-bottom: 1.5rem;">
+        <div class="stage-card-header">
+          <div>
+            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.35rem; flex-wrap:wrap;">
+              <span class="badge ${stage.badgeClass}" style="font-family:var(--font-mono); font-size:0.78rem;">${stage.num}</span>
+              <span class="badge badge-info">${stage.badge}</span>
+            </div>
+            <h3 style="margin:0; font-size:1.25rem; color:var(--text-primary);">${stage.icon} ${stage.fullTitle}</h3>
+          </div>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            ${prevStage ? `<button class="btn-secondary" style="font-size:0.8rem; padding:0.35rem 0.75rem;" onclick="window.selectRoadmapStage('${prevStage.id}')">⬅️ 上一站：${prevStage.shortTitle}</button>` : ''}
+            ${nextStage ? `<button class="btn-primary" style="font-size:0.8rem; padding:0.35rem 0.85rem;" onclick="window.selectRoadmapStage('${nextStage.id}')">下一站：${nextStage.shortTitle} ➡️</button>` : ''}
+          </div>
+        </div>
+
+        <p style="margin: 0 0 1rem 0; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.65;">
+          ${stage.summary}
+        </p>
+
+        ${stage.dualTrackHtml || ''}
+
+        <div class="roadmap-two-col">
+          <!-- Left Column: Forward Prevention -->
+          <div class="roadmap-panel-box panel-forward">
+            <div class="roadmap-panel-title title-forward">
+              🟢 本站設定順序與防呆重點（順向設定：做對什麼、漏設會害死後面哪一站？）
+            </div>
+            ${checkpointsHtml}
+          </div>
+
+          <!-- Right Column: Backward Traceability -->
+          <div class="roadmap-panel-box panel-backward">
+            <div class="roadmap-panel-title title-backward">
+              🔴 出事卡關時：往前檢查哪一個步驟？（逆向追查：點按鈕直接跳回問題源頭！）
+            </div>
+            ${tracebacksHtml}
+          </div>
+        </div>
+
+        <div class="roadmap-tools-bar">
+          <span class="roadmap-tools-label">🛠️ 本站專屬互動工具箱（點擊直達模擬器，上方會保留「返回主幹線」按鈕）：</span>
+          ${toolsHtml}
+        </div>
+      </div>
+    `;
+}
+
+function renderPpRoadmap() {
+  const metroBar = document.getElementById('roadmap-metro-bar');
+  const stageContainer = document.getElementById('roadmap-stage-container');
+  if (!metroBar || !stageContainer) return;
+
+  // 1. Render 6-Stage Metro Bar
+  metroBar.innerHTML = ppRoadmapStages.map(st => {
+    const isActive = state.roadmapViewMode === 'single' && state.activeRoadmapStage === st.id;
+    return `
+        <button class="metro-node-btn ${isActive ? 'active' : ''}" onclick="window.selectRoadmapStage('${st.id}')">
+          <div class="metro-node-top">
+            <span class="metro-stage-num">${st.num}</span>
+            <span class="metro-stage-icon">${st.icon}</span>
+          </div>
+          <div class="metro-stage-title">${st.shortTitle}</div>
+          <div class="metro-stage-sub">${st.shortSub}</div>
+        </button>
+      `;
+  }).join('');
+
+  // 2. Render Stage Content (Single active stage or All 6 stages)
+  if (state.roadmapViewMode === 'all') {
+    stageContainer.innerHTML = ppRoadmapStages.map((st, i) => renderRoadmapStageHtml(st, i, ppRoadmapStages.length)).join('');
+  } else {
+    const idx = ppRoadmapStages.findIndex(s => s.id === state.activeRoadmapStage);
+    const activeIdx = idx >= 0 ? idx : 0;
+    stageContainer.innerHTML = renderRoadmapStageHtml(ppRoadmapStages[activeIdx], activeIdx, ppRoadmapStages.length);
+  }
+}
+
+window.selectRoadmapStage = (stageId) => {
+  state.activeRoadmapStage = stageId;
+  state.roadmapReturnStage = stageId;
+  if (state.roadmapViewMode === 'all') {
+    const card = document.getElementById(`roadmap-card-${stageId}`);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  renderPpRoadmap();
+};
+
+window.setRoadmapViewMode = (mode) => {
+  state.roadmapViewMode = mode;
+  const btnSingle = document.getElementById('btn-roadmap-single');
+  const btnAll = document.getElementById('btn-roadmap-all');
+  if (btnSingle && btnAll) {
+    btnSingle.classList.toggle('active', mode === 'single');
+    btnAll.classList.toggle('active', mode === 'all');
+  }
+  renderPpRoadmap();
+};
+
+window.traceBackToStage = (targetStageId, targetCheckId) => {
+  state.activeRoadmapStage = targetStageId;
+  state.roadmapReturnStage = targetStageId;
+  renderPpRoadmap();
+
+  setTimeout(() => {
+    const checkEl = document.getElementById(`check-${targetCheckId}`);
+    if (checkEl) {
+      checkEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      checkEl.classList.remove('pulse-highlight');
+      void checkEl.offsetWidth; // Force reflow for animation restart
+      checkEl.classList.add('pulse-highlight');
+      showToast(`🎯 已為您定位至源頭檢查點：${targetCheckId.replace('_', ' ')}`);
+    }
+  }, 60);
+};
+
+window.jumpFromRoadmapToTool = (fromStageId, targetTabId, subTarget) => {
+  state.roadmapReturnStage = fromStageId;
+  const stageObj = ppRoadmapStages.find(s => s.id === fromStageId);
+
+  // Switch top tab
+  const tabBtn = document.querySelector(`.tab-btn[data-tab="${targetTabId}"]`);
+  if (tabBtn) tabBtn.click();
+
+  // Show sticky return banner
+  const returnBanner = document.getElementById('roadmap-return-banner');
+  const returnStageText = document.getElementById('roadmap-return-stage-name');
+  if (returnBanner) {
+    if (returnStageText && stageObj) {
+      returnStageText.textContent = `您剛才正在瀏覽【${stageObj.shortTitle}】`;
+    }
+    returnBanner.classList.add('show');
+  }
+
+  // Activate specific sub-tool inside the target tab
+  setTimeout(() => {
+    if (targetTabId === 'tab-decision-trees' && subTarget) {
+      if (typeof window.switchTree === 'function') window.switchTree(subTarget);
+    } else if (targetTabId === 'tab-order-matrix' && subTarget) {
+      if (subTarget === 'subtab-e005-sandbox' || subTarget === 'subtab-subcon-sandbox') {
+        if (typeof window.switchLabSubtab === 'function') window.switchLabSubtab('subtab-control-sim');
+        const targetBoxId = subTarget === 'subtab-e005-sandbox' ? 'state-sim-result' : 'subcon-sim-result';
+        const box = document.getElementById(targetBoxId);
+        if (box) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (typeof window.switchLabSubtab === 'function') {
+        window.switchLabSubtab(subTarget);
+      }
+    } else if (targetTabId === 'tab-wo-inspector' && subTarget) {
+      if (typeof window.selectWoPreset === 'function') window.selectWoPreset(subTarget);
+    } else if (targetTabId === 'tab-tcode-directory' && subTarget) {
+      if (typeof window.selectScenarioFlow === 'function') window.selectScenarioFlow(subTarget);
+    } else if (targetTabId === 'tab-cheat-sheet' && subTarget) {
+      if (typeof window.filterByCategory === 'function') window.filterByCategory(subTarget);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 50);
+};
+
+window.returnToRoadmap = () => {
+  const returnBanner = document.getElementById('roadmap-return-banner');
+  if (returnBanner) returnBanner.classList.remove('show');
+
+  const roadmapTabBtn = document.getElementById('tab-btn-pp-roadmap');
+  if (roadmapTabBtn) roadmapTabBtn.click();
+
+  if (state.roadmapReturnStage) {
+    window.selectRoadmapStage(state.roadmapReturnStage);
+  }
+};
+
+// Initial Renders
+renderPpRoadmap();
+renderIssues();
+renderDecisionTree();
+renderOrderMatrix();
+renderControlKeys();
+renderChecklist();
+renderRaci();
+renderTcodes();
+renderScenarioFlows();
+updateCalculations();
+renderRecommender();
+renderRoutingPipeline();
+simulateAction('ACTION_STATE_INSPECT');
+simulateSubAction('ACT_SUB_INSPECT');
+renderWoInspector();
+
+console.log("SAP PP Go-Live Interactive Triage Suite ready with Module 10 WO Lifecycle Inspector.");
 });
 
 

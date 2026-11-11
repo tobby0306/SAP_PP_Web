@@ -14,7 +14,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=16">
+  <link rel="stylesheet" href="css/app.css?v=18">
 </head>
 
 <body>
@@ -66,7 +66,11 @@
 
     <!-- Top Navigation Tabs (Sitting directly below Header) -->
     <nav class="tabs-bar" id="navigation-tabs" role="tablist">
-      <button class="tab-btn active" data-tab="tab-cheat-sheet" id="tab-btn-cheat-sheet" role="tab">
+      <button class="tab-btn active" data-tab="tab-pp-roadmap" id="tab-btn-pp-roadmap" role="tab">
+        🧭 PP 全流程主幹線 (PIR/SO ➔ TECO)
+        <span class="badge-tag badge-emerald" style="font-size: 0.68rem;">全流程因果導航</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-cheat-sheet" id="tab-btn-cheat-sheet" role="tab">
         🚨 秒級急救表
         <span class="tab-count" id="count-cheat-sheet">18</span>
       </button>
@@ -93,8 +97,57 @@
       </button>
     </nav>
 
+    <!-- Sticky Return Banner when jumping from Roadmap to a deep-linked tool -->
+    <div class="roadmap-return-banner" id="roadmap-return-banner">
+      <div style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.88rem; color: var(--text-main);">
+        <span style="font-size: 1.25rem;">🧭</span>
+        <span id="roadmap-return-text">您剛才從 <strong>【PP 全流程主幹線】</strong> 開啟了此進階互動工具，操作完畢後可隨時返回主幹線繼續查看上下游關聯！</span>
+      </div>
+      <button class="tool-launch-btn" onclick="returnToRoadmap()" style="flex-shrink: 0;">
+        🔙 返回 PP 全流程主幹線導航
+      </button>
+    </div>
+
+    <!-- TAB 0 (Default Home): PP 全流程主幹線導航 (End-to-End Lifecycle Navigator) -->
+    <section class="tab-panel active" id="tab-pp-roadmap" role="tabpanel">
+      <div class="roadmap-hero-card">
+        <div
+          style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2
+              style="font-size: 1.28rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.3rem;">
+              <span>🧭</span>
+              <span>SAP PP 模組全流程因果導航主幹線（從 PIR/接單 ➔ 主檔 ➔ MRP ➔ 工單 ➔ 報工 ➔ TECO）</span>
+            </h2>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55;">
+              順著 PP 業務時間軸走：每一站都清楚標示 <strong>「🟢 現在設什麼（防呆重點＆往後影響）」</strong>、<strong>「🔴 出事時往前檢查哪一步（點擊可一鍵退回上游關卡）」</strong>
+              以及 <strong>「🛠️ 一鍵開啟本站專屬試算器／沙盒」</strong>！
+            </p>
+          </div>
+          <div class="view-mode-toggle-group">
+            <button class="view-mode-btn active" id="btn-roadmap-single" onclick="setRoadmapViewMode('single')">
+              🎯 單站深度檢視 (點選 1~6 站)
+            </button>
+            <button class="view-mode-btn" id="btn-roadmap-all" onclick="setRoadmapViewMode('all')">
+              📜 全流程 1~6 站一頁縱覽
+            </button>
+          </div>
+        </div>
+
+        <!-- 6-Stage Interactive Metro Spine -->
+        <div class="roadmap-metro-bar" id="roadmap-metro-bar">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Stage Content Container -->
+      <div id="roadmap-stage-container">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
     <!-- TAB 1: 秒級急救表 (Cheat Sheet) -->
-    <main class="tab-panel active" id="tab-cheat-sheet" role="tabpanel">
+    <main class="tab-panel" id="tab-cheat-sheet" role="tabpanel">
       <!-- High Alert Emergency Box -->
       <div
         style="background: linear-gradient(135deg, rgba(244,63,94,0.15), rgba(99,102,241,0.15)); border: 1px solid rgba(244,63,94,0.3); border-radius: 14px; padding: 1.15rem 1.35rem; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 1rem;">
@@ -683,11 +736,15 @@
             <div>
               <span style="font-size: 0.8rem; color: var(--text-muted); margin-right: 0.4rem;">快速載入產線範本：</span>
               <div class="preset-pills-row" id="calc-preset-pills" style="display: inline-flex;">
-                <button class="preset-pill active" data-preset="std_1000" onclick="loadCalcPreset('std_1000')">📦 標準 1,000 雙接單預設</button>
+                <button class="preset-pill active" data-preset="std_1000" onclick="loadCalcPreset('std_1000')">📦 標準
+                  1,000 雙接單預設</button>
                 <button class="preset-pill" data-preset="cutting" onclick="loadCalcPreset('cutting')">👞 慢跑鞋裁斷線</button>
-                <button class="preset-pill" data-preset="stitching" onclick="loadCalcPreset('stitching')">🪡 高階針車組</button>
-                <button class="preset-pill" data-preset="assembly" onclick="loadCalcPreset('assembly')">⚙️ 自動化成型線</button>
-                <button class="preset-pill" data-preset="as001_co" onclick="loadCalcPreset('as001_co')">🔎 實戰：成型線 AS001 (117雙/3900分)</button>
+                <button class="preset-pill" data-preset="stitching" onclick="loadCalcPreset('stitching')">🪡
+                  高階針車組</button>
+                <button class="preset-pill" data-preset="assembly" onclick="loadCalcPreset('assembly')">⚙️
+                  自動化成型線</button>
+                <button class="preset-pill" data-preset="as001_co" onclick="loadCalcPreset('as001_co')">🔎 實戰：成型線 AS001
+                  (117雙/3900分)</button>
               </div>
             </div>
           </div>
@@ -695,11 +752,13 @@
           <!-- 頂部即時總覽橫幅 (Sticky Summary Strip) -->
           <div
             style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(99, 102, 241, 0.12)); border: 1px solid rgba(56, 189, 248, 0.32); border-radius: 12px; padding: 0.85rem 1.25rem; margin-bottom: 1.35rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-            <div style="font-size: 0.88rem; color: var(--text-main); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+            <div
+              style="font-size: 0.88rem; color: var(--text-main); font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
               <span>⚡</span>
               <span>流水線即時連動總覽（拉動下方任一滑桿，全站數字同步重算）：</span>
             </div>
-            <div id="pipeline-top-live-banner" style="font-size: 0.84rem; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center;">
+            <div id="pipeline-top-live-banner"
+              style="font-size: 0.84rem; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center;">
               <span>📦 接單：<span class="dyn-num">1,000 雙</span></span>
               <span>➔</span>
               <span>⏱️ 單雙工時：<span class="dyn-num">0.48 分/雙</span></span>
@@ -729,7 +788,8 @@
                   <div class="calc-input-control-row">
                     <input type="number" id="calc-yield" class="calc-number-input" value="1000" min="1" step="100">
                     <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">雙</span>
-                    <input type="range" id="slider-yield" class="calc-range-slider" min="100" max="10000" value="1000" step="100">
+                    <input type="range" id="slider-yield" class="calc-range-slider" min="100" max="10000" value="1000"
+                      step="100">
                   </div>
                 </div>
                 <div class="calc-step-subtotal" id="step1-subtotal">
@@ -740,7 +800,8 @@
               <div class="calc-step-right">
                 <div class="calc-step-meaning" id="note-param-yield">
                   🗣️ <strong>白話文是什麼意思？</strong><br>
-                  代表<strong>「客戶這張訂單總共訂了幾雙鞋（這張工單要做幾雙）」</strong>。目前設定為生產 <span class="dyn-num">1,000 雙</span>；若要與財務 CO 的 <code>CK11N / CK40N</code> 標準成本估算對帳，CO 系統預設也是以 <code>1,000 雙 (1,000 PR)</code> 作為標準批量。
+                  代表<strong>「客戶這張訂單總共訂了幾雙鞋（這張工單要做幾雙）」</strong>。目前設定為生產 <span class="dyn-num">1,000 雙</span>；若要與財務 CO 的
+                  <code>CK11N / CK40N</code> 標準成本估算對帳，CO 系統預設也是以 <code>1,000 雙 (1,000 PR)</code> 作為標準批量。
                 </div>
                 <div class="calc-impact-grid">
                   <div class="calc-impact-box">
@@ -773,29 +834,34 @@
                   <div class="calc-input-control-row">
                     <input type="number" id="calc-af" class="calc-number-input" value="1000" min="1" step="10">
                     <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">雙</span>
-                    <input type="range" id="slider-af" class="calc-range-slider" min="50" max="5000" value="1000" step="10">
+                    <input type="range" id="slider-af" class="calc-range-slider" min="50" max="5000" value="1000"
+                      step="10">
                   </div>
                 </div>
                 <div class="calc-step-subtotal" id="step2-subtotal">
-                  📏 <strong>當站分母設定</strong>：以每產出 <span class="dyn-num">1,000 雙</span> 作為途程計算工時的分母基準（本單 <span class="dyn-num">1,000 雙</span> 相當於 <span class="dyn-num">1.00 個基準批</span>）。
+                  📏 <strong>當站分母設定</strong>：以每產出 <span class="dyn-num">1,000 雙</span> 作為途程計算工時的分母基準（本單 <span
+                    class="dyn-num">1,000 雙</span> 相當於 <span class="dyn-num">1.00 個基準批</span>）。
                 </div>
               </div>
 
               <div class="calc-step-right">
                 <div class="calc-step-meaning" id="note-param-af">
                   🗣️ <strong>白話文是什麼意思？</strong><br>
-                  代表<strong>「計算工時的基準產量（公式裡的分母）」</strong>。因為做 1 雙鞋可能只要幾十秒，在 SAP <code>CA02</code> 途程填小數點太容易錯，所以習慣放大拿「做 <span class="dyn-num">1,000 雙</span> 鞋」當作一個測量單位。
+                  代表<strong>「計算工時的基準產量（公式裡的分母）」</strong>。因為做 1 雙鞋可能只要幾十秒，在 SAP <code>CA02</code> 途程填小數點太容易錯，所以習慣放大拿「做
+                  <span class="dyn-num">1,000 雙</span> 鞋」當作一個測量單位。
                 </div>
                 <div class="calc-impact-grid">
                   <div class="calc-impact-box">
                     <strong style="color: #10b981;">📈 若把基礎數量 AF【調高 ▲】對最後工單的影響：</strong><br>
                     • 代表同樣時間能做更多雙鞋（效率變高）：<br>
-                    • 最後工單的<strong>「單雙工時、總報工工時、排程天數」全部變少 👇</strong>，<strong style="color: #10b981;">CO 產品工費成本變低 👇</strong>
+                    • 最後工單的<strong>「單雙工時、總報工工時、排程天數」全部變少 👇</strong>，<strong style="color: #10b981;">CO 產品工費成本變低
+                      👇</strong>
                   </div>
                   <div class="calc-impact-box">
                     <strong style="color: #f43f5e;">📉 若把基礎數量 AF【調低 ▼】對最後工單的影響：</strong><br>
                     • 代表同樣時間做的鞋子變少（效率變慢）：<br>
-                    • 最後工單的<strong>「單雙工時、總報工工時、排程天數」全部暴增 👆</strong>，<strong style="color: #f43f5e;">CO 產品工費成本飆高 👆</strong>（最常見設錯地雷！）
+                    • 最後工單的<strong>「單雙工時、總報工工時、排程天數」全部暴增 👆</strong>，<strong style="color: #f43f5e;">CO 產品工費成本飆高
+                      👆</strong>（最常見設錯地雷！）
                   </div>
                 </div>
               </div>
@@ -808,8 +874,10 @@
               <div class="calc-step-left">
                 <div>
                   <div class="calc-step-badge-row" style="margin-bottom: 0.45rem;">
-                    <span class="calc-step-num" style="background: rgba(245, 158, 11, 0.18); color: var(--amber);">⏱️ STEP 3：設定途程人工分子</span>
-                    <span class="calc-var-badge" style="background: rgba(245, 158, 11, 0.18); color: var(--amber);">SAP 欄位：直接人工 (AK)</span>
+                    <span class="calc-step-num" style="background: rgba(245, 158, 11, 0.18); color: var(--amber);">⏱️
+                      STEP 3：設定途程人工分子</span>
+                    <span class="calc-var-badge" style="background: rgba(245, 158, 11, 0.18); color: var(--amber);">SAP
+                      欄位：直接人工 (AK)</span>
                   </div>
                   <div class="calc-label" style="font-size: 1rem; margin-bottom: 0.5rem;">
                     工作中心直接人工 (Direct Labor Time - AK)
@@ -817,31 +885,39 @@
                   <div class="calc-input-control-row">
                     <input type="number" id="calc-ak" class="calc-number-input" value="480" min="1" step="30">
                     <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">分鐘</span>
-                    <input type="range" id="slider-ak" class="calc-range-slider" min="30" max="6000" value="480" step="30">
+                    <input type="range" id="slider-ak" class="calc-range-slider" min="30" max="6000" value="480"
+                      step="30">
                   </div>
                 </div>
-                <div class="calc-step-subtotal" id="step3-subtotal" style="border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.08);">
+                <div class="calc-step-subtotal" id="step3-subtotal"
+                  style="border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.08);">
                   ⚡ <strong>走到第 3 步立即算出兩大核心結果</strong>：<br>
-                  • <strong>① 單雙標準工時</strong>：<code>480 ÷ 1,000 =</code> <span class="dyn-num">0.48 分鐘/雙</span>（約 <span class="dyn-num">28.8 秒</span>）<br>
-                  • <strong>② 系統報工總工時 (CO 成本直接依據)</strong>：<code>0.48 × 1,000雙 =</code> <span class="dyn-num">480 分鐘 (8.0 H)</span>
+                  • <strong>① 單雙標準工時</strong>：<code>480 ÷ 1,000 =</code> <span class="dyn-num">0.48 分鐘/雙</span>（約 <span
+                    class="dyn-num">28.8 秒</span>）<br>
+                  • <strong>② 系統報工總工時 (CO 成本直接依據)</strong>：<code>0.48 × 1,000雙 =</code> <span class="dyn-num">480 分鐘
+                    (8.0 H)</span>
                 </div>
               </div>
 
               <div class="calc-step-right">
                 <div class="calc-step-meaning" id="note-param-ak">
                   🗣️ <strong>白話文是什麼意思？</strong><br>
-                  代表<strong>「為了做出上面 STEP 2 那批基礎數量（<span class="dyn-num">1,000 雙</span>），產線所有工人加起來總共要投入幾分鐘的人工（公式裡的分子）」</strong>。走到這一步，SAP 就已經把<strong>「單雙工時」與「整張工單報工總工時（CO 算錢的依據）」100% 算完了</strong>！
+                  代表<strong>「為了做出上面 STEP 2 那批基礎數量（<span class="dyn-num">1,000
+                      雙</span>），產線所有工人加起來總共要投入幾分鐘的人工（公式裡的分子）」</strong>。走到這一步，SAP 就已經把<strong>「單雙工時」與「整張工單報工總工時（CO
+                    算錢的依據）」100% 算完了</strong>！
                 </div>
                 <div class="calc-impact-grid">
                   <div class="calc-impact-box">
                     <strong style="color: #f43f5e;">📈 若把直接人工 AK【調高 ▲】對最後工單的影響：</strong><br>
                     • 代表做這批鞋要花更多人工分鐘數：<br>
-                    • 最後工單的<strong>「單雙工時、系統報工總工時、排程天數」同步變多 👆</strong>，<strong style="color: #f43f5e;">CO 產品工費成本直接飆高 👆</strong>
+                    • 最後工單的<strong>「單雙工時、系統報工總工時、排程天數」同步變多 👆</strong>，<strong style="color: #f43f5e;">CO 產品工費成本直接飆高
+                      👆</strong>
                   </div>
                   <div class="calc-impact-box">
                     <strong style="color: #10b981;">📉 若把直接人工 AK【調低 ▼】對最後工單的影響：</strong><br>
                     • 代表做這批鞋花的人工分鐘數變少：<br>
-                    • 最後工單的<strong>「單雙工時、系統報工總工時、排程天數」同步變少 👇</strong>，<strong style="color: #10b981;">CO 產品工費成本直接降低 👇</strong>
+                    • 最後工單的<strong>「單雙工時、系統報工總工時、排程天數」同步變少 👇</strong>，<strong style="color: #10b981;">CO 產品工費成本直接降低
+                      👇</strong>
                   </div>
                 </div>
               </div>
@@ -854,8 +930,10 @@
               <div class="calc-step-left">
                 <div>
                   <div class="calc-step-badge-row" style="margin-bottom: 0.45rem;">
-                    <span class="calc-step-num" style="background: rgba(16, 185, 129, 0.18); color: var(--emerald);">👥 STEP 4：設定現場並行人數</span>
-                    <span class="calc-var-badge" style="background: rgba(16, 185, 129, 0.18); color: var(--emerald);">SAP 欄位：最大分割數</span>
+                    <span class="calc-step-num" style="background: rgba(16, 185, 129, 0.18); color: var(--emerald);">👥
+                      STEP 4：設定現場並行人數</span>
+                    <span class="calc-var-badge"
+                      style="background: rgba(16, 185, 129, 0.18); color: var(--emerald);">SAP 欄位：最大分割數</span>
                   </div>
                   <div class="calc-label" style="font-size: 1rem; margin-bottom: 0.5rem;">
                     工序配置機台數 / 作業人數 (Splitting)
@@ -863,12 +941,15 @@
                   <div class="calc-input-control-row">
                     <input type="number" id="calc-split" class="calc-number-input" value="5" min="1" max="300" step="1">
                     <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">機台/人</span>
-                    <input type="range" id="slider-split" class="calc-range-slider" min="1" max="120" value="5" step="1">
+                    <input type="range" id="slider-split" class="calc-range-slider" min="1" max="120" value="5"
+                      step="1">
                   </div>
                 </div>
-                <div class="calc-step-subtotal" id="step4-subtotal" style="border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.08);">
+                <div class="calc-step-subtotal" id="step4-subtotal"
+                  style="border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.08);">
                   ⚡ <strong>走到第 4 步立即算出【③ 產線實際排程耗時】</strong>：<br>
-                  • 總報工 <span class="dyn-num">8.0 小時</span> ÷ 現場 <span class="dyn-num">5 機台/人</span> 同時做 ＝ 產線實際只要開機 <span class="dyn-num">1.6 小時</span>！（每 <span class="dyn-num">5.8 秒</span> 產出一雙鞋）
+                  • 總報工 <span class="dyn-num">8.0 小時</span> ÷ 現場 <span class="dyn-num">5 機台/人</span> 同時做 ＝ 產線實際只要開機
+                  <span class="dyn-num">1.6 小時</span>！（每 <span class="dyn-num">5.8 秒</span> 產出一雙鞋）
                 </div>
               </div>
 
@@ -876,7 +957,8 @@
                 <div class="calc-step-meaning" id="note-param-split">
                   🗣️ <strong>白話文是什麼意思？</strong><br>
                   代表<strong>「現場同時有幾個人（或幾台機器）並排一起做這道工序？」</strong><br>
-                  例如這張單總共要花 <span class="dyn-num">8.0 個人工小時</span>，如果只有 1 個人做要花 8 小時；但現場有 <span class="dyn-num">5 個人</span> 同時做，手錶上的時間只要 <span class="dyn-num">1.6 小時</span> 就做完了！
+                  例如這張單總共要花 <span class="dyn-num">8.0 個人工小時</span>，如果只有 1 個人做要花 8 小時；但現場有 <span class="dyn-num">5
+                    個人</span> 同時做，手錶上的時間只要 <span class="dyn-num">1.6 小時</span> 就做完了！
                 </div>
                 <div class="calc-impact-grid">
                   <div class="calc-impact-box">
@@ -886,7 +968,8 @@
                   </div>
                   <div class="calc-impact-box" id="note-param-split-low">
                     <strong style="color: #f43f5e;">📉 若把最大分割數【調低 ▼】對最後工單的影響：</strong><br>
-                    • 最後工單的<strong>「產線排程天數」大幅拉長 👆</strong>（若漏填維持預設 <code>1</code>，排程耗時會暴增 <span class="dyn-num">5 倍</span> 變成 <span class="dyn-num">8.0 小時</span>！）<br>
+                    • 最後工單的<strong>「產線排程天數」大幅拉長 👆</strong>（若漏填維持預設 <code>1</code>，排程耗時會暴增 <span class="dyn-num">5
+                      倍</span> 變成 <span class="dyn-num">8.0 小時</span>！）<br>
                     • ⚠️ <strong style="color: var(--amber);">完全不會改變 CO 產品成本！</strong>
                   </div>
                 </div>
@@ -900,19 +983,24 @@
               <div class="calc-step-left">
                 <div>
                   <div class="calc-step-badge-row" style="margin-bottom: 0.45rem;">
-                    <span class="calc-step-num" style="background: rgba(168, 85, 247, 0.18); color: var(--purple);">🏭 STEP 5：設定工廠每日班制</span>
-                    <span class="calc-var-badge" style="background: rgba(168, 85, 247, 0.18); color: var(--purple);">SAP 欄位：每日工時</span>
+                    <span class="calc-step-num" style="background: rgba(168, 85, 247, 0.18); color: var(--purple);">🏭
+                      STEP 5：設定工廠每日班制</span>
+                    <span class="calc-var-badge" style="background: rgba(168, 85, 247, 0.18); color: var(--purple);">SAP
+                      欄位：每日工時</span>
                   </div>
                   <div class="calc-label" style="font-size: 1rem; margin-bottom: 0.5rem;">
                     產線每日運作班制工時 (Daily Shift Hours)
                   </div>
                   <div class="calc-input-control-row">
-                    <input type="number" id="calc-shift-hours" class="calc-number-input" value="8" min="1" max="24" step="0.5">
+                    <input type="number" id="calc-shift-hours" class="calc-number-input" value="8" min="1" max="24"
+                      step="0.5">
                     <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">小時/天</span>
-                    <input type="range" id="slider-shift-hours" class="calc-range-slider" min="4" max="16" value="8" step="0.5">
+                    <input type="range" id="slider-shift-hours" class="calc-range-slider" min="4" max="16" value="8"
+                      step="0.5">
                   </div>
                 </div>
-                <div class="calc-step-subtotal" id="step5-subtotal" style="border-color: rgba(168, 85, 247, 0.35); background: rgba(168, 85, 247, 0.08);">
+                <div class="calc-step-subtotal" id="step5-subtotal"
+                  style="border-color: rgba(168, 85, 247, 0.35); background: rgba(168, 85, 247, 0.08);">
                   🏁 <strong>走到第 5 步算出【④ 最終排程天數 ＆ 每日極限產能】</strong>：<br>
                   • <strong>預估排程工作天數</strong>：<code>1.6 H ÷ 每天 8 H =</code> <span class="dyn-num">0.20 工作天</span><br>
                   • <strong>產線每日極限產能</strong>：<span class="dyn-num">5,000 雙 / 天</span>（生管驗證途程最佳指標！）
@@ -923,7 +1011,8 @@
                 <div class="calc-step-meaning" id="note-param-shift">
                   🗣️ <strong>白話文是什麼意思？</strong><br>
                   代表<strong>「這條產線一天正常開機工作幾個小時（例如正常班 8 小時、加班 10 小時）？」</strong><br>
-                  把 STEP 4 算出的產線實際開機耗時（<span class="dyn-num">1.6 小時</span>）除以每天上班時數（<span class="dyn-num">8 小時</span>），就得到這張工單最後需要排程 <span class="dyn-num">0.20 個工作天</span>！
+                  把 STEP 4 算出的產線實際開機耗時（<span class="dyn-num">1.6 小時</span>）除以每天上班時數（<span class="dyn-num">8
+                    小時</span>），就得到這張工單最後需要排程 <span class="dyn-num">0.20 個工作天</span>！
                 </div>
                 <div class="calc-impact-grid">
                   <div class="calc-impact-box">
@@ -944,8 +1033,10 @@
 
           <!-- ==================== 流水線終點：最終工單 4 大產出結果看板 ==================== -->
           <div style="border-top: 2px solid var(--border-subtle); padding-top: 1.5rem; margin-top: 0.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-              <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+              <h3
+                style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
                 <span>🏁</span>
                 <span>流水線終點：最終工單 4 大計算結果總覽看板</span>
               </h3>
@@ -953,7 +1044,8 @@
             </div>
 
             <!-- 4 KPI Cards Row -->
-            <div class="kpi-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 1.25rem;">
+            <div class="kpi-cards-grid"
+              style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 1.25rem;">
               <!-- KPI 1: 單雙標準工時 -->
               <div class="kpi-card">
                 <div class="kpi-title">① 單雙標準作業工時 (Cycle Time)</div>
@@ -962,8 +1054,11 @@
                   <span class="kpi-unit">分鐘 / 雙</span>
                 </div>
                 <div class="kpi-subtext" id="kpi-cycle-sec">約 28.8 秒 / 雙 (單人累計) ｜ 產線節拍約 5.8 秒 / 雙</div>
-                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed var(--border-subtle); line-height: 1.5;" id="note-kpi-1">
-                  • <strong>由 STEP 2 &amp; 3 決定</strong>：<code>480分 ÷ 1,000雙 =</code> <span class="dyn-num">0.48 分/雙</span>
+                <div
+                  style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed var(--border-subtle); line-height: 1.5;"
+                  id="note-kpi-1">
+                  • <strong>由 STEP 2 &amp; 3 決定</strong>：<code>480分 ÷ 1,000雙 =</code> <span class="dyn-num">0.48
+                    分/雙</span>
                 </div>
               </div>
 
@@ -975,7 +1070,9 @@
                   <span class="kpi-unit">分鐘</span>
                 </div>
                 <div class="kpi-subtext" id="kpi-total-hours">累計 8.0 人工工時 (Man-hours)</div>
-                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed var(--border-subtle); line-height: 1.5;" id="note-kpi-2">
+                <div
+                  style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed var(--border-subtle); line-height: 1.5;"
+                  id="note-kpi-2">
                   • <strong>由 STEP 1～3 決定</strong>：SAP 認列總人工工時（不受人數與班制影響）
                 </div>
               </div>
@@ -988,7 +1085,9 @@
                   <span class="kpi-unit">小時</span>
                 </div>
                 <div class="kpi-subtext" id="kpi-lead-split-desc">已透過 5 台機台/人員分割並行加速</div>
-                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed var(--border-subtle); line-height: 1.5;" id="note-kpi-3">
+                <div
+                  style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed var(--border-subtle); line-height: 1.5;"
+                  id="note-kpi-3">
                   • <strong>由 STEP 4 並行加速</strong>：產線實際需要開線運轉的手錶時間
                 </div>
               </div>
@@ -1001,7 +1100,9 @@
                   <span class="kpi-unit">工作天</span>
                 </div>
                 <div class="kpi-subtext" id="kpi-daily-capacity">每日極限產能：5,000 雙 / 天</div>
-                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed var(--border-subtle); line-height: 1.5;" id="note-kpi-4">
+                <div
+                  style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed var(--border-subtle); line-height: 1.5;"
+                  id="note-kpi-4">
                   • <strong>由 STEP 5 換算</strong>：問現場組長日產量是否吻合，3 秒驗證途程！
                 </div>
               </div>
@@ -1011,10 +1112,12 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1rem;">
               <div class="formula-card" id="formula-card-content" style="margin: 0;">
                 <strong style="color: var(--primary);">📐 手冊標準計算公式即時驗證：</strong><br>
-                1. <strong>系統報工工時</strong> = (AK ÷ AF) × 報工量 = (480 ÷ 1,000) × 1,000 = <strong>480 分鐘 (8.0 H)</strong><br>
+                1. <strong>系統報工工時</strong> = (AK ÷ AF) × 報工量 = (480 ÷ 1,000) × 1,000 = <strong>480 分鐘 (8.0
+                  H)</strong><br>
                 2. <strong>產線排程實際耗時</strong> = 總作業工時 ÷ 最大分割數 = 8.0 小時 ÷ 5 = <strong>1.6 小時</strong><br>
                 3. <strong>排程天數</strong> = 1.6 小時 ÷ 8 小時/天 = <strong>0.20 天</strong><br>
-                4. <strong style="color: var(--amber);">CO 成本估算 (CK40N 批量 1,000 PR) 標準工時</strong> = (480 ÷ 1,000) × 1,000 ÷ 60 = <strong>8.000 H (小時)</strong>
+                4. <strong style="color: var(--amber);">CO 成本估算 (CK40N 批量 1,000 PR) 標準工時</strong> = (480 ÷ 1,000) ×
+                1,000 ÷ 60 = <strong>8.000 H (小時)</strong>
               </div>
 
               <div
@@ -1025,8 +1128,10 @@
                 <div>
                   💰 <code>產品工費成本 = ① 途程標準工時 (PP CA02) × ② 每小時工資率 (CO KP26)</code><br>
                   <span id="note-co-summary-steps">
-                    • <strong>Step 1 看日產能</strong>：目前算出日產能為 <span class="dyn-num">5,000 雙/天</span>，只要符合現場實際日產量，代表 <strong>生管途程 100% 沒設錯</strong>！<br>
-                    • <strong>Step 2 對照 CK40N</strong>：千雙標準工時為 <span class="dyn-num">8.000 H</span>，若工時合理但成本過高，即代表 <strong>CO 在 <code>KP26</code> 將每小時工資率設太高了</strong>！
+                    • <strong>Step 1 看日產能</strong>：目前算出日產能為 <span class="dyn-num">5,000 雙/天</span>，只要符合現場實際日產量，代表
+                    <strong>生管途程 100% 沒設錯</strong>！<br>
+                    • <strong>Step 2 對照 CK40N</strong>：千雙標準工時為 <span class="dyn-num">8.000 H</span>，若工時合理但成本過高，即代表
+                    <strong>CO 在 <code>KP26</code> 將每小時工資率設太高了</strong>！
                   </span>
                 </div>
               </div>
@@ -1295,8 +1400,8 @@
   <div class="toast" id="app-toast">⚡ 已複製交易碼至剪貼簿</div>
 
   <!-- Data & Script Bundle (Supports both file:// offline launch & web server) -->
-  <script src="data/knowledge_loader.js?v=16"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="data/knowledge_loader.js?v=18"></script>
+  <script src="js/app.js?v=18"></script>
 </body>
 
 </html>
