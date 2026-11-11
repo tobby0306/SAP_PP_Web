@@ -149,6 +149,22 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       ` : '';
 
+      const stageLinks = (window.ISSUE_STAGE_MAP && window.ISSUE_STAGE_MAP[issue.id]) || [];
+      const stageChipsHtml = stageLinks.length > 0 ? `
+        <div style="margin-top: 0.75rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-subtle);">
+          <div style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.38rem;">
+            🧭 所屬 PP 全流程主幹線階段（點擊可切換至該流程站點）：
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+            ${stageLinks.map(st => `
+              <button class="pill-btn" style="font-size: 0.75rem; padding: 0.22rem 0.6rem; border-radius: 6px;" onclick="window.jumpFromIssueToRoadmap('${st.stageId}')">
+                📍 ${st.stageTitle} ${st.roleTag ? `<span style="opacity:0.85;">(${st.roleTag})</span>` : ''} ➔
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
       return `
         <div class="issue-card severity-${issue.severity}" id="issue-${issue.id}">
           <div class="card-header">
@@ -177,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </ul>
 
           ${forbiddenHtml}
+          ${stageChipsHtml}
 
           <div class="card-footer">
             <span class="owner-tag">👤 責任單位：${issue.raci_owner}</span>
@@ -3260,8 +3277,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       ],
       tools: [
-        { label: '🌳 開啟「MRP 展開異常 6 步排查樹」', tab: 'tab-decision-trees', subTarget: 'mrp_tree' },
-        { label: '🗺️ 查看「2.1 長期規劃 PIR」完整 T-Code 循序圖', tab: 'tab-tcode-directory', subTarget: 'scene_ltp_pir' }
+        { label: '🌳 開啟「MRP 展開異常 6 步排查樹」', tab: 'tab-decision-tree', subTarget: 'mrp_tree' },
+        { label: '🗺️ 查看「2.1 長期規劃 PIR」完整 T-Code 循序圖', tab: 'tab-tcode-dictionary', subTarget: 'scene_ltp_pir' }
       ]
     },
     {
@@ -3335,7 +3352,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tools: [
         { label: '🧮 開啟「1,000 雙接單 ➔ 途程 5 階流水線試算器」', tab: 'tab-order-matrix', subTarget: 'subtab-routing-calc' },
         { label: '🎛️ 開啟「途程控制碼 PP01~PP08 連動模擬器」', tab: 'tab-order-matrix', subTarget: 'subtab-control-sim' },
-        { label: '🌳 開啟「委外 541 調撥與 PR 排查決策樹」', tab: 'tab-decision-trees', subTarget: 'subcon_tree' }
+        { label: '🌳 開啟「委外 541 調撥與 PR 排查決策樹」', tab: 'tab-decision-tree', subTarget: 'subcon_tree' }
       ]
     },
     {
@@ -3420,7 +3437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       ],
       tools: [
-        { label: '🌳 開啟「MRP 展開異常 6 步排查決策樹」', tab: 'tab-decision-trees', subTarget: 'mrp_tree' },
+        { label: '🌳 開啟「MRP 展開異常 6 步排查決策樹」', tab: 'tab-decision-tree', subTarget: 'mrp_tree' },
         { label: '🚨 查看「ZPPQ02 漏加 * 號 / BOM 九宮格漏碼」秒級急救卡', tab: 'tab-cheat-sheet', subTarget: 'MRP' }
       ]
     },
@@ -3632,18 +3649,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       ],
       tools: [
-        { label: '✅ 開啟「月結 TECO 四重防呆互動自檢表」', tab: 'tab-teco-checklist', subTarget: null },
+        { label: '✅ 開啟「月結 TECO 四重防呆互動自檢表」', tab: 'tab-audit-checklist', subTarget: null },
         { label: '🔬 開啟「工單 7 維度診斷器 — 檢視 TECO 阻擋案例」', tab: 'tab-wo-inspector', subTarget: 'WO_COGI_BLOCKED' },
-        { label: '🌳 開啟「月結 TECO 前置異常排查決策樹」', tab: 'tab-decision-trees', subTarget: 'teco_tree' }
+        { label: '🌳 開啟「月結 TECO 前置異常排查決策樹」', tab: 'tab-decision-tree', subTarget: 'teco_tree' }
       ]
     }
   ];
 
-function renderRoadmapStageHtml(stage, idx, total) {
-  const prevStage = idx > 0 ? ppRoadmapStages[idx - 1] : null;
-  const nextStage = idx < total - 1 ? ppRoadmapStages[idx + 1] : null;
+  function renderRoadmapStageHtml(stage, idx, total) {
+    const prevStage = idx > 0 ? ppRoadmapStages[idx - 1] : null;
+    const nextStage = idx < total - 1 ? ppRoadmapStages[idx + 1] : null;
 
-  const checkpointsHtml = stage.checkpoints.map(chk => `
+    const checkpointsHtml = stage.checkpoints.map(chk => `
       <div class="roadmap-check-item" id="check-${chk.id}">
         <div class="check-item-top">
           <div class="check-item-title">
@@ -3659,7 +3676,7 @@ function renderRoadmapStageHtml(stage, idx, total) {
       </div>
     `).join('');
 
-  const tracebacksHtml = stage.tracebacks.map(tb => `
+    const tracebacksHtml = stage.tracebacks.map(tb => `
       <div class="trace-back-card">
         <div class="trace-symptom">🚨 異常現象：${tb.symptom}</div>
         <div class="trace-cause">🔍 根因定位：${tb.cause}</div>
@@ -3669,13 +3686,44 @@ function renderRoadmapStageHtml(stage, idx, total) {
       </div>
     `).join('');
 
-  const toolsHtml = stage.tools.map(tl => `
+    // Render Emergency Cards (秒級急救表 18 張) linked to this stage
+    const stageIssues = (stageEmergencyMap[stage.id] || []).map(item => {
+      const issueObj = (knowledge.issues || []).find(i => i.id === item.id);
+      if (!issueObj) return '';
+      const sevClass = issueObj.severity === 'CRITICAL' ? 'badge-danger' : issueObj.severity === 'HIGH' ? 'badge-warning' : 'badge-info';
+      return `
+      <button class="roadmap-emergency-pill" onclick="window.jumpFromRoadmapToIssue('${stage.id}', '${issueObj.id}')" title="點擊直接跳至【🚨 秒級急救表】查看 ${issueObj.id} 發生原因與處理步驟">
+        <div class="emergency-pill-top">
+          <span class="badge ${sevClass}" style="font-family:var(--font-mono); font-size:0.72rem; padding:0.12rem 0.45rem;">🚨 ${issueObj.id}</span>
+          <span class="emergency-pill-tcode">${issueObj.trigger_tcode.join(' / ')}</span>
+          ${item.crossNote ? `<span class="emergency-cross-tag">🔄 ${item.crossNote}</span>` : ''}
+        </div>
+        <div class="emergency-pill-title">
+          <span>${issueObj.title}</span>
+          <span class="emergency-pill-arrow">急救詳解 ➔</span>
+        </div>
+      </button>
+    `;
+    }).join('');
+
+    // Render Scenario Flows (業務情境循序圖 13 景) linked to this stage
+    const stageScenarios = (stageScenarioMap[stage.id] || []).map(scId => {
+      const scObj = (knowledge.scenario_flows || []).find(s => s.id === scId);
+      if (!scObj) return '';
+      return `
+      <button class="pill-btn" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; border-radius: 8px;" onclick="window.jumpFromRoadmapToTool('${stage.id}', 'tab-tcode-dictionary', '${scObj.id}')" title="點擊切換至此業務情境 T-Code 循序圖">
+        📍 ${scObj.title} (${scObj.steps.length} 步) ➔
+      </button>
+    `;
+    }).join('');
+
+    const toolsHtml = stage.tools.map(tl => `
       <button class="tool-launch-btn" onclick="window.jumpFromRoadmapToTool('${stage.id}', '${tl.tab}', '${tl.subTarget || ''}')">
         ${tl.label} <span>➔</span>
       </button>
     `).join('');
 
-  return `
+    return `
       <div class="roadmap-stage-card" id="roadmap-card-${stage.id}" style="margin-bottom: 1.5rem;">
         <div class="stage-card-header">
           <div>
@@ -3715,23 +3763,171 @@ function renderRoadmapStageHtml(stage, idx, total) {
           </div>
         </div>
 
+        <!-- 🚨 Emergency Cheat Sheet Direct Links (秒級急救法直達區) -->
+        <div class="roadmap-emergency-box">
+          <div class="roadmap-emergency-header">
+            <span>🚨 本站關聯「秒級急救卡」直達區（點擊直接跳至【秒級急救表】看發生原因與處理步驟，含 🔄 跨階段共用標記）：</span>
+          </div>
+          <div class="roadmap-emergency-grid">
+            ${stageIssues}
+          </div>
+        </div>
+
+        <!-- 🗺️ Scenario Flow Direct Links (業務情境 T-Code 循序圖直達區) -->
+        <div class="roadmap-tools-bar" style="margin-top: 0.85rem; padding-top: 0.85rem;">
+          <span class="roadmap-tools-label">🗺️ 本站對應「業務情境 T-Code 循序圖」：</span>
+          <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+            ${stageScenarios}
+          </div>
+        </div>
+
+        <!-- 🛠️ Interactive Simulators & Calculators -->
         <div class="roadmap-tools-bar">
           <span class="roadmap-tools-label">🛠️ 本站專屬互動工具箱（點擊直達模擬器，上方會保留「返回主幹線」按鈕）：</span>
           ${toolsHtml}
         </div>
       </div>
     `;
-}
+  }
 
-function renderPpRoadmap() {
-  const metroBar = document.getElementById('roadmap-metro-bar');
-  const stageContainer = document.getElementById('roadmap-stage-container');
-  if (!metroBar || !stageContainer) return;
+  // ==========================================================================
+  // 18 Emergency Issues (E001~E_SUB_541_LACK) & 13 Scenarios <-> 6 Stages Mapping
+  // ==========================================================================
+  const stageEmergencyMap = {
+    STAGE_1: [
+      { id: 'E001', crossNote: '跨 Stage 1 訂單狀態 ⇄ Stage 4/5 開單領料' },
+      { id: 'E002', crossNote: '跨 Stage 1 SO 九宮格尺碼 ⇄ Stage 4 開單上傳' },
+      { id: 'E003', crossNote: '跨 Stage 1 SO 訂購數/挪單 ⇄ Stage 4 開單防超開' },
+      { id: 'E006', crossNote: '跨 Stage 1/2 物料工廠擴展 ⇄ Stage 5 改單補料' }
+    ],
+    STAGE_2: [
+      { id: 'E006', crossNote: '跨 Stage 2 BOM 建置 ⇄ Stage 5 改單補料' },
+      { id: 'VA_BOM_DECOUPLED', crossNote: '跨 Stage 2 BOM 九宮格種因 ➔ Stage 3 MRP 漏料' },
+      { id: 'E008', crossNote: '跨 Stage 2 虛擬階設定 ➔ Stage 5 領料阻擋' },
+      { id: 'E_SUB_NO_ME11', crossNote: '跨 Stage 2 委外資訊記錄種因 ➔ Stage 4 釋放無 PR' },
+      { id: 'DEFAULT_ROUTING_ERR', crossNote: '跨 Stage 2 生產版本日期種因 ➔ Stage 4 轉工單報錯' }
+    ],
+    STAGE_3: [
+      { id: 'VA_BOM_DECOUPLED', crossNote: 'Stage 3 MRP 展不出子階料 🔙 根因於 Stage 2 九宮格' },
+      { id: 'DEFAULT_ROUTING_ERR', crossNote: 'Stage 3/4 計畫單轉單報錯 🔙 根因於 Stage 2 C223 日期' }
+    ],
+    STAGE_4: [
+      { id: 'E001', crossNote: '跨 Stage 4 開單查無單 ⇄ Stage 1 SO 刪除/封鎖' },
+      { id: 'E002', crossNote: '跨 Stage 4 ZPP015 開單 ⇄ Stage 1 SO 尺碼矩陣' },
+      { id: 'E003', crossNote: '跨 Stage 4 超開工單阻擋 ⇄ Stage 1 SO 數量變更' },
+      { id: 'DEFAULT_ROUTING_ERR', crossNote: 'Stage 4 轉單噴錯 🔙 根因於 Stage 2 C223 生效日' },
+      { id: 'E_SUB_NO_ME11', crossNote: 'Stage 4 釋放無委外 PR 🔙 根因於 Stage 2 ME11 漏建' },
+      { id: 'E007', crossNote: '跨 Stage 4 工單異動 ⇄ Stage 5 改單 SM12 鎖定' }
+    ],
+    STAGE_5: [
+      { id: 'E005', crossNote: null },
+      { id: 'MISSING_FIRST_PROC', crossNote: 'Stage 5 領料無法拆單 🔙 忌用 CO02 手改脫離 BOM' },
+      { id: 'LOCK_ZMMT046', crossNote: null },
+      { id: 'E008', crossNote: 'Stage 5 ZPP020 禁發虛擬階 🔙 根因於 Stage 2 SOBSL=50' },
+      { id: 'E009', crossNote: null },
+      { id: 'E023', crossNote: null },
+      { id: 'RET_ZMM047_FAIL', crossNote: '跨 Stage 5 退料過帳 ⇄ Stage 6 工單已 TECO 阻擋' },
+      { id: 'E_SUB_541_LACK', crossNote: null },
+      { id: 'E011', crossNote: '跨 Stage 5 報工反沖失敗 ➔ Stage 6 月結 COGI 必清' },
+      { id: 'E007', crossNote: '跨 Stage 4/5 多人或排程同時異動工單 SM12 鎖定' },
+      { id: 'E001', crossNote: '跨 Stage 5 ZPP020 領料查無單 ⇄ Stage 1/4 單號檢核' },
+      { id: 'E006', crossNote: '跨 Stage 5 ZPP010/ZPP022 改單補料 🔙 料號未擴廠' }
+    ],
+    STAGE_6: [
+      { id: 'E011', crossNote: '跨 Stage 6 月結前 COGI 必清零 🔙 源於 Stage 5 報工扣料異常' },
+      { id: 'E010', crossNote: '跨 Stage 6 TECO 結案控管 ⇄ Stage 5 現場補領退料阻擋' },
+      { id: 'RET_ZMM047_FAIL', crossNote: '跨 Stage 6 已壓 TECO 阻擋 ⇄ Stage 5 ZMM047 退料失敗' }
+    ]
+  };
 
-  // 1. Render 6-Stage Metro Bar
-  metroBar.innerHTML = ppRoadmapStages.map(st => {
-    const isActive = state.roadmapViewMode === 'single' && state.activeRoadmapStage === st.id;
-    return `
+  const stageScenarioMap = {
+    STAGE_1: ['scene_mto_demand', 'scene_pir_ltp', 'scene_order_transfer'],
+    STAGE_2: ['scene_master_data'],
+    STAGE_3: ['scene_mto_demand', 'scene_pir_ltp'],
+    STAGE_4: ['scene_wo_release', 'scene_packing_vas', 'scene_order_transfer'],
+    STAGE_5: ['scene_gi_pick', 'scene_return_ecn', 'scene_scrap_order', 'scene_subcontract', 'scene_confirmation_gr', 'scene_cancel_conf'],
+    STAGE_6: ['scene_month_end_teco']
+  };
+
+  // Build reverse lookup map (Issue ID -> Array of { stageId, stageTitle, roleTag })
+  window.ISSUE_STAGE_MAP = {};
+  Object.keys(stageEmergencyMap).forEach(stId => {
+    const stObj = ppRoadmapStages.find(s => s.id === stId);
+    if (!stObj) return;
+    stageEmergencyMap[stId].forEach(entry => {
+      if (!window.ISSUE_STAGE_MAP[entry.id]) window.ISSUE_STAGE_MAP[entry.id] = [];
+      window.ISSUE_STAGE_MAP[entry.id].push({
+        stageId: stId,
+        stageTitle: stObj.shortTitle,
+        roleTag: entry.crossNote ? '跨站關聯' : '主發生站'
+      });
+    });
+  });
+
+  window.jumpFromRoadmapToIssue = (fromStageId, issueId) => {
+    state.roadmapReturnStage = fromStageId;
+    const stageObj = ppRoadmapStages.find(s => s.id === fromStageId);
+
+    // Switch to Cheat Sheet Tab
+    const tabBtn = document.getElementById('tab-btn-cheat-sheet');
+    if (tabBtn) tabBtn.click();
+
+    // Show sticky return banner
+    const returnBanner = document.getElementById('roadmap-return-banner');
+    const returnStageText = document.getElementById('roadmap-return-text');
+    if (returnBanner) {
+      if (returnStageText && stageObj) {
+        returnStageText.innerHTML = `您剛才從 <strong>【PP 全流程主幹線 — ${stageObj.shortTitle}】</strong> 點選了急救代碼 <code>${issueId}</code>，查看完發生原因與處理方法後可隨時返回主幹線！`;
+      }
+      returnBanner.classList.add('show');
+    }
+
+    // Ensure all issues are visible so user can see the target card in context and scroll to it
+    state.cheatCategory = 'ALL';
+    state.cheatQuery = '';
+    const cheatInput = document.getElementById('cheat-search-input');
+    if (cheatInput) cheatInput.value = '';
+    const filterPills = document.getElementById('filter-pills');
+    if (filterPills) {
+      filterPills.querySelectorAll('.pill-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.includes('全部'));
+      });
+    }
+    renderIssues();
+
+    setTimeout(() => {
+      const el = document.getElementById(`issue-${issueId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.remove('pulse-highlight');
+        void el.offsetWidth;
+        el.classList.add('pulse-highlight');
+        showToast(`🚨 已為您定位至秒級急救卡：${issueId}`);
+      }
+    }, 60);
+  };
+
+  window.jumpFromIssueToRoadmap = (targetStageId) => {
+    const returnBanner = document.getElementById('roadmap-return-banner');
+    if (returnBanner) returnBanner.classList.remove('show');
+
+    const roadmapTabBtn = document.getElementById('tab-btn-pp-roadmap');
+    if (roadmapTabBtn) roadmapTabBtn.click();
+
+    window.selectRoadmapStage(targetStageId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast(`🧭 已切換至主幹線：${targetStageId.replace('_', ' ')}`);
+  };
+
+  function renderPpRoadmap() {
+    const metroBar = document.getElementById('roadmap-metro-bar');
+    const stageContainer = document.getElementById('roadmap-stage-container');
+    if (!metroBar || !stageContainer) return;
+
+    // 1. Render 6-Stage Metro Bar
+    metroBar.innerHTML = ppRoadmapStages.map(st => {
+      const isActive = state.roadmapViewMode === 'single' && state.activeRoadmapStage === st.id;
+      return `
         <button class="metro-node-btn ${isActive ? 'active' : ''}" onclick="window.selectRoadmapStage('${st.id}')">
           <div class="metro-node-top">
             <span class="metro-stage-num">${st.num}</span>
@@ -3741,129 +3937,165 @@ function renderPpRoadmap() {
           <div class="metro-stage-sub">${st.shortSub}</div>
         </button>
       `;
-  }).join('');
+    }).join('');
 
-  // 2. Render Stage Content (Single active stage or All 6 stages)
-  if (state.roadmapViewMode === 'all') {
-    stageContainer.innerHTML = ppRoadmapStages.map((st, i) => renderRoadmapStageHtml(st, i, ppRoadmapStages.length)).join('');
-  } else {
-    const idx = ppRoadmapStages.findIndex(s => s.id === state.activeRoadmapStage);
-    const activeIdx = idx >= 0 ? idx : 0;
-    stageContainer.innerHTML = renderRoadmapStageHtml(ppRoadmapStages[activeIdx], activeIdx, ppRoadmapStages.length);
-  }
-}
-
-window.selectRoadmapStage = (stageId) => {
-  state.activeRoadmapStage = stageId;
-  state.roadmapReturnStage = stageId;
-  if (state.roadmapViewMode === 'all') {
-    const card = document.getElementById(`roadmap-card-${stageId}`);
-    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return;
-  }
-  renderPpRoadmap();
-};
-
-window.setRoadmapViewMode = (mode) => {
-  state.roadmapViewMode = mode;
-  const btnSingle = document.getElementById('btn-roadmap-single');
-  const btnAll = document.getElementById('btn-roadmap-all');
-  if (btnSingle && btnAll) {
-    btnSingle.classList.toggle('active', mode === 'single');
-    btnAll.classList.toggle('active', mode === 'all');
-  }
-  renderPpRoadmap();
-};
-
-window.traceBackToStage = (targetStageId, targetCheckId) => {
-  state.activeRoadmapStage = targetStageId;
-  state.roadmapReturnStage = targetStageId;
-  renderPpRoadmap();
-
-  setTimeout(() => {
-    const checkEl = document.getElementById(`check-${targetCheckId}`);
-    if (checkEl) {
-      checkEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      checkEl.classList.remove('pulse-highlight');
-      void checkEl.offsetWidth; // Force reflow for animation restart
-      checkEl.classList.add('pulse-highlight');
-      showToast(`🎯 已為您定位至源頭檢查點：${targetCheckId.replace('_', ' ')}`);
+    // 2. Render Stage Content (Single active stage or All 6 stages)
+    if (state.roadmapViewMode === 'all') {
+      stageContainer.innerHTML = ppRoadmapStages.map((st, i) => renderRoadmapStageHtml(st, i, ppRoadmapStages.length)).join('');
+    } else {
+      const idx = ppRoadmapStages.findIndex(s => s.id === state.activeRoadmapStage);
+      const activeIdx = idx >= 0 ? idx : 0;
+      stageContainer.innerHTML = renderRoadmapStageHtml(ppRoadmapStages[activeIdx], activeIdx, ppRoadmapStages.length);
     }
-  }, 60);
-};
-
-window.jumpFromRoadmapToTool = (fromStageId, targetTabId, subTarget) => {
-  state.roadmapReturnStage = fromStageId;
-  const stageObj = ppRoadmapStages.find(s => s.id === fromStageId);
-
-  // Switch top tab
-  const tabBtn = document.querySelector(`.tab-btn[data-tab="${targetTabId}"]`);
-  if (tabBtn) tabBtn.click();
-
-  // Show sticky return banner
-  const returnBanner = document.getElementById('roadmap-return-banner');
-  const returnStageText = document.getElementById('roadmap-return-stage-name');
-  if (returnBanner) {
-    if (returnStageText && stageObj) {
-      returnStageText.textContent = `您剛才正在瀏覽【${stageObj.shortTitle}】`;
-    }
-    returnBanner.classList.add('show');
   }
 
-  // Activate specific sub-tool inside the target tab
-  setTimeout(() => {
-    if (targetTabId === 'tab-decision-trees' && subTarget) {
-      if (typeof window.switchTree === 'function') window.switchTree(subTarget);
-    } else if (targetTabId === 'tab-order-matrix' && subTarget) {
-      if (subTarget === 'subtab-e005-sandbox' || subTarget === 'subtab-subcon-sandbox') {
-        if (typeof window.switchLabSubtab === 'function') window.switchLabSubtab('subtab-control-sim');
-        const targetBoxId = subTarget === 'subtab-e005-sandbox' ? 'state-sim-result' : 'subcon-sim-result';
-        const box = document.getElementById(targetBoxId);
-        if (box) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else if (typeof window.switchLabSubtab === 'function') {
-        window.switchLabSubtab(subTarget);
+  window.selectRoadmapStage = (stageId) => {
+    state.activeRoadmapStage = stageId;
+    state.roadmapReturnStage = stageId;
+    if (state.roadmapViewMode === 'all') {
+      const card = document.getElementById(`roadmap-card-${stageId}`);
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    renderPpRoadmap();
+  };
+
+  window.setRoadmapViewMode = (mode) => {
+    state.roadmapViewMode = mode;
+    const btnSingle = document.getElementById('btn-roadmap-single');
+    const btnAll = document.getElementById('btn-roadmap-all');
+    if (btnSingle && btnAll) {
+      btnSingle.classList.toggle('active', mode === 'single');
+      btnAll.classList.toggle('active', mode === 'all');
+    }
+    renderPpRoadmap();
+  };
+
+  window.traceBackToStage = (targetStageId, targetCheckId) => {
+    state.activeRoadmapStage = targetStageId;
+    state.roadmapReturnStage = targetStageId;
+    renderPpRoadmap();
+
+    setTimeout(() => {
+      const checkEl = document.getElementById(`check-${targetCheckId}`);
+      if (checkEl) {
+        checkEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        checkEl.classList.remove('pulse-highlight');
+        void checkEl.offsetWidth; // Force reflow for animation restart
+        checkEl.classList.add('pulse-highlight');
+        showToast(`🎯 已為您定位至源頭檢查點：${targetCheckId.replace('_', ' ')}`);
       }
-    } else if (targetTabId === 'tab-wo-inspector' && subTarget) {
-      if (typeof window.selectWoPreset === 'function') window.selectWoPreset(subTarget);
-    } else if (targetTabId === 'tab-tcode-directory' && subTarget) {
-      if (typeof window.selectScenarioFlow === 'function') window.selectScenarioFlow(subTarget);
-    } else if (targetTabId === 'tab-cheat-sheet' && subTarget) {
-      if (typeof window.filterByCategory === 'function') window.filterByCategory(subTarget);
+    }, 60);
+  };
+
+  window.openInteractiveTool = (targetTabId) => {
+    const roadmapTabBtn = document.getElementById('tab-btn-pp-roadmap');
+    const stageObj = ppRoadmapStages.find(s => s.id === state.activeRoadmapStage);
+
+    // Switch top tab directly to the target tab panel
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(b => b.classList.remove('active'));
+    tabPanels.forEach(p => p.classList.remove('active'));
+
+    const panel = document.getElementById(targetTabId);
+    if (panel) panel.classList.add('active');
+    state.activeTab = targetTabId;
+
+    // Show sticky return banner
+    const returnBanner = document.getElementById('roadmap-return-banner');
+    const returnStageText = document.getElementById('roadmap-return-text');
+    if (returnBanner) {
+      if (returnStageText && stageObj) {
+        returnStageText.innerHTML = `您剛才從 <strong>【PP 全流程主幹線 — ${stageObj.shortTitle}】</strong> 開啟了此互動工具，操作完畢後可隨時返回主幹線！`;
+      }
+      returnBanner.classList.add('show');
     }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 50);
-};
+  };
 
-window.returnToRoadmap = () => {
-  const returnBanner = document.getElementById('roadmap-return-banner');
-  if (returnBanner) returnBanner.classList.remove('show');
+  window.jumpFromRoadmapToTool = (fromStageId, targetTabId, subTarget) => {
+    state.roadmapReturnStage = fromStageId;
+    const stageObj = ppRoadmapStages.find(s => s.id === fromStageId);
 
-  const roadmapTabBtn = document.getElementById('tab-btn-pp-roadmap');
-  if (roadmapTabBtn) roadmapTabBtn.click();
+    // Switch top tab (whether in navbar or opened programmatically)
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(b => b.classList.remove('active'));
+    tabPanels.forEach(p => p.classList.remove('active'));
 
-  if (state.roadmapReturnStage) {
-    window.selectRoadmapStage(state.roadmapReturnStage);
-  }
-};
+    const navTabBtn = document.querySelector(`.tab-btn[data-tab="${targetTabId}"]`);
+    if (navTabBtn) navTabBtn.classList.add('active');
 
-// Initial Renders
-renderPpRoadmap();
-renderIssues();
-renderDecisionTree();
-renderOrderMatrix();
-renderControlKeys();
-renderChecklist();
-renderRaci();
-renderTcodes();
-renderScenarioFlows();
-updateCalculations();
-renderRecommender();
-renderRoutingPipeline();
-simulateAction('ACTION_STATE_INSPECT');
-simulateSubAction('ACT_SUB_INSPECT');
-renderWoInspector();
+    const panel = document.getElementById(targetTabId);
+    if (panel) panel.classList.add('active');
+    state.activeTab = targetTabId;
 
-console.log("SAP PP Go-Live Interactive Triage Suite ready with Module 10 WO Lifecycle Inspector.");
+    // Show sticky return banner
+    const returnBanner = document.getElementById('roadmap-return-banner');
+    const returnStageText = document.getElementById('roadmap-return-text');
+    if (returnBanner) {
+      if (returnStageText && stageObj) {
+        returnStageText.innerHTML = `您剛才從 <strong>【PP 全流程主幹線 — ${stageObj.shortTitle}】</strong> 開啟了此進階互動工具，操作完畢後可隨時返回主幹線繼續查看上下游關聯！`;
+      }
+      returnBanner.classList.add('show');
+    }
+
+    // Activate specific sub-tool inside the target tab
+    setTimeout(() => {
+      if (targetTabId === 'tab-decision-tree' && subTarget) {
+        if (typeof window.switchTree === 'function') window.switchTree(subTarget);
+      } else if (targetTabId === 'tab-order-matrix' && subTarget) {
+        if (subTarget === 'subtab-e005-sandbox' || subTarget === 'subtab-subcon-sandbox') {
+          if (typeof window.switchLabSubtab === 'function') window.switchLabSubtab('subtab-control-sim');
+          const targetBoxId = subTarget === 'subtab-e005-sandbox' ? 'state-sim-result' : 'subcon-sim-result';
+          const box = document.getElementById(targetBoxId);
+          if (box) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (typeof window.switchLabSubtab === 'function') {
+          window.switchLabSubtab(subTarget);
+        }
+      } else if (targetTabId === 'tab-wo-inspector' && subTarget) {
+        if (typeof window.selectWoPreset === 'function') window.selectWoPreset(subTarget);
+      } else if (targetTabId === 'tab-tcode-dictionary' && subTarget) {
+        if (typeof window.selectScenarioFlow === 'function') window.selectScenarioFlow(subTarget);
+      } else if (targetTabId === 'tab-cheat-sheet' && subTarget) {
+        if (typeof window.filterByCategory === 'function') window.filterByCategory(subTarget);
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
+  };
+
+  window.returnToRoadmap = () => {
+    const returnBanner = document.getElementById('roadmap-return-banner');
+    if (returnBanner) returnBanner.classList.remove('show');
+
+    const roadmapTabBtn = document.getElementById('tab-btn-pp-roadmap');
+    if (roadmapTabBtn) roadmapTabBtn.click();
+
+    if (state.roadmapReturnStage) {
+      window.selectRoadmapStage(state.roadmapReturnStage);
+    }
+  };
+
+  // Initial Renders
+  renderPpRoadmap();
+  renderIssues();
+  renderDecisionTree();
+  renderOrderMatrix();
+  renderControlKeys();
+  renderChecklist();
+  renderRaci();
+  renderTcodes();
+  renderScenarioFlows();
+  updateCalculations();
+  renderRecommender();
+  renderRoutingPipeline();
+  simulateAction('ACTION_STATE_INSPECT');
+  simulateSubAction('ACT_SUB_INSPECT');
+  renderWoInspector();
+
+  console.log("SAP PP Go-Live Interactive Triage Suite ready with Module 10 WO Lifecycle Inspector.");
 });
 
 

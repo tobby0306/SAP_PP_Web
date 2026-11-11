@@ -14,7 +14,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=18">
+  <link rel="stylesheet" href="css/app.css?v=21">
 </head>
 
 <body>
@@ -64,7 +64,7 @@
       </div>
     </header>
 
-    <!-- Top Navigation Tabs (Sitting directly below Header) -->
+    <!-- Top Navigation Tabs (Sitting directly below Header - Pure Business Process Backbone) -->
     <nav class="tabs-bar" id="navigation-tabs" role="tablist">
       <button class="tab-btn active" data-tab="tab-pp-roadmap" id="tab-btn-pp-roadmap" role="tab">
         🧭 PP 全流程主幹線 (PIR/SO ➔ TECO)
@@ -74,24 +74,6 @@
         🚨 秒級急救表
         <span class="tab-count" id="count-cheat-sheet">18</span>
       </button>
-      <button class="tab-btn" data-tab="tab-decision-tree" id="tab-btn-decision-tree" role="tab">
-        🌳 互動排查決策樹
-      </button>
-      <button class="tab-btn" data-tab="tab-order-matrix" id="tab-btn-order-matrix" role="tab">
-        🏭 工單體系與途程 (ZP01~07)
-      </button>
-      <button class="tab-btn" data-tab="tab-wo-inspector" id="tab-btn-wo-inspector" role="tab">
-        🔬 工單穿透診斷器
-        <span class="badge-tag badge-cyan">7維體檢</span>
-      </button>
-      <button class="tab-btn" data-tab="tab-audit-checklist" id="tab-btn-audit-checklist" role="tab">
-        ✅ 月結 TECO 自檢清單
-      </button>
-      <!-- [依各廠權責差異考量，暫時 MARK 掉 RACI 權責分頁]
-      <button class="tab-btn" data-tab="tab-raci-matrix" id="tab-btn-raci-matrix" role="tab">
-        👥 跨部門 RACI 權責
-      </button>
-      -->
       <button class="tab-btn" data-tab="tab-tcode-dictionary" id="tab-btn-tcode-dictionary" role="tab">
         🗺️ 業務情境 T-Code 循序地圖 (68 大字典)
       </button>
@@ -143,6 +125,88 @@
       <!-- Stage Content Container -->
       <div id="roadmap-stage-container">
         <!-- Injected via JS -->
+      </div>
+
+      <!-- Option A: Dedicated Bottom Interactive Diagnostics & Sandbox Toolbox -->
+      <div class="interactive-tools-deck" id="interactive-tools-deck">
+        <div class="deck-header">
+          <div>
+            <h3 class="deck-title">
+              <span>🛠️</span>
+              <span>現場互動診斷與模擬工具箱（四合一快捷工作台）</span>
+            </h3>
+            <p class="deck-subtitle">
+              現場異常模擬、流水線工時試算、工單穿透體檢與月結自檢工具已收納於此，點選直達免滑動！
+            </p>
+          </div>
+          <span class="badge-tag badge-cyan">隨選即用沙盒</span>
+        </div>
+
+        <div class="deck-grid">
+          <!-- Tool 1: 互動排查決策樹 -->
+          <div class="deck-card" onclick="openInteractiveTool('tab-decision-tree')">
+            <div class="deck-card-top">
+              <span class="deck-card-icon">🌳</span>
+              <span class="badge badge-info">問題精準定位</span>
+            </div>
+            <div class="deck-card-title">互動排查決策樹</div>
+            <div class="deck-card-desc">
+              收錄 MRP 跑不出資料六步樹、E005 退料抽換元件防呆鏈條、SIT-626 業務挪單處置等互動引導。
+            </div>
+            <div class="deck-card-action">
+              <span>開啟排查精靈</span>
+              <span>➔</span>
+            </div>
+          </div>
+
+          <!-- Tool 2: 工單體系與途程試算 -->
+          <div class="deck-card" onclick="openInteractiveTool('tab-order-matrix')">
+            <div class="deck-card-top">
+              <span class="deck-card-icon">🏭</span>
+              <span class="badge badge-warning">工單與產能</span>
+            </div>
+            <div class="deck-card-title">工單體系與途程 (ZP01~07)</div>
+            <div class="deck-card-desc">
+              含 1,000 雙接單途程五階流水線試算器、PP01~PP08 控制碼模擬器、ZP 類型智能推薦器與 E005/541 雙沙盒。
+            </div>
+            <div class="deck-card-action">
+              <span>開啟試算與矩陣</span>
+              <span>➔</span>
+            </div>
+          </div>
+
+          <!-- Tool 3: 工單穿透診斷器 -->
+          <div class="deck-card" onclick="openInteractiveTool('tab-wo-inspector')">
+            <div class="deck-card-top">
+              <span class="deck-card-icon">🔬</span>
+              <span class="badge badge-danger">7維穿透體檢</span>
+            </div>
+            <div class="deck-card-title">工單穿透診斷器</div>
+            <div class="deck-card-desc">
+              單號穿透 7 大核心維度（狀態、料表 RESB、途程 AFVC、庫存、外包 PO、COGI 佇列與月結風險）。
+            </div>
+            <div class="deck-card-action">
+              <span>啟動穿透體檢</span>
+              <span>➔</span>
+            </div>
+          </div>
+
+          <!-- Tool 4: 月結 TECO 自檢清單 -->
+          <div class="deck-card" onclick="openInteractiveTool('tab-audit-checklist')">
+            <div class="deck-card-top">
+              <span class="deck-card-icon">✅</span>
+              <span class="badge badge-success">月結防呆稽核</span>
+            </div>
+            <div class="deck-card-title">月結 TECO 自檢清單</div>
+            <div class="deck-card-desc">
+              包含發料閉環 (261/262)、外包 541/543、報工入庫一致性與 COGI 清零等月結四重關卡進度追蹤。
+            </div>
+            <div class="deck-card-action">
+              <span>進入自檢稽核</span>
+              <span>➔</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1400,8 +1464,8 @@
   <div class="toast" id="app-toast">⚡ 已複製交易碼至剪貼簿</div>
 
   <!-- Data & Script Bundle (Supports both file:// offline launch & web server) -->
-  <script src="data/knowledge_loader.js?v=18"></script>
-  <script src="js/app.js?v=18"></script>
+  <script src="data/knowledge_loader.js?v=21"></script>
+  <script src="js/app.js?v=21"></script>
 </body>
 
 </html>

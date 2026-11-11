@@ -47,40 +47,40 @@
   --transition-normal: 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Light Theme Variables */
+/* Light Theme Variables - High-Contrast SAP Fiori Quartz Design */
 body.light-theme {
-  --bg-body: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-body: #dfe6ef;
+  --bg-card: #ffffff;
   --bg-card-hover: #ffffff;
-  --bg-card-solid: #ffffff;
+  --bg-card-solid: #f1f5f9;
   --bg-input: #ffffff;
   --bg-badge: #e2e8f0;
 
-  --border-subtle: rgba(15, 23, 42, 0.12);
-  --border-glow: rgba(2, 132, 199, 0.4);
+  --border-subtle: #94a3b8;
+  --border-glow: rgba(2, 132, 199, 0.55);
   --border-focus: #0284c7;
 
   --text-main: #0f172a;
-  --text-secondary: #334155;
+  --text-secondary: #1e293b;
   --text-muted: #475569;
   --text-inverse: #ffffff;
 
   --primary: #0284c7;
-  --primary-glow: rgba(2, 132, 199, 0.15);
+  --primary-glow: rgba(2, 132, 199, 0.2);
   --primary-dark: #0369a1;
 
   --cyan: #0e7490;
   --indigo: #4338ca;
   --emerald: #047857;
-  --emerald-bg: rgba(16, 185, 129, 0.14);
+  --emerald-bg: rgba(16, 185, 129, 0.16);
   --amber: #b45309;
-  --amber-bg: rgba(245, 158, 11, 0.15);
+  --amber-bg: rgba(245, 158, 11, 0.18);
   --rose: #be123c;
-  --rose-bg: rgba(244, 63, 94, 0.12);
+  --rose-bg: rgba(244, 63, 94, 0.14);
   --purple: #6d28d9;
 
-  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.1), 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.14);
 }
 
 /* Reset & Basics */
@@ -3296,6 +3296,144 @@ body.light-theme .calc-step-subtotal {
 }
 
 /* ==========================================================================
+   Option A: Bottom Interactive Tools Deck Styles (現場互動診斷與模擬工具箱)
+   ========================================================================== */
+.interactive-tools-deck {
+  margin-top: 2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.deck-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.95rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.deck-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.25rem;
+}
+
+.deck-subtitle {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.deck-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .deck-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .deck-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.deck-card {
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.15rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.deck-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.deck-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.deck-card-icon {
+  font-size: 1.6rem;
+}
+
+.deck-card-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.35;
+}
+
+.deck-card-desc {
+  font-size: 0.81rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  flex: 1;
+}
+
+.deck-card-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--primary);
+  padding-top: 0.55rem;
+  border-top: 1px dashed var(--border-subtle);
+  transition: color var(--transition-fast);
+}
+
+.deck-card:hover .deck-card-action {
+  color: var(--primary-dark);
+}
+
+body.light-theme .interactive-tools-deck {
+  background: #ffffff;
+  border: 1.5px solid #94a3b8;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+body.light-theme .deck-card {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+}
+
+body.light-theme .deck-card:hover {
+  background: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.18);
+}
+
+body.light-theme .deck-card-action {
+  color: #0284c7;
+  border-color: #e2e8f0;
+}
+
+/* ==========================================================================
    Module 0: End-to-End PP Lifecycle Master Roadmap (🧭 PP 全流程主幹線導航)
    ========================================================================== */
 .roadmap-return-banner {
@@ -3304,7 +3442,7 @@ body.light-theme .calc-step-subtotal {
   justify-content: space-between;
   gap: 1rem;
   background: linear-gradient(135deg, rgba(2, 132, 199, 0.22), rgba(99, 102, 241, 0.22));
-  border: 1px solid var(--primary);
+  border: 1.5px solid var(--primary);
   border-left: 5px solid var(--amber);
   border-radius: 12px;
   padding: 0.75rem 1.25rem;
@@ -3329,7 +3467,7 @@ body.light-theme .calc-step-subtotal {
 .roadmap-metro-bar {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 0.65rem;
+  gap: 0.7rem;
   margin-top: 1.15rem;
 }
 
@@ -3348,18 +3486,19 @@ body.light-theme .calc-step-subtotal {
 .metro-node-btn {
   background: var(--bg-card-solid);
   border: 1px solid var(--border-subtle);
-  border-top: 3px solid var(--text-muted);
+  border-top: 4px solid var(--text-muted);
   border-radius: 12px;
-  padding: 0.8rem 0.9rem;
+  padding: 0.85rem 0.95rem;
   text-align: left;
   cursor: pointer;
   transition: all var(--transition-fast);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.35rem;
+  gap: 0.4rem;
   position: relative;
   color: var(--text-main);
+  font-family: inherit;
 }
 
 .metro-node-btn:hover {
@@ -3369,9 +3508,9 @@ body.light-theme .calc-step-subtotal {
 }
 
 .metro-node-btn.active {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.16), rgba(99, 102, 241, 0.16));
-  border-color: var(--primary);
-  border-top: 4px solid var(--primary);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(99, 102, 241, 0.18));
+  border: 1.5px solid var(--primary);
+  border-top: 5px solid var(--primary);
   box-shadow: 0 0 16px var(--primary-glow);
 }
 
@@ -3380,20 +3519,30 @@ body.light-theme .calc-step-subtotal {
   justify-content: space-between;
   align-items: center;
   font-family: var(--font-mono);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: var(--primary);
 }
 
-.metro-node-title {
-  font-size: 0.92rem;
+.metro-stage-num {
+  letter-spacing: 0.04em;
+}
+
+.metro-stage-icon {
+  font-size: 1.05rem;
+}
+
+.metro-node-title,
+.metro-stage-title {
+  font-size: 0.94rem;
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.3;
 }
 
-.metro-node-sub {
-  font-size: 0.75rem;
+.metro-node-sub,
+.metro-stage-sub {
+  font-size: 0.76rem;
   color: var(--text-secondary);
   line-height: 1.35;
 }
@@ -3408,21 +3557,91 @@ body.light-theme .calc-step-subtotal {
   animation: fadeIn 0.25s ease-out;
 }
 
-.roadmap-stage-header {
+.roadmap-stage-header,
+.stage-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 1rem;
   padding-bottom: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.1rem;
   border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Generic Badges & Buttons used in Roadmap */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.badge-info {
+  background: rgba(56, 189, 248, 0.16);
+  color: var(--primary);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.badge-warning {
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badge-danger {
+  background: var(--rose-bg);
+  color: var(--rose);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+}
+
+.badge-success {
+  background: var(--emerald-bg);
+  color: var(--emerald);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--primary-dark);
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.btn-secondary {
+  background: var(--bg-badge);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.btn-secondary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .roadmap-two-col {
   display: grid;
   grid-template-columns: 1.15fr 1fr;
   gap: 1.35rem;
+  margin-top: 1rem;
 }
 
 @media (max-width: 1024px) {
@@ -3441,37 +3660,101 @@ body.light-theme .calc-step-subtotal {
   gap: 0.9rem;
 }
 
-.roadmap-panel-box.forward-box {
+.roadmap-panel-box.forward-box,
+.roadmap-panel-box.panel-forward {
   border-top: 4px solid var(--emerald);
 }
 
-.roadmap-panel-box.backward-box {
+.roadmap-panel-box.backward-box,
+.roadmap-panel-box.panel-backward {
   border-top: 4px solid var(--rose);
+}
+
+.roadmap-panel-title {
+  font-size: 0.96rem;
+  font-weight: 700;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px dashed var(--border-subtle);
+  line-height: 1.4;
+}
+
+.roadmap-panel-title.title-forward {
+  color: var(--emerald);
+}
+
+.roadmap-panel-title.title-backward {
+  color: var(--rose);
 }
 
 .roadmap-check-item {
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--border-subtle);
-  border-left: 3px solid var(--primary);
+  border-left: 4px solid var(--primary);
   border-radius: 10px;
-  padding: 0.9rem 1.05rem;
+  padding: 0.95rem 1.1rem;
   transition: all 0.3s ease;
+}
+
+.check-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.55rem;
+}
+
+.check-item-title {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  line-height: 1.35;
+}
+
+.check-item-tcodes {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.check-item-desc {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.check-item-desc code,
+.dual-track-flow code,
+.roadmap-stage-card p code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.14);
+  color: var(--primary);
+  border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
 .roadmap-check-item.pulse-highlight {
   border-color: var(--amber) !important;
-  border-left: 5px solid var(--amber) !important;
+  border-left: 6px solid var(--amber) !important;
   box-shadow: 0 0 22px rgba(245, 158, 11, 0.45) !important;
   background: rgba(245, 158, 11, 0.14) !important;
 }
 
 .forward-impact-tag {
-  margin-top: 0.55rem;
-  padding: 0.45rem 0.7rem;
+  margin-top: 0.65rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 6px;
   background: rgba(245, 158, 11, 0.12);
-  border: 1px dashed rgba(245, 158, 11, 0.4);
-  font-size: 0.8rem;
+  border: 1px dashed rgba(245, 158, 11, 0.45);
+  font-size: 0.82rem;
+  font-weight: 600;
   color: var(--amber);
   line-height: 1.45;
 }
@@ -3481,27 +3764,41 @@ body.light-theme .calc-step-subtotal {
   border: 1px solid rgba(244, 63, 94, 0.28);
   border-left: 4px solid var(--rose);
   border-radius: 10px;
-  padding: 0.9rem 1.05rem;
+  padding: 0.95rem 1.1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.5rem;
+}
+
+.trace-symptom {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--rose);
+  line-height: 1.45;
+}
+
+.trace-cause {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
 }
 
 .trace-jump-btn {
   align-self: flex-start;
-  margin-top: 0.25rem;
+  margin-top: 0.3rem;
   background: rgba(56, 189, 248, 0.15);
-  border: 1px solid var(--primary);
+  border: 1.5px solid var(--primary);
   color: var(--primary);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  padding: 0.35rem 0.75rem;
-  border-radius: 7px;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   transition: all var(--transition-fast);
+  font-family: inherit;
 }
 
 .trace-jump-btn:hover {
@@ -3516,14 +3813,132 @@ body.light-theme .calc-step-subtotal {
   border-top: 1px dashed var(--border-subtle);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
 
+.roadmap-tools-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Roadmap Emergency Pills & Box Styles (秒級急救法直達區)
+   ========================================================================== */
+.roadmap-emergency-box {
+  margin-top: 1.15rem;
+  padding: 1.1rem 1.25rem;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--rose);
+  border-radius: 12px;
+}
+
+.roadmap-emergency-header {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.roadmap-emergency-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.65rem;
+}
+
+.roadmap-emergency-pill {
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: inherit;
+  color: var(--text-main);
+}
+
+.roadmap-emergency-pill:hover {
+  border-color: var(--rose);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+}
+
+.emergency-pill-top {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.emergency-pill-tcode {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.emergency-cross-tag {
+  font-size: 0.7rem;
+  color: var(--amber);
+  background: rgba(245, 158, 11, 0.12);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  border: 1px dashed rgba(245, 158, 11, 0.35);
+}
+
+.emergency-pill-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-main);
+  gap: 0.5rem;
+}
+
+.emergency-pill-arrow {
+  font-size: 0.75rem;
+  color: var(--rose);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+body.light-theme .roadmap-emergency-box {
+  background: #fff5f5;
+  border-color: #fecdd3;
+  border-left: 4px solid #e11d48;
+}
+
+body.light-theme .roadmap-emergency-pill {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+body.light-theme .roadmap-emergency-pill:hover {
+  border-color: #e11d48;
+  background: #fff1f2;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.15);
+}
+
+body.light-theme .emergency-cross-tag {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #f59e0b;
+}
+
 .tool-launch-btn {
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(99, 102, 241, 0.18));
-  border: 1px solid var(--primary);
+  border: 1.5px solid var(--primary);
   color: var(--text-main);
   font-size: 0.84rem;
   font-weight: 600;
@@ -3534,6 +3949,7 @@ body.light-theme .calc-step-subtotal {
   align-items: center;
   gap: 0.45rem;
   transition: all var(--transition-fast);
+  font-family: inherit;
 }
 
 .tool-launch-btn:hover {
@@ -3546,8 +3962,8 @@ body.light-theme .calc-step-subtotal {
 .dual-track-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.85rem;
-  margin-top: 0.5rem;
+  gap: 0.95rem;
+  margin: 0.75rem 0 1.15rem;
 }
 
 @media (max-width: 768px) {
@@ -3557,45 +3973,236 @@ body.light-theme .calc-step-subtotal {
 }
 
 .dual-track-card {
-  border-radius: 10px;
-  padding: 0.85rem 1rem;
-  font-size: 0.83rem;
-  line-height: 1.55;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.dual-track-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.dual-track-flow {
+  color: var(--text-secondary);
 }
 
 .dual-track-card.track-so {
   background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.35);
+  border: 1.5px solid rgba(16, 185, 129, 0.4);
+  border-left: 5px solid var(--emerald);
 }
 
 .dual-track-card.track-pir {
   background: rgba(168, 85, 247, 0.1);
-  border: 1px solid rgba(168, 85, 247, 0.35);
+  border: 1.5px solid rgba(168, 85, 247, 0.4);
+  border-left: 5px solid var(--purple);
+}
+
+/* ==========================================================================
+   Global Light Theme (☀️ 亮色 Fiori) Ultra-Clear Tabs, Fields & Borders
+   ========================================================================== */
+
+/* 1. Top Navigation Tabs Bar — Distinct Segmented Track & Button Borders */
+body.light-theme .tabs-bar {
+  background: #cbd5e1;
+  padding: 0.45rem 0.55rem;
+  border-radius: 14px;
+  border: 1.5px solid #94a3b8;
+  gap: 0.45rem;
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+body.light-theme .tab-btn {
+  background: #f8fafc;
+  border: 1.5px solid #94a3b8;
+  border-radius: 10px;
+  color: #1e293b;
+  font-weight: 600;
+  padding: 0.58rem 1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+body.light-theme .tab-btn:hover {
+  background: #ffffff;
+  border-color: #0284c7;
+  color: #0284c7;
+}
+
+body.light-theme .tab-btn.active {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff !important;
+  border-color: #075985;
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(2, 132, 199, 0.35);
+}
+
+body.light-theme .tab-btn.active::after {
+  display: none;
+}
+
+body.light-theme .tab-btn.active .tab-count,
+body.light-theme .tab-btn.active .badge-tag {
+  background: #ffffff !important;
+  color: #0369a1 !important;
+  border-color: #bae6fd !important;
+  font-weight: 800;
+}
+
+/* 2. All Sub-navigation Pills & Filter Buttons in Light Theme */
+body.light-theme .pill-btn,
+body.light-theme .lab-pill-btn,
+body.light-theme .preset-pill,
+body.light-theme .scenario-pill,
+body.light-theme .wo-preset-btn,
+body.light-theme .btn-icon,
+body.light-theme .btn-secondary {
+  background: #ffffff;
+  border: 1.5px solid #94a3b8;
+  color: #1e293b;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+body.light-theme .pill-btn:hover,
+body.light-theme .lab-pill-btn:hover,
+body.light-theme .preset-pill:hover,
+body.light-theme .scenario-pill:hover,
+body.light-theme .wo-preset-btn:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+  background: #f0f9ff;
+}
+
+body.light-theme .pill-btn.active,
+body.light-theme .lab-pill-btn.active,
+body.light-theme .scenario-pill.active,
+body.light-theme .wo-preset-btn.active {
+  background: #0284c7 !important;
+  border-color: #0369a1 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+}
+
+/* 3. All Input Fields, Number Boxes & Select Dropdowns in Light Theme */
+body.light-theme .search-input,
+body.light-theme .calc-number-input,
+body.light-theme .station-select,
+body.light-theme input[type="text"],
+body.light-theme input[type="number"],
+body.light-theme select {
+  background: #ffffff !important;
+  border: 2px solid #64748b !important;
+  color: #0f172a !important;
+  font-weight: 600;
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+body.light-theme .search-input:focus,
+body.light-theme .calc-number-input:focus,
+body.light-theme .station-select:focus,
+body.light-theme input[type="text"]:focus,
+body.light-theme input[type="number"]:focus,
+body.light-theme select:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25) !important;
+}
+
+/* 4. Roadmap Metro Cards, Panels & Checkpoints in Light Theme */
+body.light-theme .metro-node-btn {
+  background: #ffffff;
+  border: 1.5px solid #94a3b8;
+  border-top: 4px solid #64748b;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.06);
+}
+
+body.light-theme .metro-node-btn:hover {
+  border-color: #0284c7;
+  background: #f8fafc;
+}
+
+body.light-theme .metro-node-btn.active {
+  background: #e0f2fe;
+  border: 2px solid #0284c7;
+  border-top: 5px solid #0284c7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.22);
+}
+
+body.light-theme .roadmap-panel-box {
+  background: #f1f5f9;
+  border: 1.5px solid #94a3b8;
 }
 
 body.light-theme .roadmap-check-item {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: #ffffff;
+  border: 1.5px solid #94a3b8;
+  border-left: 4px solid #0284c7;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+body.light-theme .check-item-desc code,
+body.light-theme .dual-track-flow code,
+body.light-theme .roadmap-stage-card p code {
+  background: #e0f2fe;
+  color: #0369a1;
+  border-color: #7dd3fc;
 }
 
 body.light-theme .trace-back-card {
   background: #fff1f2;
-  border-color: #fda4af;
+  border: 1.5px solid #fda4af;
+  border-left: 4px solid #e11d48;
+}
+
+body.light-theme .trace-jump-btn {
+  background: #ffffff;
+  border: 1.5px solid #0284c7;
+  color: #0369a1;
+}
+
+body.light-theme .trace-jump-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+body.light-theme .tool-launch-btn {
+  background: #eff6ff;
+  border: 1.5px solid #0284c7;
+  color: #0369a1;
+}
+
+body.light-theme .tool-launch-btn:hover {
+  background: #0284c7;
+  color: #ffffff;
 }
 
 body.light-theme .forward-impact-tag {
-  background: #fffbeb;
-  border-color: #fcd34d;
+  background: #fef3c7;
+  border: 1.5px dashed #d97706;
   color: #92400e;
 }
 
 body.light-theme .dual-track-card.track-so {
   background: #ecfdf5;
-  border-color: #6ee7b7;
+  border: 1.5px solid #34d399;
+  border-left: 5px solid #059669;
 }
 
 body.light-theme .dual-track-card.track-pir {
   background: #faf5ff;
-  border-color: #d8b4fe;
+  border: 1.5px solid #c084fc;
+  border-left: 5px solid #7c3aed;
 }
 
+body.light-theme .calc-pipeline-step,
+body.light-theme .kpi-card,
+body.light-theme .checklist-item,
+body.light-theme .pipeline-station-card {
+  background: #ffffff;
+  border: 1.5px solid #94a3b8;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.06);
+}
