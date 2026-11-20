@@ -3588,10 +3588,10 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'S4_C1',
           stepCode: 'STEP 4.1',
-          title: '精準選擇工單類型 (ZP01 ~ ZP07) 並由計畫單轉換開單 (MD04 / CO40 / CO41 / ZPP014)',
-          tcodes: ['MD04', 'CO40', 'CO41', 'ZPP014', 'CO01', 'CO07'],
-          desc: '生管依生產情境選對工單類型：<br>• <strong><code>ZP01</code> (大底工單) / <code>ZP02</code> (成型成品與半成品工單)</strong>：由 <code>MD04</code> 單筆轉、<code>CO41</code> 批次轉或 <code>ZPP014</code> 開立；<br>• <strong><code>ZP03</code> (廠內補料工單，用 <code>CO07</code> 無料號開單) / <code>ZP06</code> (外包補料工單)</strong>：現場材料損耗超領時開立，<strong>僅含材料組件、無須報工入庫</strong>；<br>• <strong><code>ZP04</code> (重工工單，用 <code>CO01</code> 同料號自我消耗重工)</strong>：成品不良退回重修；<br>• <strong><code>ZP05</code> (全製程或主要外包工單)</strong>：整雙或半成品委外加工；<br>• <strong><code>ZP07</code> (鞋墊/特殊半成品工單)</strong>。',
-          forwardImpact: '👉 影響後續：若把單純現場損耗補料誤開成 ZP02 量產工單，Stage 6 月結時會因為沒有成品入庫而卡死無法 TECO！補料請務必開 ZP03/ZP06。'
+          title: '精準選擇工單類型 (ZP01 ~ ZP07) 並執行轉單／開單 (FSH_PCW / ZPP015 / CO01 / CO07 / CO08 / ZPP022)',
+          tcodes: ['FSH_PCW', 'ZPP015', 'CO01', 'CO07', 'CO08', 'ZPP022'],
+          desc: '生管依業務場景選對工單類型與開單程式（對照上方 Slide 17 矩陣）：<br>• <strong><code>ZP01</code> (試量生產工單)</strong>：用 <code>CO01</code> / <code>FSH_PCW</code> 開立，開發／試產／試做鞋型小批量投產（無正式 SO、不派工、手動報工、成品入庫）；<br>• <strong><code>ZP02</code> (量產工單)</strong>：用 <code>FSH_PCW</code> / <code>ZPP015</code> 開立，正式接單 (MTO/MTS) 主力工單（派工、報工、成品入庫）；<br>• <strong><code>ZP03</code> (超耗單補料工單)</strong>：用 <code>ZPP022</code> 開立，正單未入庫前之加工不良／報廢個別補料（不派工、不報工、不入庫）；<br>• <strong><code>ZP04</code> (包裝工單)</strong>：用 <code>CO07</code> 開立（不展 BOM），成品鞋裝箱、吊牌／貼標或 VAS 加值包裝（不派工、不報工、不入庫）；<br>• <strong><code>ZP05</code> (成套補料工單)</strong>：用 <code>ZPP022</code> 開立，正單已入庫結案後產生之 B/C 品成套補料重投（派工、報工、成品入庫）；<br>• <strong><code>ZP06</code> (全代工-委託廠) / <code>ZP07</code> (製程代工-受託廠)</strong>：<code>ZP06</code> 用 <code>ZPP015</code> / <code>CO08</code>（追蹤外發料與代工驗收入庫）；<code>ZP07</code> 用 <code>CO07</code>（受託廠 SAP 報工、不入庫）。',
+          forwardImpact: '👉 影響後續：若把現場單純超耗補料誤開成 ZP02 量產工單，Stage 6 月結時會因為沒有成品入庫而卡死無法 TECO！個別補料請務必開 ZP03（成套重投才開 ZP05）。'
         },
         {
           id: 'S4_C2',
