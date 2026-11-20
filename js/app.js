@@ -3353,10 +3353,10 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'S2_C1',
           stepCode: 'STEP 2.1',
-          title: '部位代碼 (ZPP001) ➔ BOM 建立 (CS01/ZPP002) ➔ 尺碼對照九宮格 (FSH_BOM_VD / ZPPBOMFIX)',
-          tcodes: ['ZPP001', 'CS01', 'ZPP002', 'FSH_BOM_VD', 'ZPPBOMFIX'],
-          desc: '① 先在 <code>ZPP001</code> 定義部位代碼並綁定<strong>「首工序作業代號 (<code>ZZFIRST</code>)」</strong>；<br>② 建立 BOM (<code>CS01</code> / <code>ZPP002</code>) 時，輸入部位代碼於排序字串，系統會自動帶出首工序（<strong>決定日後 <code>ZPP020</code> 領料單如何按裁斷/針車/成型分單領料</strong>）；<br>③ 針對分尺碼材料（大底、中底、楦頭），於 <code>FSH_BOM_VD</code> 維護九宮格尺碼區段，若有漏碼立即執行 <strong><code>ZPPBOMFIX</code></strong> 自動補齊；<br>④ 廠內自製貼合半成品不領料者，特殊採購類設為 <strong><code>50</code> (虛擬件 Phantom)</strong>。',
-          forwardImpact: '👉 影響後續：若漏設首工序 ZZFIRST，Stage 5 現場用 ZPP020 列印領料單時會無法按工段分單；若九宮格漏碼，Stage 3 跑 MRP 時該尺碼將展不出大底需求！'
+          title: '部位代碼 (ZPP001) ➔ BOM 與九宮格尺碼維護 (CS01/CS02/ZPP002) ➔ 異常修復 (ZPPBOMFIX)',
+          tcodes: ['ZPP001', 'CS01', 'CS02', 'ZPP002', 'ZPPBOMFIX'],
+          desc: '① 先在 <code>ZPP001</code> 定義部位代碼並綁定<strong>「首工序作業代號 (<code>ZZFIRST</code>)」</strong>；<br>② 建立 BOM (<code>CS01</code> / <code>ZPP002</code>) 時，輸入部位代碼於排序字串，系統會自動帶出首工序（<strong>決定日後 <code>ZPP020</code> 領料單如何按裁斷/針車/成型分單領料</strong>）；<br>③ 針對分尺碼材料（大底、中底、楦頭），於 <strong><code>CS02</code> 或 <code>ZPP002</code></strong> 維護「數量分配設定檔（九宮格尺碼區段）」；若母階 (GA) 與子階尺碼 (VA) 發生漏碼或不同步，立即執行 <strong><code>ZPPBOMFIX</code></strong> 自動補齊修復（或由顧問協助排查底層關聯）；<br>④ 廠內自製貼合半成品不領料者，特殊採購類設為 <strong><code>50</code> (虛擬件 Phantom)</strong>。',
+          forwardImpact: '👉 影響後續：若漏設首工序 ZZFIRST，Stage 5 現場用 ZPP020 列印領料單時會無法按工段分單；若九宮格漏碼，Stage 3 跑 MRP 時該尺碼將展不出相對應尺碼需求！'
         },
         {
           id: 'S2_C2',
