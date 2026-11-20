@@ -154,7 +154,7 @@ flowchart TD
 | <nobr><b><code>ZP01</code></b></nobr> | <nobr><b>試量生產工單</b></nobr> | 開發 / 試產/試做鞋型小批量試量投產。 | <nobr><code>CO01</code> / <code>FSH_PCW</code></nobr> | <nobr>正單 (ZP01 / ZP02)</nobr> | 歸集至開發 / 試產專案成本，SIT-609 <!-- 來源: scenario_pp_mm_fi_sit-609_試量生產.md -->。 |
 | <nobr><b><code>ZP02</code></b></nobr> | <nobr><b>量產工單</b></nobr> | 業務正式接單（MTO / MTS）之大貨量產，主檔計畫單轉工單。 | <nobr><code>FSH_PCW</code> / <code>ZPP015</code></nobr> | <nobr>正單 (ZP01 / ZP02)</nobr> | 必填利潤中心，成本結轉至庫存產成品與銷貨成本。 |
 | <nobr><b><code>ZP03</code></b></nobr> | <nobr><b>超耗單補料工單</b></nobr> | 現場加工不良、人為報廢或材料瑕疵需超額個別補料（正單未入庫）。 | <nobr><code>ZPP022</code></nobr> | <nobr>補料工單 (ZP03 / ZP05)</nobr> | 成本獨立歸集至該補料工單，利於月結進行超耗異常分析。 |
-| <nobr><b><code>ZP04</code></b></nobr> | <nobr><b>包裝工單</b></nobr> | 成品鞋裝箱、加附吊牌、貼標或 VAS 客製化加值包裝（不展BOM）。 | <nobr><code>CO07</code></nobr> | <nobr>包裝工單 (ZP04)</nobr> | 領用包裝材（紙箱、乾燥劑、鞋撐、條碼標籤），結算至銷貨成本-重工。 |
+| <nobr><b><code>ZP04</code></b></nobr> | <nobr><b>包裝工單</b></nobr> | 成品鞋裝箱、加附吊牌、貼標或 VAS 客製化加值包裝（不展BOM）。 | <nobr><code>CO07</code> / <code>ZSD003A</code> / <code>ZSD003B</code> / <code>ZSD008</code></nobr> | <nobr>包裝工單 (ZP04)</nobr> | 領用包裝材（紙箱、乾燥劑、鞋撐、條碼標籤），結算至銷貨成本-重工。 |
 | <nobr><b><code>ZP05</code></b></nobr> | <nobr><b>成套補料工單</b></nobr> | 正單已入庫後之 B / C 品，成套補料重新投產（走 MES 輪次派工）。 | <nobr><code>ZPP022</code></nobr> | <nobr>補料工單 (ZP03 / ZP05)</nobr> | 結算規則自動帶，完整走 MES 派工與報工入庫。 |
 | <nobr><b><code>ZP06</code></b></nobr> | <nobr><b>全代工工單 (委託廠)</b></nobr> | 全製程委外代工時，委託方於系統中開立之追蹤工單。 | <nobr><code>ZPP015</code> / <code>CO08</code></nobr> | <nobr>委託廠代工領料單</nobr> | 追蹤外發原物料耗用與代工成品驗收入庫；受託廠端不對接本廠 SAP 報工。 |
 | <nobr><b><code>ZP07</code></b></nobr> | <nobr><b>製程代工工單 (受託廠)</b></nobr> | 承接集團內其他廠區委託代工生產時開立之製程工單（受託廠不需要完整成品 BOM / 途程）。 | <nobr><code>CO07</code></nobr> | <nobr>受託廠領料單</nobr> | 結算至銷貨成本-加工 51110002，由受託廠在 SAP 報工，不對接 MES 產量。 |
@@ -590,10 +590,13 @@ flowchart TD
 
 ---
 
-### 3.6 包裝工單 (`ZP04`) 與 VAS 客製加值服務獨立作業 (CO07) <!-- 來源: ku_pp_co07_建立包裝工單.md -->
+### 3.6 包裝工單 (`ZP04`) 與 VAS 客製加值服務獨立作業 (CO07 / ZSD003A / ZSD003B / ZSD008) <!-- 來源: ku_pp_co07_建立包裝工單.md -->
 * **業務時機**：成型後之成品鞋需進行特殊外箱組裝、裝入鞋撐 / 乾燥劑、加掛品牌特定 RFID 吊牌、貼外箱條碼或 VAS（Value-Added Services）加值作業。
-* **開單流程**：
-  1. 生管進入 `CO07`（無物料生產訂單建立），選擇訂單類型 **`ZP04` (包裝工單)**。
+* **開單來源與流程**：
+  1. **來源途徑**：除生管透過 `CO07`（無物料生產訂單建立）手動開立 `ZP04` 外，實務上主要由**業務 (SD) 客製程式**依品牌與作業類型自動展開：
+     * **`ZSD003A`**：CROCS 包裝工單
+     * **`ZSD003B`**：包裝工單（除 CROCS 之外品牌）
+     * **`ZSD008`**：VAS 工單
   2. 參考銷售訂單展開包裝材料明細（紙箱、吊牌、包裝袋、條碼貼紙）。
   3. 進入 `ZPP020` 建立領料單時，**工單種類選取「包裝工單 (ZP04)」**，獨立開立包裝領料單交由外包裝倉或成品倉發料。
   4. 包裝完成後進行報工與完工入庫，包裝工單之成本獨立核算，與主鞋體製造成本脫鉤。

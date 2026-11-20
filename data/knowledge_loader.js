@@ -12,7 +12,7 @@ window.PP_KNOWLEDGE = {
       "跨模組顧問"
     ],
     "last_updated": "2026-11-17",
-    "tcode_count": 74,
+    "tcode_count": 77,
     "table_count": 17
   },
   "issues": [
@@ -423,8 +423,8 @@ window.PP_KNOWLEDGE = {
     {
       "type": "ZP04",
       "name": "包裝工單",
-      "scenario": "成品鞋裝箱、加附吊牌、貼標或 VAS 客製化加值包裝（不展 BOM 架構）。",
-      "trigger_tcode": "CO07",
+      "scenario": "成品鞋裝箱、加附吊牌、貼標或 VAS 客製化加值包裝（不展 BOM 架構；除 CO07 外，可由業務 SD 程式 ZSD003A / ZSD003B / ZSD008 展開）。",
+      "trigger_tcode": "CO07 / ZSD003A / ZSD003B / ZSD008",
       "pick_type": "包裝工單 (ZP04)",
       "cost_rule": "領用包裝材（外箱、吊牌、乾燥劑），結算至銷貨成本-重工 G/L 51110099。",
       "mes_dispatch": "不派工 (X)",
@@ -1387,7 +1387,37 @@ window.PP_KNOWLEDGE = {
       "name": "建立無物料生產訂單 (包裝/重工)",
       "category": "工單與排程",
       "role": "生管 (PP)",
-      "desc": "建立無物料表頭之包裝工單 (ZP04)，不展階，成本直接進重工科目 51110099。",
+      "desc": "建立無物料表頭之包裝工單 (ZP04) 或製程代工單 (ZP07)，不展階，ZP04 成本直接進重工科目 51110099。",
+      "scenarios": [
+        "【場景 12】包裝工單與 VAS 客製加值循序"
+      ]
+    },
+    {
+      "code": "ZSD003A",
+      "name": "CROCS 包裝工單展開 (SD)",
+      "category": "工單與排程",
+      "role": "業務 (SD) / 生管 (PP)",
+      "desc": "由業務 (SD) 執行的客製程式，針對 CROCS 品牌訂單自動展開建立 ZP04 包裝工單。",
+      "scenarios": [
+        "【場景 12】包裝工單與 VAS 客製加值循序"
+      ]
+    },
+    {
+      "code": "ZSD003B",
+      "name": "包裝工單展開-除 CROCS 之外品牌 (SD)",
+      "category": "工單與排程",
+      "role": "業務 (SD) / 生管 (PP)",
+      "desc": "由業務 (SD) 執行的客製程式，針對除 CROCS 之外各品牌訂單展開建立 ZP04 包裝工單。",
+      "scenarios": [
+        "【場景 12】包裝工單與 VAS 客製加值循序"
+      ]
+    },
+    {
+      "code": "ZSD008",
+      "name": "VAS 加值包裝工單展開 (SD)",
+      "category": "工單與排程",
+      "role": "業務 (SD) / 生管 (PP)",
+      "desc": "由業務 (SD) 執行的客製程式，針對客製化加值服務 (VAS) 需求展開建立 ZP04 包裝工單。",
       "scenarios": [
         "【場景 12】包裝工單與 VAS 客製加值循序"
       ]
