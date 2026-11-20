@@ -3300,7 +3300,8 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
           id: 'S1_C2',
-          stepCode: 'STEP 1.2',
+          stepCode: 'STEP 1.2-A（🟢 軌道 A）',
+          stepBadgeClass: 'badge-track-a',
           title: '正式銷售訂單 (ZOR1) 與預告銷售訂單 (ZA01) 開立與 Z3 沖銷防呆',
           tcodes: ['DeGen', 'ZSD012', 'ZSD019', 'VA03'],
           desc: '業務透過 <strong><code>DeGen</code></strong> 下銷售訂單，由 <code>ZSD012</code> 背景批次匯入。<br>若為提前採購長交期材料而開立 <strong>預告訂單 (<code>ZA01</code>)</strong>，在跑完 <code>MD01N</code> 並把 PR 轉成 PO 後，<strong>必須立即用 <code>ZSD019</code> 批次壓上拒絕原因 <code>Z3 (預告訂單關閉)</code></strong>。<br>生管可由 <code>VA03</code> 查詢銷售訂單。',
@@ -3308,7 +3309,8 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
           id: 'S1_C3',
-          stepCode: 'STEP 1.3',
+          stepCode: 'STEP 1.2-B（🟣 軌道 B）',
+          stepBadgeClass: 'badge-track-b',
           title: 'PIR 預測獨立需求建立 (MD61 / ZPP006) — 嚴守版本 01 隔離原則',
           tcodes: ['MD61', 'MD62', 'ZPP006'],
           desc: '生管透過 <code>ZPP006</code> 批次上傳或 <code>MD61</code> 維護滾動預測時，<strong>版本必須選 <code>01</code>（非啟用之模擬版本）</strong>，計畫期間選 <code>M (月)</code> 或 <code>W (週)</code>。嚴禁將未確認之滾動預測直接勾選為啟用版本 (<code>00</code> + Active)，否則會混入正式 <code>MD01N</code> 產生巨量假請購單。',
@@ -3321,14 +3323,14 @@ document.addEventListener('DOMContentLoaded', () => {
           cause: '銷售訂單明細可能被壓了「拒絕原因 (如 Z3)」、交貨計畫行未確認，或 DeGen 拋轉前未設妥 ZMMT059_3/ZMMT059_4 參數，導致 MM42「後勤：配銷中心」的 MRP 類型為 ND 或缺策略群組。',
           targetStageId: 'STAGE_1',
           targetCheckId: 'S1_C1',
-          jumpLabel: '檢查本階段 Step 1.1 (ZMMT059_3/4 預設表 & MM42 後勤參數) 與 Step 1.2'
+          jumpLabel: '檢查本階段 Step 1.1 (ZMMT059_3/4 預設表 & MM42 後勤參數) 與 Step 1.2-A'
         },
         {
           symptom: '同一個型體跑完 MRP 後，材料請購單 (PR) 與計畫單數量竟然暴增為兩倍？',
           cause: '先前開立的「預告銷售訂單 (ZA01)」在轉完採購單後，忘記到 ZSD019 壓拒絕原因 Z3 關閉，導致與新進的正式訂單 (ZOR1) 疊加！',
           targetStageId: 'STAGE_1',
           targetCheckId: 'S1_C2',
-          jumpLabel: '檢查本階段 Step 1.2 (ZSD019 預告單 Z3 結案防呆)'
+          jumpLabel: '檢查本階段 Step 1.2-A (ZSD019 預告單 Z3 結案防呆)'
         }
       ],
       tools: [
@@ -3798,7 +3800,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="roadmap-check-item" id="check-${chk.id}">
         <div class="check-item-top">
           <div class="check-item-title">
-            <span class="badge badge-info" style="font-family:var(--font-mono);">${chk.stepCode}</span>
+            <span class="badge ${chk.stepBadgeClass || 'badge-info'}" style="font-family:var(--font-mono);">${chk.stepCode}</span>
             ${chk.title}
           </div>
           <div class="check-item-tcodes">

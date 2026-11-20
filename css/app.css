@@ -3586,6 +3586,30 @@ body.light-theme .deck-card-action {
   border: 1px solid rgba(56, 189, 248, 0.4);
 }
 
+.badge-track-a {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.45);
+}
+
+.badge-track-b {
+  background: rgba(168, 85, 247, 0.16);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.45);
+}
+
+body.light-theme .badge-track-a {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+body.light-theme .badge-track-b {
+  background: rgba(168, 85, 247, 0.12);
+  color: #6d28d9;
+  border-color: rgba(168, 85, 247, 0.5);
+}
+
 .badge-warning {
   background: var(--amber-bg);
   color: var(--amber);
