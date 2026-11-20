@@ -3576,8 +3576,8 @@ document.addEventListener('DOMContentLoaded', () => {
             '</table>' +
             '</div>' +
             '<div style="background:rgba(245,158,11,0.08); border-left:3px solid var(--amber); padding:0.6rem 0.85rem; border-radius:6px; font-size:0.78rem; line-height:1.6; color:var(--text-secondary);">' +
-            '<strong>📌 注意事項守則（杜奕功 EC 會議說明）</strong>：<br>' +
-            '1. 因為未結採購單轉檔已經包含補單，DeERP 未結補單在 SAP 開補用 <code>ZPP022_NOPR</code> (不產生請購)。<br>' +
+            '<strong>📌 注意事項守則</strong>：<br>' +
+            '1. 如果未結採購單轉檔已包含補單，DeERP 未結補單在 SAP 開補用 <code>ZPP022_NOPR</code> (不產生請購)。<br>' +
             '2. 後續新接單或 SAP 上線後的開補，使用 <code>ZPP022</code> (正常產生請購)。<br>' +
             '3. 在 DeERP 已經預入庫的指令，已經預領料預入庫，現場作業到完成。<br>' +
             '4. 在 DeERP 已經預入庫的指令，在 SAP 上線後因為超額損耗，在 SAP 正常開補 <code>ZPP022</code>。<br>' +
