@@ -3448,10 +3448,10 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'S3_C1',
           stepCode: 'STEP 3.1',
-          title: '正式 MRP Live 執行要點 (MD01N)：規劃模式 1 vs 3 與半成品連帶展開',
+          title: '正式 MRP Live 執行要點 (MD01N)：計畫模式 1 vs 3 與半成品連帶展開',
           tcodes: ['MD01N', 'MD04'],
-          desc: '在 <code>MD01N</code> 執行正式 MRP 時，若工程剛修改過 Stage 2 的 BOM (<code>CS02</code>) 或生產版本 (<code>C223</code>)，<strong>規劃模式務必選擇 <code>3 (刪除並重新建立規劃資料)</code></strong>，並勾選「規劃變更之 BOM 組件」，系統才會把舊的未確認計畫單刪掉、按最新 BOM 重算！',
-          forwardImpact: '👉 影響後續：若改了 BOM 卻只用模式 1 或沒重跑 MD01N，Stage 4 轉出來的工單仍會帶著舊版錯誤的組件清單！'
+          desc: '在 <code>MD01N</code> 執行正式 MRP 時，依主檔異動情況選擇「計畫模式」：<br>• <strong>計畫模式 <code>1</code>（一般運算）</strong>：如果 Stage 2 的 BOM (<code>CS02</code>) 或生產版本 (<code>C223</code>) 沒有改變，只要選<strong>計畫模式 <code>1</code></strong> 即可；<br>• <strong>計畫模式 <code>3</code>（刪除並重新建立規劃資料）</strong>：若剛修改過 Stage 2 的 BOM (<code>CS02</code>) 或生產版本 (<code>C223</code>)，<strong>計畫模式務必選擇 <code>3</code></strong>，並勾選「規劃變更之 BOM 組件」，系統才會把舊的未確認計畫單刪掉、按最新 BOM 重算！',
+          forwardImpact: '👉 影響後續：若改了 BOM 卻只用計畫模式 1 或沒重跑 MD01N，Stage 4 轉出來的工單仍會帶著舊版錯誤的組件清單！'
         },
         {
           id: 'S3_C2',
