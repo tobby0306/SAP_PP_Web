@@ -4123,7 +4123,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Render 6-Stage Metro Bar
     metroBar.innerHTML = ppRoadmapStages.map(st => {
-      const isActive = state.roadmapViewMode === 'single' && state.activeRoadmapStage === st.id;
+      const isActive = state.activeRoadmapStage === st.id;
       return `
         <button class="metro-node-btn ${isActive ? 'active' : ''}" onclick="window.selectRoadmapStage('${st.id}')">
           <div class="metro-node-top">
@@ -4136,24 +4136,15 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }).join('');
 
-    // 2. Render Stage Content (Single active stage or All 6 stages)
-    if (state.roadmapViewMode === 'all') {
-      stageContainer.innerHTML = ppRoadmapStages.map((st, i) => renderRoadmapStageHtml(st, i, ppRoadmapStages.length)).join('');
-    } else {
-      const idx = ppRoadmapStages.findIndex(s => s.id === state.activeRoadmapStage);
-      const activeIdx = idx >= 0 ? idx : 0;
-      stageContainer.innerHTML = renderRoadmapStageHtml(ppRoadmapStages[activeIdx], activeIdx, ppRoadmapStages.length);
-    }
+    // 2. Render Stage Content (Single active stage)
+    const idx = ppRoadmapStages.findIndex(s => s.id === state.activeRoadmapStage);
+    const activeIdx = idx >= 0 ? idx : 0;
+    stageContainer.innerHTML = renderRoadmapStageHtml(ppRoadmapStages[activeIdx], activeIdx, ppRoadmapStages.length);
   }
 
   window.selectRoadmapStage = (stageId) => {
     state.activeRoadmapStage = stageId;
     state.roadmapReturnStage = stageId;
-    if (state.roadmapViewMode === 'all') {
-      const card = document.getElementById(`roadmap-card-${stageId}`);
-      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
     renderPpRoadmap();
   };
 

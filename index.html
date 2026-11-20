@@ -14,7 +14,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=26">
+  <link rel="stylesheet" href="css/app.css?v=27">
 </head>
 
 <body>
@@ -66,14 +66,13 @@
     <nav class="tabs-bar" id="navigation-tabs" role="tablist">
       <button class="tab-btn active" data-tab="tab-pp-roadmap" id="tab-btn-pp-roadmap" role="tab">
         🧭 PP 全流程主幹線 (PIR/SO ➔ TECO)
-        <span class="badge-tag badge-emerald" style="font-size: 0.68rem;">全流程因果導航</span>
       </button>
       <button class="tab-btn" data-tab="tab-cheat-sheet" id="tab-btn-cheat-sheet" role="tab">
         🚨 秒級急救表
         <span class="tab-count" id="count-cheat-sheet">19</span>
       </button>
       <button class="tab-btn" data-tab="tab-tcode-dictionary" id="tab-btn-tcode-dictionary" role="tab">
-        🗺️ 業務情境 T-Code 循序地圖 (69 大字典)
+        🗺️ 業務情境 T-Code 循序地圖
       </button>
     </nav>
 
@@ -91,26 +90,16 @@
     <!-- TAB 0 (Default Home): PP 全流程主幹線導航 (End-to-End Lifecycle Navigator) -->
     <section class="tab-panel active" id="tab-pp-roadmap" role="tabpanel">
       <div class="roadmap-hero-card">
-        <div
-          style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
           <div>
             <h2
               style="font-size: 1.28rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.3rem;">
               <span>🧭</span>
-              <span>SAP PP 模組全流程因果導航主幹線（從 PIR/接單 ➔ 主檔 ➔ MRP ➔ 工單 ➔ 報工 ➔ TECO）</span>
+              <span>SAP PP 模組全流程主幹線（從 PIR/接單 ➔ 主檔 ➔ MRP ➔ 工單 ➔ 報工 ➔ TECO）</span>
             </h2>
             <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55;">
-              順著 PP 業務時間軸走：每一站都清楚標示 <strong>「🟢 現在設什麼（防呆重點＆往後影響）」</strong>、<strong>「🔴 出事時往前檢查哪一步（點擊可一鍵退回上游關卡）」</strong>
-              以及 <strong>「🛠️ 一鍵開啟本站專屬試算器／沙盒」</strong>！
+              順著 PP 業務時間軸走：每一站都清楚標示 <strong>「🟢 現在設什麼（防呆重點＆往後影響）」</strong> 與 <strong>「🔴 出事時往前檢查哪一步（點擊可一鍵退回上游關卡）」</strong>。
             </p>
-          </div>
-          <div class="view-mode-toggle-group">
-            <button class="view-mode-btn active" id="btn-roadmap-single" onclick="setRoadmapViewMode('single')">
-              🎯 單站深度檢視 (點選 1~6 站)
-            </button>
-            <button class="view-mode-btn" id="btn-roadmap-all" onclick="setRoadmapViewMode('all')">
-              📜 全流程 1~6 站一頁縱覽
-            </button>
           </div>
         </div>
 
@@ -1465,8 +1454,8 @@
   <div class="toast" id="app-toast">⚡ 已複製交易碼至剪貼簿</div>
 
   <!-- Data & Script Bundle (Supports both file:// offline launch & web server) -->
-  <script src="data/knowledge_loader.js?v=26"></script>
-  <script src="js/app.js?v=26"></script>
+  <script src="data/knowledge_loader.js?v=27"></script>
+  <script src="js/app.js?v=27"></script>
 </body>
 
 </html>
