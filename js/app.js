@@ -3353,17 +3353,17 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'S2_C1',
           stepCode: 'STEP 2.1',
-          title: '部位代碼 (ZPP001) ➔ BOM 與九宮格尺碼維護 (CS01/CS02/ZPP002) ➔ 異常修復 (ZPPBOMFIX)',
+          title: '部位代碼 (ZPP001) ➔ BOM 與首投製程/九宮格維護 (CS01/CS02/ZPP002) ➔ 異常修復 (ZPPBOMFIX)',
           tcodes: ['ZPP001', 'CS01', 'CS02', 'ZPP002', 'ZPPBOMFIX'],
-          desc: '① 先在 <code>ZPP001</code> 定義部位代碼並綁定<strong>「首工序作業代號 (<code>ZZFIRST</code>)」</strong>；<br>② 建立 BOM (<code>CS01</code> / <code>ZPP002</code>) 時，輸入部位代碼於排序字串，系統會自動帶出首工序（<strong>決定日後 <code>ZPP020</code> 領料單如何按裁斷/針車/成型分單領料</strong>）；<br>③ 針對分尺碼材料（大底、中底、楦頭），於 <strong><code>CS02</code> 或 <code>ZPP002</code></strong> 維護「九宮格尺碼區段」；若母階 (GA) 與尺碼變體 (VA) 發生漏碼不同步，立即執行 <strong><code>ZPPBOMFIX</code></strong> 自動補齊（底層關聯表為 <code>FSH_BOM_VD</code>，異常時由顧問查核）；<br>④ 廠內自製貼合半成品不領料者，特殊採購類設為 <strong><code>50</code> (虛擬件 Phantom)</strong>。',
-          forwardImpact: '👉 影響後續：若漏設首工序 ZZFIRST，Stage 5 現場用 ZPP020 列印領料單時會無法按工段分單；若九宮格漏碼，Stage 3 跑 MRP 時該尺碼將展不出相對應尺碼需求！'
+          desc: '① 先在 <code>ZPP001</code> 定義品牌部位代碼與名稱（如鞋面、鞋舌、大底）；<br>② 建立或修改 BOM (<code>CS01</code> / <code>CS02</code> / <code>ZPP002</code> 上傳) 時，於元件明細輸入部位代碼於排序字串，並綁定<strong>「首投製程 (<code>ZZFIRST</code>)」</strong>（<strong>決定日後 <code>ZPP020</code> 領料單如何按裁斷/針車/成型分單領料</strong>）；<br>③ 針對分尺碼材料（大底、中底、楦頭），於 <strong><code>CS02</code> 或 <code>ZPP002</code></strong> 維護「九宮格尺碼區段」；若母階 (GA) 與尺碼變體 (VA) 發生漏碼不同步，立即執行 <strong><code>ZPPBOMFIX</code></strong> 自動補齊（底層關聯表為 <code>FSH_BOM_VD</code>，異常時由顧問查核）；<br>④ 廠內自製貼合半成品不領料者，特殊採購類設為 <strong><code>50</code> (虛擬件 Phantom)</strong>。',
+          forwardImpact: '👉 影響後續：若 BOM 漏設首投製程 (ZZFIRST)，Stage 5 現場用 ZPP020 列印領料單時會無法按工段分單；若九宮格漏碼，Stage 3 跑 MRP 時該尺碼將展不出相對應尺碼需求！'
         },
         {
           id: 'S2_C2',
           stepCode: 'STEP 2.2',
-          title: '工作中心 (CR01) ➔ 標準途程 (CA01/ZPP003)：控制碼 PP01~PP08、基礎數量 AF、直接人工 AK 與分割數',
-          tcodes: ['CR01', 'CA01', 'CA02', 'ZPP003'],
-          desc: '① <code>CR01</code> 工作中心必須綁定財務<strong>成本中心</strong>與作業類型 (<code>AK</code> 直接人工、<code>AM</code> 機器)；<br>② <code>CA01</code> / <code>ZPP003</code> 建立途程各道工序時，必須正確配置<strong>控制碼 (<code>PP01</code> 廠內報工、<code>PP02/PP06/PP07</code> 工序委外、<code>PP05</code> 排程不報工)</strong>；<br>③ <strong>鐵律：整個途程的最後一道工序（且僅限一道）必須設為 <code>PP03</code>（廠內末站自動 101 入庫）或 <code>PP08</code>（外包末站收貨自動 101 入庫）</strong>；<br>④ 準確設定<strong>基礎數量 (<code>AF</code>，如 1,000 雙)</strong>、<strong>直接人工 (<code>AK</code> 分鐘)</strong> 與 <strong>最大分割數 (<code>Splitting</code> 機台/人數)</strong>。',
+          title: '工作中心 (CR01/CR02) ➔ 標準途程 (CA01/ZPP003)：控制碼 PP01~PP08、標準值與分割數',
+          tcodes: ['CR01', 'CR02', 'CA01', 'CA02', 'ZPP003'],
+          desc: '① <code>CR01</code> / <code>CR02</code> 工作中心於「成本計算」分頁綁定財務<strong>成本中心</strong>與 6 項作業類型（<code>1000</code> 直接人工、<code>2000</code> 直間人工、<code>3000</code> 固定、<code>4000</code> 變動、<code>5000</code> 折舊、<code>6000</code> 其他費用，單位 <code>H</code>，產能公式 <code>ZSAP06</code>；「排程」分頁設 <code>ZSAP02</code>）；<br>② <code>CA01</code> / <code>CA02</code> / <code>ZPP003</code> 建立途程各道工序時，必須正確配置<strong>控制碼 (<code>PP01</code> 廠內報工、<code>PP02/PP06/PP07</code> 工序委外、<code>PP05</code> 里程碑報工)</strong>；<br>③ <strong>鐵律：整個途程的最後一道工序（且僅限一道）必須設為 <code>PP03</code> / <code>PP08</code>（廠內末站自動 101 入庫，<code>PP08</code> 含里程碑補報）或 <code>PP07</code>（外包末站收貨自動 101 入庫）</strong>；<br>④ 於途程工序明細準確設定<strong>基礎數量</strong>（如 1,000 雙）、<strong>標準值工時（直接人工等）</strong>與 <strong>最大分割數 (<code>Splitting</code> 機台/人數)</strong>。',
           forwardImpact: '👉 影響後續：直接決定 Stage 4 工單排程天數、Stage 5 末站報工能否自動 101 成品入庫，以及財務 CK40N 標準成本估算！'
         },
         {
