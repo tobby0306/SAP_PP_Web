@@ -1,7 +1,7 @@
 ---
 module: PP
 type: Manual
-tcode: [ZPP001, CS01, CS02, CS03, ZPP002, CC01, CC02, CR01, CA01, CA03, ZPP003, C223, ZC223, MD01N, MD02, MD04, MD04P, MD61, MD62, MD63, ZPP006, MS31, MS32, MS01, MSBT, ZPPQ02, MS04, ZPP914, FSH_PCW, ZPP015, CO01, CO02, CO03, CO07, CO13, ZPP014A, ZPP014B, ZPP016, ZPP019, ZPP020, ZPP021, MIGO, ZPP024, ZPP010, ZPP022, ZPP017A, ZPP017B, CO11N, COGI, COOIS, ZPP042, ZPPQ42, ZPP031, ZPP032, ZMM046, ZMM046M, ZMM047, ZPP110, ZSD012, ZSD013, ZMM091, ZPPQ01, VA03, SE16N, ME27, ME21N, ME11, ME2O]
+tcode: [MM41, MM42, MM43, ZPP001, CS01, CS02, CS03, ZPP002, CC01, CC02, CR01, CA01, CA03, ZPP003, C223, ZC223, MD01N, MD02, MD04, MD04P, MD61, MD62, MD63, ZPP006, MS31, MS32, MS01, MSBT, ZPPQ02, MS04, ZPP914, FSH_PCW, ZPP015, CO01, CO02, CO03, CO07, CO13, ZPP014A, ZPP014B, ZPP016, ZPP019, ZPP020, ZPP021, MIGO, ZPP024, ZPP010, ZPP022, ZPP017A, ZPP017B, CO11N, COGI, COOIS, ZPP042, ZPPQ42, ZPP031, ZPP032, ZMM046, ZMM046M, ZMM047, ZPP110, ZSD012, ZSD013, ZMM091, ZPPQ01, VA03, SE16N, ME27, ME21N, ME11, ME2O]
 tables: [AFKO, AFPO, RESB, MAST, STKO, STPO, PLPO, MARC, FSH_BOM_VD, PPH_DBVM, EKPO, AENR, ZPPL016_H, ZPPL016_R, ZPPL016_TMP, ZPPL017, ZMMT046]
 last_updated: 2026-10-16
 ---
@@ -18,7 +18,8 @@ last_updated: 2026-10-16
   - [0.1 集團 10 大生產業務場景與系統介接總覽矩陣 (Slide 17 全場景)](#01-集團-10-大生產業務場景與系統介接總覽矩陣-slide-17-全場景)
   - [0.2 ZP01~ZP07 核心工單屬性與執行參數對照表](#02-zp01zp07-核心工單屬性與執行參數對照表)
   - [0.3 跨部門角色職責與交接邊界矩陣 (RACI Matrix)](#03-跨部門角色職責與交接邊界矩陣-raci-matrix)
-- [第 1 章：PP 基礎主檔建置深度實戰（部位 ➔ BOM ➔ 途程 ➔ 生產版本）](#第-1-章pp-基礎主檔建置深度實戰部位--bom--途程--生產版本)
+- [第 1 章：PP 基礎主檔建置深度實戰（商品物料 ➔ 部位 ➔ BOM ➔ 途程 ➔ 生產版本）](#第-1-章pp-基礎主檔建置深度實戰商品物料--部位--bom--途程--生產版本)
+  - [1.0 鞋業商品/物料主檔建置與後勤 MRP 參數 (MM41 / MM42 / MM43)](#10-鞋業商品物料主檔建置與後勤-mrp-參數-mm41--mm42--mm43)
   - [1.1 品牌部位代碼維護 (ZPP001)](#11-品牌部位代碼維護-zpp001)
   - [1.2 BOM 主檔與 Fashion 九宮格維護 (CS01 / CS02 / ZPP002)](#12-bom-主檔與-fashion-九宮格維護-cs01--cs02--zpp002)
   - [1.3 工作中心與標準途程建置 (CR01 / CA01 / ZPP003)](#13-工作中心與標準途程建置-cr01--ca01--zpp003)
@@ -184,7 +185,26 @@ flowchart TD
 
 ---
 
-## 第 1 章：PP 基礎主檔建置深度實戰（部位 ➔ BOM ➔ 途程 ➔ 生產版本）
+## 第 1 章：PP 基礎主檔建置深度實戰（商品物料 ➔ 部位 ➔ BOM ➔ 途程 ➔ 生產版本）
+
+### 1.0 鞋業商品/物料主檔建置與後勤 MRP 參數 (MM41 / MM42 / MM43)
+> 💡 **鞋業 S/4HANA Fashion (IS-Retail) 架構核心特點**：  
+> 標準離散製造業使用 `MM01` / `MM02` / `MM03` 維護「物料主檔 (Material Master)」。  
+> 然而集團鞋業導入 **SAP S/4HANA Fashion** 產業套件，成品鞋（含型體、色號與九宮格尺碼變體）、半成品及材料全面採用 **Article Master (商品/物料主檔)**，標準交易碼為 **`MM41` (建立)**、**`MM42` (修改/擴展)** 與 **`MM43` (顯示)**！
+
+* **料號類型與架構**：
+  1. **母階通用商品 (Generic Article, GA)**：代表鞋款型體（如款號/顏色），不含具體尺碼。
+  2. **尺碼變體商品 (Variant Article, VA)**：在 GA 底下依據九宮格尺碼矩陣（Size Run）自動展出各尺碼之具體料號，工單與庫存均扣減至變體層級。
+  3. **單一物料 (Single Article, 如材料/半成品 `ZR01`)**：橡膠、大底、貼合布、車縫線等各類鞋材直接以單一物料建立。
+* **生管必查核心視圖 ——「後勤：配銷中心 (Logistics: DC)」**：
+  在 Fashion 架構中，標準 MM 的 `MRP 1 ~ MRP 4` 參數被收納在**「後勤：配銷中心」**視圖中。接單排產前，必須確認以下關鍵欄位已由資材/生管設妥：
+  * **MRP 類型 (MRP Type)**：必須設定為 **`PD` (MRP 需求運算)**。若誤設為 `ND` (不進行規劃)，Stage 3 執行 `MD01N` / `MS01` 時將完全漏跑該料號！
+  * **策略群組 (Strategy Group)**：鞋業量產普遍為 **`20` (MTO 銷售訂單生產)** 或預測儲備之 **`40` (MTS 預測庫存生產)**，決定後續需求如何被沖銷與轉工單。
+  * **批量大小 (Lot Size)**：通常設為 **`EX` (批對批 Lot-for-lot)**，緊扣訂單需求量生產與請購。
+  * **個別/彙總指示碼 (Individual/Collective)**：`1` 表示僅個別需求（專款專料，綁 SO 工單）；`2` 表示僅彙總需求（共用材料跨單合併採購）。
+  * **工廠特定物料狀態 (Plant-Specific Material Status)**：若標記為凍結或作廢，工單將無法釋放 (`E006`)。
+
+---
 
 ### 1.1 品牌部位代碼維護 (ZPP001) <!-- 來源: ku_pp_zpp001_品牌部位代號及名稱維護.md -->
 * **用途**：定義鞋型之裁斷部位代號（如鞋面 Upper、鞋舌 Tongue、鞋帶 Lace、內裡 Lining）。

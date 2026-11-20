@@ -3293,10 +3293,10 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'S1_C1',
           stepCode: 'STEP 1.1',
-          title: '物料主檔 (MM01/MM02) 策略群組與 MRP 參數設定',
-          tcodes: ['MM01', 'MM02'],
-          desc: '成品與半成品在接單或建立 PIR 前，必須先於物料主檔 <code>MRP 1 ~ MRP 4</code> 視圖設妥：<strong>MRP 類型 (<code>PD</code>)</strong>、<strong>策略群組 (Strategy Group，決定 MTO 訂單生產或 MTS 預測生產)</strong>、<strong>批量大小 (<code>EX</code> 批對批)</strong> 與 <strong>個別/彙總指示碼 (<code>1</code> 僅個別需求 或 <code>2</code> 彙總)</strong>。',
-          forwardImpact: '👉 影響後續：若策略群組或 MRP 類型設為 ND (不規劃)，Stage 3 跑 MD01N / MS01 時系統將完全跳過該鞋型！'
+          title: '鞋業商品/物料主檔 (MM41/MM42/MM43) 策略群組與後勤 MRP 參數設定',
+          tcodes: ['MM41', 'MM42', 'MM43'],
+          desc: '集團鞋業在 <strong>SAP S/4HANA Fashion (IS-Retail)</strong> 架構下，成品鞋（含型體/色號/九宮格尺碼變式）、半成品與材料均屬於 Article (商品/物料主檔)，使用 <strong><code>MM41</code> (建立)</strong>、<strong><code>MM42</code> (修改)</strong>、<strong><code>MM43</code> (顯示)</strong> 維護。<br>生管在接單或建立 PIR 前，必須先於<strong>「後勤：配銷中心 (Logistics: DC)」</strong>視圖設妥關鍵生管與 MRP 參數：<br>① <strong>MRP 類型 (<code>PD</code>)</strong>：決定納入正式 MRP 需求運算（若誤設為 <code>ND</code> 則系統不規劃）；<br>② <strong>策略群組 (Strategy Group)</strong>：決定 <strong><code>20</code> (MTO 銷售訂單生產)</strong> 或 <strong><code>40</code> (MTS 預測庫存生產)</strong>；<br>③ <strong>批量大小 (<code>EX</code> 批對批)</strong> 與 <strong>個別/彙總指示碼 (<code>1</code> 僅個別需求 或 <code>2</code> 彙總)</strong>。',
+          forwardImpact: '👉 影響後續：若策略群組或 MRP 類型誤設為 ND (不規劃)，Stage 3 跑 MD01N / MS01 時系統將完全跳過該鞋型！'
         },
         {
           id: 'S1_C2',
@@ -3318,10 +3318,10 @@ document.addEventListener('DOMContentLoaded', () => {
       tracebacks: [
         {
           symptom: '在 MD04 看不到客戶剛下的銷售訂單需求，或跑完 MRP 完全沒反應？',
-          cause: '銷售訂單明細可能被壓了「拒絕原因 (如 Z3)」、交貨計畫行未確認，或物料主檔 MM02 的 MRP 類型被設為 ND。',
+          cause: '銷售訂單明細可能被壓了「拒絕原因 (如 Z3)」、交貨計畫行未確認，或商品/物料主檔 MM42「後勤：配銷中心」的 MRP 類型被誤設為 ND (不規劃)。',
           targetStageId: 'STAGE_1',
           targetCheckId: 'S1_C1',
-          jumpLabel: '檢查本階段 Step 1.1 (MM02 MRP 參數) 與 Step 1.2 (SO 拒絕原因)'
+          jumpLabel: '檢查本階段 Step 1.1 (MM42 後勤配銷中心 MRP 參數) 與 Step 1.2 (SO 拒絕原因)'
         },
         {
           symptom: '同一個型體跑完 MRP 後，材料請購單 (PR) 與計畫單數量竟然暴增為兩倍？',
@@ -3376,7 +3376,7 @@ document.addEventListener('DOMContentLoaded', () => {
           id: 'S2_C4',
           stepCode: 'STEP 2.4',
           title: '生產版本四合一綁定 (C223 / ZC223) — 綠燈檢核與有效日期對齊',
-          tcodes: ['C223', 'ZC223', 'MM02'],
+          tcodes: ['C223', 'ZC223', 'MM42'],
           desc: 'MRP 與工單不會直接去抓 BOM 或途程，而是只認 <strong>生產版本 (<code>C223</code> / 批導 <code>ZC223</code>)</strong>！<br>① 將「成品/半成品料號 + 批量範圍 (1 ~ 99,999,999) + <strong>有效起訖日期</strong> + <strong>途程群組/計數器</strong> + <strong>BOM 用途/可選 BOM</strong>」綁定為版本 <code>0001</code>；<br>② 點擊<strong>「檢查 (Check)」按鈕，確保途程與 BOM 雙雙亮起 🟢 綠燈</strong>；<br>③ <strong>⚠️ 日期鐵律：生產版本的「有效起始日」必須 <code>&gt;=</code> 途程 (<code>CA01</code>) 與 BOM (<code>CS01</code>) 的有效起始日</strong>，否則轉工單必崩潰！',
           forwardImpact: '👉 影響後續：這是連接 Stage 2 主檔與 Stage 3 MRP / Stage 4 開工單的唯一橋樑！C223 沒亮綠燈，後面一步都走不動。'
         }

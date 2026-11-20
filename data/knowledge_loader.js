@@ -12,7 +12,7 @@ window.PP_KNOWLEDGE = {
       "跨模組顧問"
     ],
     "last_updated": "2026-11-17",
-    "tcode_count": 69,
+    "tcode_count": 72,
     "table_count": 17
   },
   "issues": [
@@ -988,6 +988,39 @@ window.PP_KNOWLEDGE = {
     }
   ],
   "tcodes": [
+    {
+      "code": "MM41",
+      "name": "建立商品/物料主檔 (Fashion)",
+      "category": "基礎主檔",
+      "role": "主檔組 / 生管",
+      "desc": "SAP S/4HANA Fashion 鞋業專用商品/物料主檔建立。設定基本資料、分類與『後勤：配銷中心 (Logistics: DC)』視圖之 MRP 參數 (PD、批量、策略群組)。",
+      "scenarios": [
+        "【場景 1】PP 基礎主檔建置標準循序",
+        "【場景 2】MTO 銷售訂單到生產工單全流程"
+      ]
+    },
+    {
+      "code": "MM42",
+      "name": "修改商品/物料主檔 (Fashion)",
+      "category": "基礎主檔",
+      "role": "主檔組 / 生管",
+      "desc": "鞋業商品/物料主檔異動。於『後勤：配銷中心』視圖調整 MRP 類型 (PD/ND)、工廠特定狀態、生產版本 (C223) 與安全庫存。",
+      "scenarios": [
+        "【場景 1】PP 基礎主檔建置標準循序",
+        "【場景 2】MTO 銷售訂單到生產工單全流程"
+      ]
+    },
+    {
+      "code": "MM43",
+      "name": "顯示商品/物料主檔 (Fashion)",
+      "category": "基礎主檔",
+      "role": "生管 / 業務 / 倉管",
+      "desc": "鞋業商品/物料主檔各視圖查詢。檢視基本資料 (ZR01/計量單位)、後勤配銷中心 MRP 1~4 參數與工廠庫存狀態。",
+      "scenarios": [
+        "【場景 1】PP 基礎主檔建置標準循序",
+        "【場景 2】MTO 銷售訂單到生產工單全流程"
+      ]
+    },
     {
       "code": "ZPP001",
       "name": "品牌部位代碼維護",
