@@ -3320,7 +3320,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tracebacks: [
         {
           symptom: '在 MD04 看不到客戶剛下的銷售訂單需求，或跑完 MRP 完全沒反應？',
-          cause: '銷售訂單明細可能被壓了「拒絕原因 (如 Z3)」、交貨計畫行未確認，或 DeGen 拋轉前未設妥 ZMMT059_3/ZMMT059_4 參數，導致 MM42「後勤：配銷中心」的 MRP 類型為 ND 或缺策略群組。',
+          cause: '銷售訂單明細可能已被取消或壓上「拒絕原因（如 Z2 取消、Z3 預告訂單關閉）」、交貨計畫行未確認，或 DeGen 拋轉前未設妥 ZMMT059_3/ZMMT059_4 參數，導致 MM42「後勤：配銷中心」的 MRP 類型為 ND 或缺策略群組。',
           targetStageId: 'STAGE_1',
           targetCheckId: 'S1_C1',
           jumpLabel: '檢查本階段 Step 1.1 (ZMMT059_3/4 預設表 & MM42 後勤參數) 與 Step 1.2-A'
@@ -3815,7 +3815,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tracebacksHtml = stage.tracebacks.map(tb => `
       <div class="trace-back-card">
         <div class="trace-symptom">🚨 異常現象：${tb.symptom}</div>
-        <div class="trace-cause">🔍 根因定位：${tb.cause}</div>
+        <div class="trace-cause">🔍 可能原因：${tb.cause}</div>
         <button class="trace-jump-btn" onclick="window.traceBackToStage('${tb.targetStageId}', '${tb.targetCheckId}')">
           🎯 ${tb.jumpLabel}
         </button>
