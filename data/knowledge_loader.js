@@ -11,8 +11,8 @@ window.PP_KNOWLEDGE = {
       "資材倉管 (MM)",
       "跨模組顧問"
     ],
-    "last_updated": "2026-10-16",
-    "tcode_count": 68,
+    "last_updated": "2026-11-17",
+    "tcode_count": 69,
     "table_count": 17
   },
   "issues": [
@@ -355,6 +355,29 @@ window.PP_KNOWLEDGE = {
       "raci_owner": "MM (倉管) + PP (生管)",
       "forbidden_action": "嚴禁在 MIGO 勾銷 543 耗用明細強制過帳 101，這會造成供應商無料卻產出加工品，帳實嚴重脫節！",
       "badge": "委外庫存"
+    },
+    {
+      "id": "E_TRANS_CUTOVER_REORDER",
+      "title": "ERP轉檔補單誤開 (ZPP022 vs ZPP022_NOPR 溢買防呆)",
+      "severity": "CRITICAL",
+      "category": "系統切換補單",
+      "trigger_tcode": [
+        "ZPP022",
+        "ZPP022_NOPR"
+      ],
+      "root_cause": "舊系統 (DeERP) 轉檔之未結採購單已包含補單量，若生管在 SAP 上線後誤用標準 ZPP022 開補，系統將重複產生採購請購單 (PR)，導致工廠重複採購雙倍原料！",
+      "resolution_steps": [
+        "【情境 1：預補單 (尚未開始生產)】：DeERP 已開立之預補保留（PO已轉入SAP），SAP 系統開放後一律強制使用『ZPP022_NOPR』開補（建立原料保留需求，不產生 PR 請購單）。",
+        "【情境 2.1：一般補單 (正單尚未領料)】：DeERP 已開立之補單保留（PO已轉入SAP），SAP 開放後一律強制使用『ZPP022_NOPR』開補，沖銷未結 PO，嚴防材料溢買！",
+        "【情境 2.2：一般補單 (正單已經領料)】：納入預入庫範圍，必須在 DeERP 完成『預發料』與『預入庫』結案，嚴禁轉入 SAP 重開補單！",
+        "【情境 3：全新接單 或 SAP 上線後現場超耗】：方可使用標準『ZPP022』開補（正常產生 PR 請購單，由採購執行採購下單）。",
+        "【情境 4：DeERP 已預入庫指令，上線後超額損耗】：依現場實際超耗於 SAP 正常開補『ZPP022』正常產生 PR。",
+        "【情境 5：DeERP 沒有操作預入庫的指令】：轉入 SAP 作為未結訂單，在 SAP 正常開單排產 (ZPP015)、正常開補 (ZPP022)。",
+        "【🚨 緊急搶救步驟】：若生管誤對轉檔未結補單開立標準 ZPP022，請立即至 ME52N / ME5A 找出該筆假性 PR 打上刪除旗標，並於 CO02 刪除錯誤補單，改用 ZPP022_NOPR 重新開補！"
+      ],
+      "raci_owner": "PP (生管) + MM (採購)",
+      "forbidden_action": "💥 切換期鐵律：DeERP 既有未結補單嚴禁使用標準 ZPP022！必須使用 ZPP022_NOPR，否則將造成鉅額呆料與雙重請購！",
+      "badge": "轉檔補單防呆"
     }
   ],
   "order_types": [
@@ -1679,6 +1702,17 @@ window.PP_KNOWLEDGE = {
       "desc": "監控各委外廠商名下之原材料特殊庫存 (SC Stock / Mvt 541) 結存與 543 耗用情況。",
       "scenarios": [
         "【場景 8】途程工序製程委外閉環循序 (PP02 / 541 / 543)"
+      ]
+    },
+    {
+      "code": "ZPP022_NOPR",
+      "name": "切換期未結補單開補 (不產生請購 PR)",
+      "category": "系統切換補單",
+      "role": "生管 (PP)",
+      "desc": "Task #63755 專用程式。針對舊系統 (DeERP) 未結之預補單或正單未領料之一盤補單開立 ZP03 補單，嚴格控制不重複產生 PR 請購單，防範材料重複採購。",
+      "scenarios": [
+        "【場景 4】工單轉開與釋放循序",
+        "【場景 7】現場不良報廢開立補料單循序"
       ]
     }
   ],

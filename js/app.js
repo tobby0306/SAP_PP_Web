@@ -75,11 +75,46 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
   window.handleCheatSearch = function (val) {
     state.cheatQuery = val;
+    const clearBtn = document.getElementById('cheat-search-clear');
+    if (clearBtn) clearBtn.style.display = val ? 'block' : 'none';
     renderIssues();
+  };
+
+  window.clearCheatSearch = function () {
+    state.cheatQuery = '';
+    const cheatInput = document.getElementById('cheat-search-input');
+    if (cheatInput) cheatInput.value = '';
+    const clearBtn = document.getElementById('cheat-search-clear');
+    if (clearBtn) clearBtn.style.display = 'none';
+    renderIssues();
+  };
+
+  window.resetAllCheatFilters = function () {
+    state.cheatCategory = 'ALL';
+    state.cheatQuery = '';
+    const cheatInput = document.getElementById('cheat-search-input');
+    if (cheatInput) cheatInput.value = '';
+    const clearBtn = document.getElementById('cheat-search-clear');
+    if (clearBtn) clearBtn.style.display = 'none';
+    const filterPills = document.getElementById('filter-pills');
+    if (filterPills) {
+      filterPills.querySelectorAll('.pill-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-category') === 'ALL');
+      });
+    }
+    renderIssues();
+    showToast('🔄 已重設篩選條件，顯示全部 19 項急救代碼');
   };
 
   window.handleCheatCategory = function (cat, btnEl) {
     state.cheatCategory = cat;
+    // Clear search query when selecting category so user sees all issues under that category!
+    state.cheatQuery = '';
+    const cheatInput = document.getElementById('cheat-search-input');
+    if (cheatInput) cheatInput.value = '';
+    const clearBtn = document.getElementById('cheat-search-clear');
+    if (clearBtn) clearBtn.style.display = 'none';
+
     const filterPills = document.getElementById('filter-pills');
     if (filterPills) {
       filterPills.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
@@ -97,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Category filter
       if (cat !== 'ALL') {
         if (cat === 'CRITICAL' && issue.severity !== 'CRITICAL') return false;
-        if (cat === '開單與轉單' && !issue.category.includes('開單') && !issue.category.includes('版本')) return false;
+        if (cat === '開單與轉單' && !issue.category.includes('開單') && !issue.category.includes('版本') && !issue.category.includes('切換')) return false;
         if (cat === '領料與發料' && !issue.category.includes('領料') && !issue.category.includes('發料')) return false;
         if (cat === '退料與改單' && !issue.category.includes('退料') && !issue.category.includes('元件')) return false;
         if (cat === '報工與入庫' && !issue.category.includes('報工') && !issue.category.includes('入庫')) return false;
@@ -121,14 +156,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cheatCountBadge) cheatCountBadge.textContent = filtered.length;
 
     const cheatStatsEl = document.getElementById('cheat-results-count');
-    if (cheatStatsEl) cheatStatsEl.textContent = `顯示 ${filtered.length} / ${knowledge.issues.length} 項`;
+    if (cheatStatsEl) {
+      const isFiltered = state.cheatQuery || state.cheatCategory !== 'ALL';
+      cheatStatsEl.innerHTML = `顯示 ${filtered.length} / ${knowledge.issues.length} 項` +
+        (isFiltered ? ` <button onclick="window.resetAllCheatFilters()" style="background:none; border:none; color:var(--primary); font-size:0.8rem; text-decoration:underline; cursor:pointer; margin-left:0.4rem;" title="清除所有篩選，還原 19 項">[顯示全部 19 項]</button>` : '');
+    }
 
     if (filtered.length === 0) {
       issuesGrid.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
           <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🔍</div>
           <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-main);">未找到匹配之急救代碼或故障</div>
-          <p style="font-size: 0.9rem; margin-top: 0.35rem;">請嘗試搜尋其他代碼 (如 E005、ZPP020、九宮格、備料單) 或清空過濾條件</p>
+          <p style="font-size: 0.9rem; margin-top: 0.35rem;">當前選取之分類「${state.cheatCategory}」與快篩關鍵字無交集</p>
+          <button class="pill-btn active" style="margin-top: 1rem; padding: 0.45rem 1.2rem; cursor:pointer;" onclick="window.resetAllCheatFilters()">
+            🔄 重設篩選（查看全部 19 大急救代碼）
+          </button>
         </div>
       `;
       return;
@@ -157,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
             ${stageLinks.map(st => `
-              <button class="pill-btn" style="font-size: 0.75rem; padding: 0.22rem 0.6rem; border-radius: 6px;" onclick="window.jumpFromIssueToRoadmap('${st.stageId}')">
+              <button class="pill-btn" style="font-size: 0.75rem; padding: 0.22rem 0.6rem; border-radius: 6px;" onclick="window.jumpFromIssueToRoadmap('${st.stageId}', '${issue.id}')">
                 📍 ${st.stageTitle} ${st.roleTag ? `<span style="opacity:0.85;">(${st.roleTag})</span>` : ''} ➔
               </button>
             `).join('')}
@@ -375,16 +417,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const tabBtn = document.getElementById('tab-btn-cheat-sheet');
       if (tabBtn) tabBtn.click();
       state.cheatCategory = 'ALL';
-      state.cheatQuery = id;
+      state.cheatQuery = '';
       const cheatInput = document.getElementById('cheat-search-input');
-      if (cheatInput) cheatInput.value = id;
-      renderIssues();
-      const el = document.getElementById(`issue-${id}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.style.boxShadow = '0 0 20px var(--primary)';
-        setTimeout(() => { el.style.boxShadow = ''; }, 2000);
+      if (cheatInput) cheatInput.value = '';
+      const clearBtn = document.getElementById('cheat-search-clear');
+      if (clearBtn) clearBtn.style.display = 'none';
+
+      const filterPills = document.getElementById('filter-pills');
+      if (filterPills) {
+        filterPills.querySelectorAll('.pill-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-category') === 'ALL');
+        });
       }
+      renderIssues();
+      setTimeout(() => {
+        const el = document.getElementById(`issue-${id}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.remove('pulse-highlight');
+          void el.offsetWidth;
+          el.classList.add('pulse-highlight');
+          showToast(`🚨 已定位至秒級急救卡：${id}`);
+        }
+      }, 60);
     } else if (type === 'scenario') {
       jumpToScenario(id);
     } else if (type === 'tcode') {
@@ -3454,6 +3509,78 @@ document.addEventListener('DOMContentLoaded', () => {
       dualTrackHtml: '',
       checkpoints: [
         {
+          id: 'S4_C0',
+          stepCode: 'STEP 4.0 (CUT-OVER 前置)',
+          title: '📌 CUT-OVER ERP補料轉SAP操作 (Task #63755)：DeERP 未結補單開補防呆 (ZPP022 vs ZPP022_NOPR)',
+          tcodes: ['ZPP022_NOPR', 'ZPP022'],
+          desc: '<div style="margin-bottom:0.75rem; line-height:1.6;">' +
+            '<strong>【CUT-OVER 轉檔切換期供需平衡鐵律】</strong>：未結採購單 (PO) 轉檔時已包含補單量（原料供給已先轉入），但 SAP 初始僅轉入正單需求。' +
+            '若生管於系統開放後誤開標準 <code>ZPP022</code>，系統將重新拋出 <code>PR</code> 導致採購重複下雙倍 PO！<strong>必須強制使用 <code>ZPP022_NOPR</code> 開補（不產生 PR）！</strong>' +
+            '</div>' +
+            '<div style="margin: 0.75rem 0 1.15rem 0; overflow-x: auto;">' +
+            '<div style="font-weight:700; color:var(--primary); font-size:0.88rem; margin-bottom:0.45rem; display:flex; align-items:center; gap:0.4rem;">' +
+            '📊 供需平衡對比表（以正單 C6001 需求 1000 + 預補料 100 為例）' +
+            '</div>' +
+            '<table class="custom-table" style="font-size:0.8rem; border:1px solid var(--border-subtle); border-radius:8px; overflow:hidden;">' +
+            '<thead>' +
+            '<tr style="background:rgba(56,189,248,0.12); text-align:center;">' +
+            '<th style="padding:6px 10px; border-bottom:1px solid var(--border-subtle); text-align:left;">項目</th>' +
+            '<th style="padding:6px 10px; border-bottom:1px solid var(--border-subtle);" colspan="2">① DeERP (轉檔前)</th>' +
+            '<th style="padding:6px 10px; border-bottom:1px solid var(--border-subtle); background:rgba(239,68,68,0.12);" colspan="2">② SAP (轉檔完成當下)</th>' +
+            '<th style="padding:6px 10px; border-bottom:1px solid var(--border-subtle); background:rgba(16,185,129,0.12);" colspan="2">③ SAP (系統開放後標準操作)</th>' +
+            '</tr>' +
+            '<tr style="background:rgba(0,0,0,0.22); font-size:0.75rem; text-align:center;">' +
+            '<th style="padding:4px 8px; text-align:left;">明細欄位</th>' +
+            '<th style="padding:4px 8px;">原料需求</th><th style="padding:4px 8px;">原料供給</th>' +
+            '<th style="padding:4px 8px; color:#ef4444;">原料需求</th><th style="padding:4px 8px;">原料供給</th>' +
+            '<th style="padding:4px 8px; color:#10b981;">原料需求</th><th style="padding:4px 8px; color:#10b981;">原料供給</th>' +
+            '</tr>' +
+            '</thead>' +
+            '<tbody style="text-align:center;">' +
+            '<tr><td style="padding:5px 8px; text-align:left; font-weight:600;">正單 C6001</td><td>1000</td><td style="color:var(--text-muted);">-</td><td>1000</td><td style="color:var(--text-muted);">-</td><td>1000</td><td style="color:var(--text-muted);">-</td></tr>' +
+            '<tr><td style="padding:5px 8px; text-align:left; font-weight:600;">正單採購單 (PO)</td><td style="color:var(--text-muted);">-</td><td>1000</td><td style="color:var(--text-muted);">-</td><td>1000</td><td style="color:var(--text-muted);">-</td><td>1000</td></tr>' +
+            '<tr style="background:rgba(245,158,11,0.06);"><td style="padding:5px 8px; text-align:left; font-weight:600; color:var(--amber);">預補料 (未結補單)</td><td style="color:var(--amber); font-weight:600;">100</td><td style="color:var(--text-muted);">-</td><td style="color:#ef4444; font-weight:700;">0 <span style="font-size:0.7rem;">(尚未轉入)</span></td><td style="color:var(--text-muted);">-</td><td style="color:#10b981; font-weight:700;">(開補) 100</td><td style="color:var(--text-muted);">-</td></tr>' +
+            '<tr style="background:rgba(245,158,11,0.06);"><td style="padding:5px 8px; text-align:left; font-weight:600; color:var(--amber);">補單採購單 (PO)</td><td style="color:var(--text-muted);">-</td><td style="color:var(--amber); font-weight:600;">100</td><td style="color:var(--text-muted);">-</td><td style="color:var(--amber); font-weight:600;">100 <span style="font-size:0.7rem;">(已先轉入PO)</span></td><td style="color:var(--text-muted);">-</td><td style="color:var(--amber); font-weight:600;">100</td></tr>' +
+            '<tr style="border-top:1px solid var(--border-subtle); font-weight:700; background:rgba(255,255,255,0.03);"><td style="padding:6px 8px; text-align:left;">總供需合計</td><td>1100</td><td>1100</td><td style="color:#ef4444;">1000</td><td>1100</td><td style="color:#10b981;">1100</td><td style="color:#10b981;">1100</td></tr>' +
+            '<tr style="border-top:2px solid var(--border-subtle); font-weight:800; font-size:0.85rem;"><td style="padding:7px 8px; text-align:left;">供需平衡 (供給-需求)</td><td style="color:#10b981;" colspan="2">0 (平衡)</td><td style="color:#ef4444; background:rgba(239,68,68,0.15);" colspan="2">⚠️ +100 (假性供過於求)</td><td style="color:#10b981; background:rgba(16,185,129,0.15);" colspan="2">✅ 0 (平衡，無重複採購)</td></tr>' +
+            '</tbody>' +
+            '</table>' +
+            '</div>' +
+            '<div style="margin: 1rem 0; overflow-x: auto;">' +
+            '<div style="font-weight:700; color:var(--emerald); font-size:0.88rem; margin-bottom:0.45rem; display:flex; align-items:center; gap:0.4rem;">' +
+            '📋 5 大情境處置速查矩陣（Task #63755 執行準則）' +
+            '</div>' +
+            '<table class="custom-table" style="font-size:0.8rem; border:1px solid var(--border-subtle); border-radius:8px; overflow:hidden;">' +
+            '<thead>' +
+            '<tr style="background:rgba(16,185,129,0.12); text-align:center;">' +
+            '<th style="padding:6px 8px; width:65px; border-bottom:1px solid var(--border-subtle);">情境 #</th>' +
+            '<th style="padding:6px 10px; width:135px; border-bottom:1px solid var(--border-subtle); text-align:left;">業務情境分類</th>' +
+            '<th style="padding:6px 10px; border-bottom:1px solid var(--border-subtle); text-align:left;">DeERP 階段狀態與必要動作</th>' +
+            '<th style="padding:6px 10px; border-bottom:1px solid var(--border-subtle); text-align:left;">SAP 上線後標準動作</th>' +
+            '<th style="padding:6px 10px; width:160px; border-bottom:1px solid var(--border-subtle); text-align:left;">關鍵程式與防呆規範</th>' +
+            '</tr>' +
+            '</thead>' +
+            '<tbody>' +
+            '<tr><td style="padding:6px 8px; text-align:center; font-weight:700; color:var(--primary);">情境 1</td><td style="padding:6px 10px; font-weight:600;">預補單<br><span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">尚未開始生產</span></td><td style="padding:6px 10px;">DeERP 已開立預補保留（採購單 PO 已轉入 SAP）</td><td style="padding:6px 10px;">SAP 系統開放後立即開補</td><td style="padding:6px 10px;"><span class="badge badge-warning" style="font-family:var(--font-mono); font-size:0.72rem; padding:0.1rem 0.35rem;">ZPP022_NOPR</span><br><span style="font-size:0.72rem; color:#10b981; font-weight:600;">🚫 不產生 PR 請購單</span></td></tr>' +
+            '<tr><td style="padding:6px 8px; text-align:center; font-weight:700; color:var(--primary);">情境 2.1</td><td style="padding:6px 10px; font-weight:600;">一般補單<br><span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">正單尚未領料</span></td><td style="padding:6px 10px;">DeERP 已開立補單保留（採購單 PO 已轉入 SAP）</td><td style="padding:6px 10px;">SAP 系統開放後執行開補</td><td style="padding:6px 10px;"><span class="badge badge-warning" style="font-family:var(--font-mono); font-size:0.72rem; padding:0.1rem 0.35rem;">ZPP022_NOPR</span><br><span style="font-size:0.72rem; color:#10b981; font-weight:600;">🚫 不產生 PR，防材料溢買</span></td></tr>' +
+            '<tr style="background:rgba(239,68,68,0.06);"><td style="padding:6px 8px; text-align:center; font-weight:700; color:var(--amber);">情境 2.2</td><td style="padding:6px 10px; font-weight:600; color:#ef4444;">一般補單<br><span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">正單已經領料</span></td><td style="padding:6px 10px; font-weight:600; color:#ef4444;">納入預入庫範圍！<br>必須在 DeERP 完成「預發料」與「預入庫」</td><td style="padding:6px 10px;">不轉入 SAP，現場線邊作業直至成品完工</td><td style="padding:6px 10px;"><span class="badge badge-danger" style="font-size:0.72rem; padding:0.1rem 0.35rem;">DeERP 結清</span><br><span style="font-size:0.72rem; color:#ef4444; font-weight:600;">🚫 嚴禁在 SAP 重開補單</span></td></tr>' +
+            '<tr><td style="padding:6px 8px; text-align:center; font-weight:700; color:var(--primary);">情境 3</td><td style="padding:6px 10px; font-weight:600;">全新接單<br><span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">或 SAP 上線後現場超耗</span></td><td style="padding:6px 10px; color:var(--text-muted);">無（SAP 上線後新發生之業務）</td><td style="padding:6px 10px;">現場依實際超耗提報開補</td><td style="padding:6px 10px;"><span class="badge badge-info" style="font-family:var(--font-mono); font-size:0.72rem; padding:0.1rem 0.35rem;">ZPP022</span><br><span style="font-size:0.72rem; color:var(--text-secondary);">✅ 正常產生 PR 請購採購</span></td></tr>' +
+            '<tr><td style="padding:6px 8px; text-align:center; font-weight:700; color:var(--primary);">情境 4</td><td style="padding:6px 10px; font-weight:600;">DeERP 已預入庫指令<br><span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">上線後超額損耗</span></td><td style="padding:6px 10px;">DeERP 已完成預領料與預入庫作業</td><td style="padding:6px 10px;">依現場實際額外超耗，於 SAP 正常開補</td><td style="padding:6px 10px;"><span class="badge badge-info" style="font-family:var(--font-mono); font-size:0.72rem; padding:0.1rem 0.35rem;">ZPP022</span><br><span style="font-size:0.72rem; color:var(--text-secondary);">✅ 正常產生 PR 請購單</span></td></tr>' +
+            '<tr><td style="padding:6px 8px; text-align:center; font-weight:700; color:var(--primary);">情境 5</td><td style="padding:6px 10px; font-weight:600;">DeERP 未預入庫指令<br><span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">完整轉入 SAP</span></td><td style="padding:6px 10px;">轉入 SAP 作為初始未結銷售/生產需求</td><td style="padding:6px 10px;">在 SAP 正常開單排產、正常開補</td><td style="padding:6px 10px;"><span class="badge badge-info" style="font-family:var(--font-mono); font-size:0.72rem; padding:0.1rem 0.35rem;">ZPP015 / ZPP022</span><br><span style="font-size:0.72rem; color:var(--text-secondary);">✅ 正常生產流程開補</span></td></tr>' +
+            '</tbody>' +
+            '</table>' +
+            '</div>' +
+            '<div style="background:rgba(245,158,11,0.08); border-left:3px solid var(--amber); padding:0.6rem 0.85rem; border-radius:6px; font-size:0.78rem; line-height:1.6; color:var(--text-secondary);">' +
+            '<strong>📌 注意事項守則（杜奕功 EC 會議說明）</strong>：<br>' +
+            '1. 因為未結採購單轉檔已經包含補單，DeERP 未結補單在 SAP 開補用 <code>ZPP022_NOPR</code> (不產生請購)。<br>' +
+            '2. 後續新接單或 SAP 上線後的開補，使用 <code>ZPP022</code> (正常產生請購)。<br>' +
+            '3. 在 DeERP 已經預入庫的指令，已經預領料預入庫，現場作業到完成。<br>' +
+            '4. 在 DeERP 已經預入庫的指令，在 SAP 上線後因為超額損耗，在 SAP 正常開補 <code>ZPP022</code>。<br>' +
+            '5. 在 DeERP 沒有操作預入庫的指令，在 SAP 正常開單生產，正常開補。' +
+            '</div>',
+          forwardImpact: '👉 影響後續：若對轉檔未結補單誤用標準 ZPP022，將產生假性重複 PR，導致工廠購買雙倍材料與巨額呆料！'
+        },
+        {
           id: 'S4_C1',
           stepCode: 'STEP 4.1',
           title: '精準選擇工單類型 (ZP01 ~ ZP07) 並由計畫單轉換開單 (MD04 / CO40 / CO41 / ZPP014)',
@@ -3479,6 +3606,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       ],
       tracebacks: [
+        {
+          symptom: '轉檔上線後，同一張工單的補料材料採購單 (PO) 竟然重複採購了雙倍數量？',
+          cause: '舊系統 DeERP 轉檔之未結採購單已包含補單量，但生管在 SAP 上線開補時誤用了標準 ZPP022 (產生 PR)，而非使用專用程式 ZPP022_NOPR (不產生 PR)！',
+          targetStageId: 'STAGE_4',
+          targetCheckId: 'S4_C0',
+          jumpLabel: '檢查本階段 Step 4.0 (Task #63755 CUT-OVER ERP補料轉SAP操作：ZPP022_NOPR 溢買防呆)'
+        },
         {
           symptom: '在 MD04 點選「計畫單轉工單」時，彈出紅字錯誤「未維護訂單類型 ZP02 作業產生的預設值」而無法開單？',
           cause: '這是上游 Stage 2 的生產版本 (C223)「有效開始日」早於途程 (CA01) 的有效開始日，導致開單引擎抓不到途程工序！',
@@ -3812,6 +3946,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'DEFAULT_ROUTING_ERR', crossNote: 'Stage 3/4 計畫單轉單報錯 🔙 根因於 Stage 2 C223 日期' }
     ],
     STAGE_4: [
+      { id: 'E_TRANS_CUTOVER_REORDER', crossNote: null },
       { id: 'E001', crossNote: '跨 Stage 4 開單查無單 ⇄ Stage 1 SO 刪除/封鎖' },
       { id: 'E002', crossNote: '跨 Stage 4 ZPP015 開單 ⇄ Stage 1 SO 尺碼矩陣' },
       { id: 'E003', crossNote: '跨 Stage 4 超開工單阻擋 ⇄ Stage 1 SO 數量變更' },
@@ -3866,6 +4001,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.jumpFromRoadmapToIssue = (fromStageId, issueId) => {
     state.roadmapReturnStage = fromStageId;
+    state.returnToIssueId = null;
     const stageObj = ppRoadmapStages.find(s => s.id === fromStageId);
 
     // Switch to Cheat Sheet Tab
@@ -3875,9 +4011,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show sticky return banner
     const returnBanner = document.getElementById('roadmap-return-banner');
     const returnStageText = document.getElementById('roadmap-return-text');
+    const returnBtn = document.getElementById('roadmap-return-btn');
     if (returnBanner) {
       if (returnStageText && stageObj) {
         returnStageText.innerHTML = `您剛才從 <strong>【PP 全流程主幹線 — ${stageObj.shortTitle}】</strong> 點選了急救代碼 <code>${issueId}</code>，查看完發生原因與處理方法後可隨時返回主幹線！`;
+      }
+      if (returnBtn) {
+        returnBtn.innerHTML = `🔙 返回 PP 全流程主幹線 (${stageObj.shortTitle})`;
+        returnBtn.onclick = window.returnToRoadmap;
       }
       returnBanner.classList.add('show');
     }
@@ -3887,10 +4028,13 @@ document.addEventListener('DOMContentLoaded', () => {
     state.cheatQuery = '';
     const cheatInput = document.getElementById('cheat-search-input');
     if (cheatInput) cheatInput.value = '';
+    const clearBtn = document.getElementById('cheat-search-clear');
+    if (clearBtn) clearBtn.style.display = 'none';
+
     const filterPills = document.getElementById('filter-pills');
     if (filterPills) {
       filterPills.querySelectorAll('.pill-btn').forEach(b => {
-        b.classList.toggle('active', b.textContent.includes('全部'));
+        b.classList.toggle('active', b.getAttribute('data-category') === 'ALL');
       });
     }
     renderIssues();
@@ -3907,16 +4051,69 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 60);
   };
 
-  window.jumpFromIssueToRoadmap = (targetStageId) => {
-    const returnBanner = document.getElementById('roadmap-return-banner');
-    if (returnBanner) returnBanner.classList.remove('show');
+  window.jumpFromIssueToRoadmap = (targetStageId, fromIssueId) => {
+    state.returnToIssueId = fromIssueId;
+    state.roadmapReturnStage = targetStageId;
+    const stageObj = ppRoadmapStages.find(s => s.id === targetStageId);
 
     const roadmapTabBtn = document.getElementById('tab-btn-pp-roadmap');
     if (roadmapTabBtn) roadmapTabBtn.click();
 
     window.selectRoadmapStage(targetStageId);
+
+    const returnBanner = document.getElementById('roadmap-return-banner');
+    const returnStageText = document.getElementById('roadmap-return-text');
+    const returnBtn = document.getElementById('roadmap-return-btn');
+    if (returnBanner) {
+      if (returnStageText) {
+        returnStageText.innerHTML = `您剛才從 <strong>【🚨 秒級急救表 — ${fromIssueId || '急救卡'}】</strong> 切換至【${stageObj ? stageObj.shortTitle : targetStageId}】對照流程，對照完畢後可隨時一鍵返回急救卡！`;
+      }
+      if (returnBtn) {
+        returnBtn.innerHTML = `🔙 返回急救卡片 (${fromIssueId || '前一頁'})`;
+        returnBtn.onclick = window.returnToPreviousIssue;
+      }
+      returnBanner.classList.add('show');
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showToast(`🧭 已切換至主幹線：${targetStageId.replace('_', ' ')}`);
+    showToast(`🧭 已切換至主幹線：${stageObj ? stageObj.shortTitle : targetStageId} (可點上方橫幅一鍵返回急救表)`);
+  };
+
+  window.returnToPreviousIssue = () => {
+    const returnBanner = document.getElementById('roadmap-return-banner');
+    if (returnBanner) returnBanner.classList.remove('show');
+
+    const cheatTabBtn = document.getElementById('tab-btn-cheat-sheet');
+    if (cheatTabBtn) cheatTabBtn.click();
+
+    const issueId = state.returnToIssueId;
+    if (issueId) {
+      state.cheatCategory = 'ALL';
+      state.cheatQuery = '';
+      const cheatInput = document.getElementById('cheat-search-input');
+      if (cheatInput) cheatInput.value = '';
+      const clearBtn = document.getElementById('cheat-search-clear');
+      if (clearBtn) clearBtn.style.display = 'none';
+
+      const filterPills = document.getElementById('filter-pills');
+      if (filterPills) {
+        filterPills.querySelectorAll('.pill-btn').forEach(b => {
+          b.classList.toggle('active', b.getAttribute('data-category') === 'ALL');
+        });
+      }
+      renderIssues();
+
+      setTimeout(() => {
+        const el = document.getElementById(`issue-${issueId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.remove('pulse-highlight');
+          void el.offsetWidth;
+          el.classList.add('pulse-highlight');
+          showToast(`🎯 已返回急救卡片：${issueId}`);
+        }
+      }, 60);
+    }
   };
 
   function renderPpRoadmap() {

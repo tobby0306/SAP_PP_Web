@@ -1,4 +1,6 @@
-with open('js/app.js', encoding='utf-8') as f:
+import sys
+target = sys.argv[1] if len(sys.argv) > 1 else 'js/app.js'
+with open(target, encoding='utf-8') as f:
     text = f.read()
 
 i = 0
@@ -45,10 +47,14 @@ while i < n:
         else:
             top, tl, tc = stack.pop()
             exp = {'{':'}', '[':']', '(':')'}[top]
-            if line >= 3010:
-                print(f'Popped {top} from {tl}:{tc} with {c} at {line}:{col}')
             if c != exp:
-                print(f'Mismatch: got {c} at {line}:{col}, expected {exp} opened at {tl}:{tc}')
-                break
-    i += 1
+                print(f'Mismatch: {top} from {tl}:{tc} closed by {c} at {line}:{col}')
     col += 1
+    i += 1
+
+if stack:
+    print('Unclosed brackets remaining:', len(stack))
+    for s in stack[:10]:
+        print(' ', s)
+else:
+    print(f'{target}: All brackets balanced successfully!')

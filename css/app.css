@@ -2093,7 +2093,7 @@ body {
 .header-omni-search-container {
   position: relative;
   flex: 1;
-  max-width: 520px;
+  max-width: 760px;
   margin: 0 1.5rem;
 }
 
@@ -2109,9 +2109,9 @@ body {
   background: #0f172a;
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
-  padding: 0.52rem 3.5rem 0.52rem 2.4rem;
+  padding: 0.55rem 5.8rem 0.55rem 2.5rem;
   color: var(--text-main);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   outline: none;
   transition: all var(--transition-fast);
 }

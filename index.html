@@ -14,7 +14,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/app.css?v=21">
+  <link rel="stylesheet" href="css/app.css?v=26">
 </head>
 
 <body>
@@ -59,8 +59,6 @@
 
       <div class="header-actions">
         <button id="theme-toggle-btn" class="btn-icon" title="切換深淺主題">☀️ 亮色 Fiori</button>
-        <button class="btn-icon" onclick="copyTCode('COOIS')" title="常用工單總查驗">📋 COOIS</button>
-        <button class="btn-icon" onclick="copyTCode('COGI')" title="失敗異動清理">📋 COGI</button>
       </div>
     </header>
 
@@ -72,10 +70,10 @@
       </button>
       <button class="tab-btn" data-tab="tab-cheat-sheet" id="tab-btn-cheat-sheet" role="tab">
         🚨 秒級急救表
-        <span class="tab-count" id="count-cheat-sheet">18</span>
+        <span class="tab-count" id="count-cheat-sheet">19</span>
       </button>
       <button class="tab-btn" data-tab="tab-tcode-dictionary" id="tab-btn-tcode-dictionary" role="tab">
-        🗺️ 業務情境 T-Code 循序地圖 (68 大字典)
+        🗺️ 業務情境 T-Code 循序地圖 (69 大字典)
       </button>
     </nav>
 
@@ -85,7 +83,7 @@
         <span style="font-size: 1.25rem;">🧭</span>
         <span id="roadmap-return-text">您剛才從 <strong>【PP 全流程主幹線】</strong> 開啟了此進階互動工具，操作完畢後可隨時返回主幹線繼續查看上下游關聯！</span>
       </div>
-      <button class="tool-launch-btn" onclick="returnToRoadmap()" style="flex-shrink: 0;">
+      <button class="tool-launch-btn" id="roadmap-return-btn" onclick="returnToRoadmap()" style="flex-shrink: 0;">
         🔙 返回 PP 全流程主幹線導航
       </button>
     </div>
@@ -236,23 +234,26 @@
         style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 260px;">
-            <div class="search-input-wrapper" style="width: 100%;">
+            <div class="search-input-wrapper" style="width: 100%; position: relative;">
               <span class="search-icon">🔍</span>
               <input type="text" id="cheat-search-input" class="search-input"
-                placeholder="在 18 大急救代碼中快篩 (如 E005、PP02、541、備料單、退料)..." autocomplete="off"
+                placeholder="在 19 大急救代碼中快篩 (如 E005、PP02、541、備料單、退料、Task 63755)..." autocomplete="off"
                 oninput="handleCheatSearch(this.value)">
+              <button id="cheat-search-clear" onclick="window.clearCheatSearch()"
+                style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: var(--bg-badge); border: 1px solid var(--border-subtle); color: var(--text-muted); border-radius: 50%; width: 22px; height: 22px; line-height: 20px; text-align: center; font-size: 0.75rem; cursor: pointer;"
+                title="清除快篩關鍵字">✕</button>
             </div>
           </div>
           <div id="cheat-results-count"
             style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); white-space: nowrap;">
-            顯示 18 / 18 項
+            顯示 19 / 19 項
           </div>
         </div>
 
         <div class="filter-pills-row" id="filter-pills">
           <span class="filter-pill-label">急救類別篩選：</span>
           <button class="pill-btn active" data-category="ALL" onclick="handleCheatCategory('ALL', this)">全部
-            (18)</button>
+            (19)</button>
           <button class="pill-btn" data-category="CRITICAL" onclick="handleCheatCategory('CRITICAL', this)">💥 阻擋/致命
             (Critical)</button>
           <button class="pill-btn" data-category="工序委外" onclick="handleCheatCategory('工序委外', this)">工序委外 (PP02 / 541 /
@@ -1403,7 +1404,7 @@
             ⚡ 依情境循序流動檢視
           </button>
           <button class="view-mode-btn" id="view-mode-grid" onclick="switchTCodeViewMode('grid')">
-            🔤 68 大交易碼字典卡片
+            🔤 69 大交易碼字典卡片
           </button>
         </div>
       </div>
@@ -1444,10 +1445,10 @@
         <div
           style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           <div style="font-size: 0.9rem; color: var(--text-secondary);">
-            共收錄 <strong style="color: var(--primary);">68</strong> 個集團鞋業 SAP PP / MM / SD 核心交易碼。點擊卡片右上角或交易碼代號可一鍵複製。
+            共收錄 <strong style="color: var(--primary);">69</strong> 個集團鞋業 SAP PP / MM / SD 核心交易碼。點擊卡片右上角或交易碼代號可一鍵複製。
           </div>
           <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="tcode-filter-input" placeholder="在 68 個 T-Code 中快篩..." class="search-input"
+            <input type="text" id="tcode-filter-input" placeholder="在 69 個 T-Code 中快篩..." class="search-input"
               style="padding: 0.4rem 0.8rem; font-size: 0.85rem; width: 240px;" oninput="filterTCodeCards(this.value)">
           </div>
         </div>
@@ -1464,8 +1465,8 @@
   <div class="toast" id="app-toast">⚡ 已複製交易碼至剪貼簿</div>
 
   <!-- Data & Script Bundle (Supports both file:// offline launch & web server) -->
-  <script src="data/knowledge_loader.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="data/knowledge_loader.js?v=26"></script>
+  <script src="js/app.js?v=26"></script>
 </body>
 
 </html>
