@@ -3274,7 +3274,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="dual-track-card track-so">
             <div class="dual-track-title">🟢 軌道 A：正式訂單 / 預告訂單 (Sales Order)</div>
             <div class="dual-track-flow">
-              <strong>T-Code：</strong><span class="tcode-chip" onclick="window.copyText('VA01', '已複製 VA01')">VA01</span> / <span class="tcode-chip" onclick="window.copyText('ZSD012', '已複製 ZSD012')">ZSD012</span><br>
+              <strong>來源 / 交易碼：</strong><span class="tcode-chip" onclick="window.copyText('DeGen', '已複製 DeGen')">DeGen</span> ➔ <span class="tcode-chip" onclick="window.copyText('ZSD012', '已複製 ZSD012')">ZSD012</span> / <span class="tcode-chip" onclick="window.copyText('VA03', '已複製 VA03')">VA03</span> (查詢)<br>
               • <strong>正式訂單 (<code>ZOR1</code>)</strong>：客戶正式下單，進入正式 MRP (<code>MD01N</code>) 展開真實請購單與工單。<br>
               • <strong>預告訂單 (<code>ZA01</code>)</strong>：長交期主料需提前向供應商下正式 PO 時使用；<strong>⚠️ 轉完 PO 後必須至 <code>ZSD019</code> 壓拒絕原因 <code>Z3</code> 結案</strong>，否則正式單進來會重複跑出雙倍料！
             </div>
@@ -3302,8 +3302,8 @@ document.addEventListener('DOMContentLoaded', () => {
           id: 'S1_C2',
           stepCode: 'STEP 1.2',
           title: '正式銷售訂單 (ZOR1) 與預告銷售訂單 (ZA01) 開立與 Z3 沖銷防呆',
-          tcodes: ['VA01', 'ZSD012', 'ZSD019'],
-          desc: '業務透過 <code>ZSD012</code> 批次匯入或 <code>VA01</code> 建立銷售訂單（含客戶交期、型體、顏色與尺碼 Size Run 數量）。若為提前採購長交期材料而開立 <strong>預告訂單 (<code>ZA01</code>)</strong>，在跑完 <code>MD01N</code> 並把 PR 轉成 PO 後，<strong>必須立即用 <code>ZSD019</code> 批次壓上拒絕原因 <code>Z3 (預告訂單關閉)</code></strong>。',
+          tcodes: ['DeGen', 'ZSD012', 'ZSD019', 'VA03'],
+          desc: '業務透過 <strong><code>DeGen</code></strong> 下銷售訂單，由 <code>ZSD012</code> 背景批次匯入。<br>若為提前採購長交期材料而開立 <strong>預告訂單 (<code>ZA01</code>)</strong>，在跑完 <code>MD01N</code> 並把 PR 轉成 PO 後，<strong>必須立即用 <code>ZSD019</code> 批次壓上拒絕原因 <code>Z3 (預告訂單關閉)</code></strong>。<br>生管可由 <code>VA03</code> 查詢銷售訂單。',
           forwardImpact: '👉 影響後續：預告單 ZA01 若忘記壓 Z3 關閉，當正式訂單 ZOR1 匯入後跑 Stage 3 MD01N，採購與生管會看到兩倍的需求量！'
         },
         {
