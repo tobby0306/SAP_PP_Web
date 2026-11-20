@@ -3428,7 +3428,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="dual-track-title">🟢 正式軌：銷售訂單 MRP Live (真實供需)</div>
             <div class="dual-track-flow">
               <strong>執行順序：</strong><span class="tcode-chip" onclick="window.copyText('MD01N', '已複製 MD01N')">MD01N</span> ➔ <span class="tcode-chip" onclick="window.copyText('MD04', '已複製 MD04')">MD04</span><br>
-              1. <strong>設定參數</strong>：勾選「變更之 BOM 展開」、規劃模式選 <strong><code>1</code> (適應規劃資料)</strong> 或 <strong><code>3</code> (刪除並重新建立未確定之計畫單/PR)</strong>。<br>
+              1. <strong>設定參數</strong>：勾選「變更之 BOM 展開」、計畫模式選 <strong><code>1</code> (一般運算)</strong> 或 <strong><code>3</code> (刪除並重新建立未確定之計畫單/PR)</strong>。<br>
               2. <strong>展開結果</strong>：依據 <code>C223</code> 生產版本逐階展開 BOM，產生<strong>正式計畫訂單 (<code>PLDORD</code>)</strong> 與 <strong>正式採購請購單 (<code>PurRqs</code>)</strong>。<br>
               3. <strong>接續動作</strong>：採購將 PR 轉正式 PO；生管進入 Stage 4 將計畫單轉為正式生產工單 (<code>ZP01~ZP07</code>)。
             </div>
@@ -3447,7 +3447,8 @@ document.addEventListener('DOMContentLoaded', () => {
       checkpoints: [
         {
           id: 'S3_C1',
-          stepCode: 'STEP 3.1',
+          stepCode: 'STEP 3-A（🟢 正式軌）',
+          stepBadgeClass: 'badge-track-a',
           title: '正式 MRP Live 執行要點 (MD01N)：計畫模式 1 vs 3 與半成品連帶展開',
           tcodes: ['MD01N', 'MD04'],
           desc: '在 <code>MD01N</code> 執行正式 MRP 時，依主檔異動情況選擇「計畫模式」：<br>• <strong>計畫模式 <code>1</code>（一般運算）</strong>：如果 Stage 2 的 BOM (<code>CS02</code>) 或生產版本 (<code>C223</code>) 沒有改變，只要選<strong>計畫模式 <code>1</code></strong> 即可；<br>• <strong>計畫模式 <code>3</code>（刪除並重新建立規劃資料）</strong>：若剛修改過 Stage 2 的 BOM (<code>CS02</code>) 或生產版本 (<code>C223</code>)，<strong>計畫模式務必選擇 <code>3</code></strong>，並勾選「規劃變更之 BOM 組件」，系統才會把舊的未確認計畫單刪掉、按最新 BOM 重算！',
@@ -3455,7 +3456,8 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
           id: 'S3_C2',
-          stepCode: 'STEP 3.2',
+          stepCode: 'STEP 3-B.1（🟣 模擬軌）',
+          stepBadgeClass: 'badge-track-b',
           title: 'PIR 長期規劃模擬三部曲 (MS31 情境 ➔ MS01/MSBT 模擬執行 ➔ MS04 模擬供需檢視)',
           tcodes: ['MS31', 'MS32', 'MS01', 'MSBT', 'MS04'],
           desc: '針對 Stage 1 的 <code>MD61/ZPP006</code> 預測單：先確認 <code>MS31/MS32</code> 長期規劃情境已納入獨立需求版本 <code>01</code> 並已「下達 (Released)」；筆數少時直接用 <code>MS01</code> 執行，大批量季預測則用 <code>MSBT</code> 設定背景 Job 夜間跑完，隔天早上於 <code>MS04</code> 檢視模擬展開結果。',
@@ -3463,7 +3465,8 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
           id: 'S3_C3',
-          stepCode: 'STEP 3.3',
+          stepCode: 'STEP 3-B.2（🟣 模擬軌）',
+          stepBadgeClass: 'badge-track-b',
           title: '預測材料需求報表 (ZPPQ02) 必加星號 * 鐵律與 B2B 拋轉 (ZPP914)',
           tcodes: ['ZPPQ02', 'ZPP914'],
           desc: '跑完 <code>MS01/MSBT</code> 後，打開 <code>ZPPQ02</code> 匯出預測材料需求表時，因為成鞋屬於具有尺碼網格的變式料號 (Generic Article + Variants)，<strong>在「物料」欄位輸入型體色號後，結尾絕對要加上 <code>*</code>（例如 <code>1011B547-001*</code>）</strong>！若漏打 <code>*</code>，系統只會查空殼母料號，查出 0 筆尺碼材料！',
@@ -3473,10 +3476,10 @@ document.addEventListener('DOMContentLoaded', () => {
       tracebacks: [
         {
           symptom: '已經在 CS02 修改了 BOM 材料或用量，為什麼跑完 MD01N 後，MD04 裡的計畫單還是舊材料？',
-          cause: '1. 跑 MD01N 時「規劃模式」沒有選 3 (刪除並重建)；2. 或者該計畫單被人工勾選了「固定 (Firmed * 號)」，MRP 不敢覆蓋固定計畫單！',
+          cause: '1. 跑 MD01N 時「計畫模式」沒有選 3 (刪除並重建)；2. 或者該計畫單被人工勾選了「固定 (Firmed * 號)」，MRP 不敢覆蓋固定計畫單！',
           targetStageId: 'STAGE_3',
           targetCheckId: 'S3_C1',
-          jumpLabel: '檢查本階段 Step 3.1 (MD01N 規劃模式 3 與取消計畫單固定)'
+          jumpLabel: '檢查本階段 Step 3-A (MD01N 計畫模式 3 與取消計畫單固定)'
         },
         {
           symptom: '跑完 MD01N 後，MD04 完全沒有展開下階半成品或沒有產生計畫訂單？',
@@ -3490,7 +3493,7 @@ document.addEventListener('DOMContentLoaded', () => {
           cause: '1. 在 ZPPQ02 輸入成品料號時結尾忘記加星號 *（未展開尺碼變式 VA）；2. 或 MS31 規劃情境尚未點選「下達 (Release)」。',
           targetStageId: 'STAGE_3',
           targetCheckId: 'S3_C3',
-          jumpLabel: '檢查本階段 Step 3.3 (ZPPQ02 料號結尾必加 * 號)'
+          jumpLabel: '檢查本階段 Step 3-B.2 (ZPPQ02 料號結尾必加 * 號)'
         }
       ],
       tools: [
