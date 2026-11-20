@@ -3293,10 +3293,10 @@ document.addEventListener('DOMContentLoaded', () => {
         {
           id: 'S1_C1',
           stepCode: 'STEP 1.1',
-          title: '鞋業商品/物料主檔 (MM41/MM42/MM43) 策略群組與後勤 MRP 參數設定',
-          tcodes: ['MM41', 'MM42', 'MM43'],
-          desc: '集團鞋業在 <strong>SAP S/4HANA Fashion (IS-Retail)</strong> 架構下，成品鞋（含型體/色號/九宮格尺碼變式）、半成品與材料均屬於 Article (商品/物料主檔)，使用 <strong><code>MM41</code> (建立)</strong>、<strong><code>MM42</code> (修改)</strong>、<strong><code>MM43</code> (顯示)</strong> 維護。<br>生管在接單或建立 PIR 前，必須先於<strong>「後勤：配銷中心 (Logistics: DC)」</strong>視圖設妥關鍵生管與 MRP 參數：<br>① <strong>MRP 類型 (<code>PD</code>)</strong>：決定納入正式 MRP 需求運算（若誤設為 <code>ND</code> 則系統不規劃）；<br>② <strong>策略群組 (Strategy Group)</strong>：決定 <strong><code>20</code> (MTO 銷售訂單生產)</strong> 或 <strong><code>40</code> (MTS 預測庫存生產)</strong>；<br>③ <strong>批量大小 (<code>EX</code> 批對批)</strong> 與 <strong>個別/彙總指示碼 (<code>1</code> 僅個別需求 或 <code>2</code> 彙總)</strong>。',
-          forwardImpact: '👉 影響後續：若策略群組或 MRP 類型誤設為 ND (不規劃)，Stage 3 跑 MD01N / MS01 時系統將完全跳過該鞋型！'
+          title: '鞋業商品/物料主檔 (DeGen 建立 / MM42 / MM43) 與預設參數表 ZMMT059_3 / ZMMT059_4',
+          tcodes: ['MM42', 'MM43', 'ZMMT059_3', 'ZMMT059_4'],
+          desc: '物料主檔由 <strong>DeGen 系統</strong>建立並拋轉至 SAP，後續於 SAP 端使用 <strong><code>MM42</code> (修改)</strong>、<strong><code>MM43</code> (顯示)</strong> 維護「後勤：配銷中心 (Logistics: DC)」視圖。<br>① <strong>建立物料前，指令組需先確認參數表 <code>ZMMT059_3</code>、<code>ZMMT059_4</code> 設定參數</strong>，在 DeGen 建立物料傳送到 SAP 時，系統才會自動依照參數表將預設資料寫入 SAP：<br>• <strong><code>ZMMT059_3</code> (MM059 品牌工廠參數預設檔，依 物料類型+工廠+物料群組)</strong>：預設寫入 <strong>採購類型</strong> (<code>E</code> 自製 / <code>F</code> 外購)、<strong>MRP 控制員</strong>、<strong>計劃交貨天數</strong> (影響 PR 交期)、<strong>批次管理</strong> 及 <strong>個人/集體需求</strong> (<code>1</code> 個別專款 / <code>2</code> 彙總共用)；<br>• <strong><code>ZMMT059_4</code> (MM059 物料群組工廠參數預設檔，依 物料群組+工廠)</strong>：預設寫入 <strong>採購群組</strong>、<strong>來源群組</strong>、<strong>批量計算</strong> (如 <code>EX</code> 批對批)、<strong>特殊採購</strong> (如 <code>30</code> 委外)、<strong>生產/外部採購儲存地點</strong> (預設發料/收貨庫別)、<strong>策略群組</strong> (如 <code>50</code>，決定 MTO/PIR 規劃邏輯) 與 <strong>標準單價</strong>。<br>② <strong>接單或建 PIR 前生管複核</strong>：確認 <code>MM42</code> / <code>MM43</code>「後勤：配銷中心」中之 <strong>MRP 類型 (<code>PD</code>)</strong> 未誤設為 <code>ND</code>、策略群組與個別/彙總碼符合生產模式。',
+          forwardImpact: '👉 影響後續：若 ZMMT059_3 / ZMMT059_4 漏設，DeGen 傳入 SAP 的料號將缺少 MRP 控制員、儲存地點或策略群組，導致 Stage 3 跑 MD01N / MS01 漏展或報錯！'
         },
         {
           id: 'S1_C2',
@@ -3318,10 +3318,10 @@ document.addEventListener('DOMContentLoaded', () => {
       tracebacks: [
         {
           symptom: '在 MD04 看不到客戶剛下的銷售訂單需求，或跑完 MRP 完全沒反應？',
-          cause: '銷售訂單明細可能被壓了「拒絕原因 (如 Z3)」、交貨計畫行未確認，或商品/物料主檔 MM42「後勤：配銷中心」的 MRP 類型被誤設為 ND (不規劃)。',
+          cause: '銷售訂單明細可能被壓了「拒絕原因 (如 Z3)」、交貨計畫行未確認，或 DeGen 拋轉前未設妥 ZMMT059_3/ZMMT059_4 參數，導致 MM42「後勤：配銷中心」的 MRP 類型為 ND 或缺策略群組。',
           targetStageId: 'STAGE_1',
           targetCheckId: 'S1_C1',
-          jumpLabel: '檢查本階段 Step 1.1 (MM42 後勤配銷中心 MRP 參數) 與 Step 1.2 (SO 拒絕原因)'
+          jumpLabel: '檢查本階段 Step 1.1 (ZMMT059_3/4 預設表 & MM42 後勤參數) 與 Step 1.2'
         },
         {
           symptom: '同一個型體跑完 MRP 後，材料請購單 (PR) 與計畫單數量竟然暴增為兩倍？',
